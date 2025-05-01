@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Pliego Minimalista (9+1 Fotos) - 300 DPI Calidad 1.0</title>
+    <!-- Incluir una fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variables CSS para colores y espaciado */
+        :root {
+            --color-background: #f8f8f8; /* Fondo general muy suave */
+            --color-surface: #ffffff; /* Fondo de las secciones (formularios, preview) */
+            --color-text-primary: #333;
+            --color-text-secondary: #666;
+            --color-accent: #007bff; /* Azul primario */
+            --color-accent-hover: #0056b3;
+            --color-border: #e0dcdc; /* Borde suave - Ajustado para ser ligeramente más visible */
+            --color-error: #dc3545;
+            --color-success: #28a745;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Estilos generales */
+        body {
+            font-family: 'Inter', sans-serif; /* Usar la fuente moderna */
+            margin: 0; /* Resetear margin del body dentro del iframe de Wix */
+            padding: var(--spacing-md); /* Usar variable para padding */
+            text-align: center;
+            background-color: var(--color-background); /* Usar variable */
+            color: var(--color-text-primary); /* Usar variable */
+            line-height: 1.6; /* Mejorar legibilidad */
+            overflow-x: hidden; /* Evita scroll horizontal */
+        }
+        .container {
+            max-width: 800px; /* Ancho máximo razonable */
+            margin: var(--spacing-md) auto; /* Usar variable y centrar */
+            padding: 0;
+        }
+        h1 {
+            color: var(--color-text-primary); /* Usar variable */
+            font-size: 1.8em; /* Ajusta tamaño */
+            margin-bottom: var(--spacing-sm); /* Usar variable */
+            font-weight: 700; /* Más peso para título principal */
+        }
+         h2 { /* Nuevo estilo para títulos de sección */
+            color: var(--color-text-primary);
+            font-size: 1.2em;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            text-align: left; /* Alinea títulos de sección a la izquierda */
+            margin-top: var(--spacing-lg); /* Espacio antes de una nueva sección */
+         }
+        p {
+            color: var(--color-text-secondary); /* Usar variable */
+            font-size: 0.95em; /* Ajusta tamaño */
+            margin-bottom: var(--spacing-sm); /* Usar variable */
+        }
+         .form-section p, .preview-section p {
+             text-align: left; /* Pero alinea párrafos dentro de secciones a la izquierda */
+             margin-bottom: var(--spacing-md);
+         }
+
+
+        /* Estilos del formulario y secciones */
+        .form-section { /* Nuevo div envolvente para el formulario */
+             margin-top: var(--spacing-lg); /* Usar variable */
+             padding: var(--spacing-md); /* Usar variable */
+             border: none; /* Eliminar borde */
+             border-radius: var(--border-radius); /* Usar variable */
+             background-color: var(--color-surface); /* Usar variable */
+             box-shadow: var(--box-shadow); /* Añadir sombra suave */
+             text-align: left; /* Alinea el contenido del form a la izquierda */
+        }
+
+        /* Layout flexible para los grupos de input (para que se ajusten mejor) */
+        .input-area {
+             display: flex;
+             flex-wrap: wrap; /* Permite que los elementos se envuelvan */
+             gap: var(--spacing-md); /* Espacio entre los grupos */
+             margin-bottom: var(--spacing-md);
+             justify-content: center; /* Centra los elementos si no llenan la línea */
+        }
+
+
+        .file-input-group {
+            flex: 1 1 280px; /* Cada grupo intenta tener 280px, puede crecer */
+            min-width: 280px; /* Ancho mínimo */
+            padding: var(--spacing-md); /* Usar variable */
+            border: 1px dashed var(--color-border); /* Borde punteado suave */
+            border-radius: var(--border-radius); /* Usar variable */
+            background-color: var(--color-background); /* Fondo ligeramente diferente */
+            text-align: left;
+             display: flex; /* Flexbox para el contenido interno */
+             flex-direction: column; /* Apila label, input y controles */
+             gap: var(--spacing-sm); /* Espacio entre elementos apilados */
+            box-sizing: border-box; /* Incluye padding y border en el width */
+            transition: border-color 0.3s ease; /* Transición suave al hacer hover */
+        }
+
+        .file-input-group:hover {
+             border-color: var(--color-accent); /* Cambia color del borde al hacer hover */
+        }
+         /* Clase añadida por JS cuando hay archivo */
+        .file-input-group.has-file {
+             border: 1px solid var(--color-accent); /* Borde sólido cuando hay archivo */
+        }
+
+
+        .file-input-group label {
+            display: flex; /* Usar flexbox para alinear input y thumbnail */
+            align-items: center; /* Centrado vertical */
+            cursor: pointer;
+            font-weight: 600; /* Peso de fuente */
+            font-size: 0.95em; /* Ajusta tamaño */
+            color: var(--color-text-primary); /* Usar variable */
+            width: 100%; /* Ocupa todo el ancho disponible */
+             justify-content: space-between; /* Empuja el contenido y el ::after a los extremos */
+             margin-bottom: 0; /* Eliminar margin-bottom del original */
+        }
+         /* Estilo del texto "Ranura X:" dentro del label */
+         .file-input-group label span {
+             margin-right: var(--spacing-sm); /* Espacio entre texto y miniatura/botón */
+             flex-grow: 1; /* Permite que el texto ocupe el espacio disponible */
+         }
+
+
+         .file-input-group input[type="file"] {
+             /* Estilo para ocultar el input nativo y simular click en label */
+             width: 0.1px;
+             height: 0.1px;
+             opacity: 0;
+             overflow: hidden;
+             position: absolute;
+             z-index: -1;
+         }
+
+         /* Estilo del área "clickable" del label - SIMULANDO UN BOTÓN */
+         .file-input-group label::after {
+            content: "Seleccionar archivo"; /* Texto por defecto */
+            display: inline-block;
+            background-color: var(--color-border); /* Usar variable */
+            color: var(--color-text-secondary); /* Usar variable */
+            padding: var(--spacing-xs) var(--spacing-sm); /* Usar variables */
+            border-radius: var(--border-radius); /* Usar variable */
+            flex-shrink: 0; /* Evita que el pseudo-elemento se encoja */
+            font-weight: 400; /* Peso normal */
+            font-size: 0.9em; /* Ajusta tamaño */
+            transition: background-color 0.3s ease; /* Transición suave */
+         }
+         .file-input-group label:hover::after {
+             background-color: #d0d0d0; /* Color al hacer hover */
+         }
+         /* El JS añadirá la clase has-file */
+         .file-input-group.has-file label::after {
+             content: "Cambiar archivo"; /* Texto si ya hay archivo */
+             background-color: var(--color-accent); /* Usar variable */
+             color: white;
+         }
+          .file-input-group.has-file label:hover::after {
+             background-color: var(--color-accent-hover); /* Usar variable */
+          }
+
+
+         /* Estilo para mini-previsualización */
+         .thumbnail {
+             display: none; /* Oculto por defecto en CSS */
+             width: 40px !important; /* Tamaño de la miniatura */
+             height: 40px !important;
+             border: 1px solid var(--color-border); /* Usar variable */
+             border-radius: var(--border-radius); /* Usar variable */
+             object-fit: cover; /* Asegura que la imagen cubra el espacio */
+             margin-right: var(--spacing-sm); /* Espacio entre thumbnail y texto del label */
+             flex-shrink: 0; /* Evita que se encoja en flexbox */
+         }
+          /* Muestra la miniatura solo si el div padre tiene la clase has-file */
+         .file-input-group.has-file .thumbnail {
+            display: inline-block; /* Muestra la miniatura */
+         }
+
+
+         /* Estilos de los controles de ajuste */
+        .adjust-controls {
+            margin-top: var(--spacing-sm); /* Usar variable */
+            padding-top: var(--spacing-sm); /* Usar variable */
+            border-top: 1px solid var(--color-border); /* Usar variable */
+            display: none; /* Inicialmente oculto */
+            text-align: center;
+        }
+         .adjust-controls > span { /* Selector directo para el span "Ajustar:" */
+              font-size: 0.9em; /* Ajusta tamaño */
+              font-weight: 600; /* Peso de fuente */
+              margin-right: var(--spacing-sm); /* Espacio después del texto */
+              vertical-align: middle; /* Alineación vertical */
+              display: inline-block; /* Permite que el margen funcione correctamente */
+         }
+         /* Nuevos divs envolventes para grupos de botones (Zoom/Pan) */
+         .adjust-buttons {
+             display: inline-block; /* Permite que los grupos de botones estén en línea */
+             vertical-align: middle;
+             margin: 0 var(--spacing-xs); /* Espacio entre grupos de botones */
+         }
+          .adjust-buttons:last-child {
+             margin-right: 0; /* Eliminar margen extra en el último grupo */
+          }
+
+
+         .adjust-controls button {
+            padding: var(--spacing-xs) var(--spacing-sm); /* Usar variables */
+            font-size: 0.85em; /* Ajusta tamaño */
+            margin: 1px; /* Espacio mínimo entre botones */
+            vertical-align: middle; /* Alineación vertical */
+            background-color: transparent; /* Botones discretos */
+            color: var(--color-text-secondary); /* Usar variable */
+            border: 1px solid var(--color-border); /* Usar variable */
+            border-radius: var(--border-radius); /* Usar variable */
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* Transiciones suaves */
+         }
+          .adjust-controls button:hover {
+             background-color: var(--color-border); /* Color al hacer hover */
+             color: var(--color-text-primary); /* Color al hacer hover */
+          }
+           .adjust-controls button:active {
+             background-color: #ccc; /* Feedback visual al presionar */
+           }
+          .adjust-controls button:disabled {
+             background-color: var(--color-background); /* Usar variable */
+             color: #ccc;
+             border-color: #eee;
+             cursor: not-allowed;
+          }
+          .adjust-controls button[data-action="reset"] {
+              margin-left: var(--spacing-sm); /* Espacio extra para reset */
+              background-color: #f0f0f0; /* Fondo ligero para reset */
+          }
+           .adjust-controls button[data-action="reset"]:hover {
+               background-color: #ddd;
+           }
+
+
+        /* Estilos del botón principal */
+        button#generateBtn {
+            width: 100%; /* Botón de ancho completo */
+            padding: var(--spacing-md) var(--spacing-lg); /* Usar variables */
+            background-color: var(--color-accent); /* Usar variable */
+            color: white;
+            border: none;
+            border-radius: var(--border-radius); /* Usar variable */
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600; /* Peso de fuente */
+            transition: background-color 0.3s ease, opacity 0.3s ease; /* Transiciones */
+            margin-top: var(--spacing-md); /* Usar variable */
+        }
+        button#generateBtn:hover {
+            background-color: var(--color-accent-hover); /* Usar variable */
+        }
+        button#generateBtn:disabled {
+            background-color: var(--color-border); /* Usar variable */
+            color: var(--color-text-secondary); /* Usar variable */
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Estilos de mensajes */
+        .message { /* Clase base para mensajes */
+            margin-top: var(--spacing-md); /* Usar variable */
+            padding: var(--spacing-sm); /* Usar variable */
+            border-radius: var(--border-radius); /* Usar variable */
+            font-size: 0.95em; /* Ajusta tamaño */
+            font-weight: 600; /* Peso de fuente */
+            width: calc(100% - var(--spacing-md) * 2); /* Ajusta ancho basado en padding del container */
+            margin-left: auto; /* Centrar */
+            margin-right: auto; /* Centrar */
+             text-align: left; /* Alinea el texto dentro del mensaje */
+             box-sizing: border-box; /* Incluye padding y border en el width */
+        }
+        .error {
+            color: var(--color-error); /* Usar variable */
+            background-color: #f8d7da; /* Fondo rojo claro */
+            border: 1px solid #f5c6cb;
+             display: none; /* Oculto por defecto en CSS, JS lo mostrará si hay error */
+        }
+        .loading {
+            color: var(--color-accent); /* Usar variable */
+             background-color: #cfe2ff; /* Fondo azul claro */
+             border: 1px solid #b9d1f8;
+             display: none; /* Oculto por defecto en CSS, JS lo mostrará al cargar */
+             text-align: center; /* Centra el contenido del loading message */
+        }
+        .loading::before { /* Spinner simple para loading */
+             content: '';
+             display: inline-block;
+             width: 1em;
+             height: 1em;
+             border: 2px solid var(--color-accent); /* Usar variable */
+             border-top-color: transparent;
+             border-radius: 50%;
+             animation: spin 1s linear infinite; /* Animación */
+             vertical-align: middle;
+             margin-right: var(--spacing-sm); /* Espacio después del spinner */
+        }
+         @keyframes spin { /* Animación del spinner */
+             0% { transform: rotate(0deg); }
+             100% { transform: rotate(360deg); }
+         }
+
+
+        /* Estilos de la previsualización */
+         .preview-section { /* Nuevo div envolvente */
+             margin-top: var(--spacing-lg); /* Usar variable */
+             padding: var(--spacing-md); /* Usar variable */
+             background-color: var(--color-surface); /* Usar variable */
+             border-radius: var(--border-radius); /* Usar variable */
+             box-shadow: var(--box-shadow); /* Añadir sombra suave */
+             text-align: left; /* Alinea el texto de la sección */
+         }
+          .preview-section h2, .preview-section p {
+              text-align: center; /* Centrar encabezado y párrafo dentro de preview */
+          }
+         .preview-section p {
+             margin-bottom: var(--spacing-md); /* Más espacio después del párrafo introductorio */
+         }
+
+
+        #previewContainer {
+            margin-top: var(--spacing-md); /* Usar variable */
+            border: none; /* Eliminamos cualquier borde en el contenedor */
+            border-radius: 0; /* Eliminar esquinas redondeadas */
+            overflow: hidden;
+            position: relative;
+            background-color: transparent; /* Hacer el contenedor transparente */
+            display: flex; /* Usar flexbox para centrar el canvas */
+            justify-content: center;
+            align-items: center;
+             max-width: 100%; /* Asegura que el contenedor no se desborde */
+             height: auto;
+        }
+        #previewCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+             /* Añadir fondo blanco al canvas de preview */
+            background-color: #ffffff;
+        }
+
+        /* Estilos para el botón/switch de intercambio de páginas - COPIADO DEL CÓDIGO 7 FOTOS */
+        .swap-controls {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background-color: var(--color-background);
+            border-radius: var(--border-radius);
+             display: inline-block; /* Para que no ocupe todo el ancho */
+        }
+         .swap-controls label {
+             font-weight: 600;
+             color: var(--color-text-primary);
+             margin-right: var(--spacing-sm);
+             vertical-align: middle;
+         }
+          .swap-controls button {
+              padding: var(--spacing-xs) var(--spacing-sm);
+              font-size: 0.9em;
+              background-color: var(--color-border);
+              color: var(--color-text-secondary);
+              border: 1px solid var(--color-border);
+              border-radius: var(--border-radius);
+              cursor: pointer;
+              transition: background-color 0.2s ease, color 0.2s ease;
+          }
+           .swap-controls button.active {
+               background-color: var(--color-accent);
+               color: white;
+               border-color: var(--color-accent);
+           }
+            .swap-controls button:hover:not(.active) {
+                background-color: #ddd;
+            }
+
+         /* Estilos para el botón de previsualización grande - COPIADO DEL CÓDIGO 7 FOTOS */
+        #largePreviewBtn {
+            display: block; /* Ocupa su propia línea */
+            width: auto; /* Ancho automático basado en contenido */
+            margin: var(--spacing-md) auto var(--spacing-md) auto; /* Centrado y con espacio */
+            padding: var(--spacing-sm) var(--spacing-md);
+            background-color: var(--color-background); /* Botón discreto */
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent); /* Borde de acento */
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        #largePreviewBtn:hover {
+            background-color: var(--color-accent);
+            color: white;
+        }
+         #largePreviewBtn:disabled {
+             color: var(--color-text-secondary);
+             border-color: var(--color-border);
+             background-color: var(--color-background);
+             cursor: not-allowed;
+             opacity: 0.7;
+         }
+
+         /* --- Estilos para la ventana modal de previsualización grande - COPIADO DEL CÓDIGO 7 FOTOS --- */
+        .modal-overlay {
+            position: fixed; /* Fijo en el viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semi-transparente */
+            display: none; /* Oculto por defecto */
+            justify-content: center; /* Centra el contenido horizontalmente */
+            align-items: center; /* Centra el contenido verticalmente */
+            z-index: 1000; /* Asegura que esté por encima de todo */
+            overflow: auto; /* Permite scroll si el contenido es demasiado grande */
+             padding: var(--spacing-md); /* Añadir padding para móviles */
+             box-sizing: border-box;
+        }
+
+        .modal-content {
+            position: relative; /* Para posicionar el botón de cierre */
+            background-color: var(--color-surface);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 95%; /* Máximo ancho del contenido */
+             max-height: 95%; /* Máximo alto del contenido */
+            overflow: hidden; /* Oculta lo que se desborda del contenido, el scroll es en el overlay */
+            text-align: center; /* Centra el canvas dentro del modal content */
+        }
+
+         #largePreviewCanvas {
+             display: block; /* Asegura que el canvas no tenga espacio extra abajo */
+             max-width: 100%; /* Asegura que el canvas no desborde su contenedor modal */
+             max-height: calc(100vh - var(--spacing-md) * 4); /* Intenta que el canvas no sea más alto que el viewport menos algo de margen */
+             height: auto; /* Mantiene el aspecto */
+             border: 1px solid var(--color-border); /* Borde sutil al canvas */
+             margin: 0 auto; /* Centra el canvas si es más estrecho que el modal-content */
+             background-color: #ffffff; /* Fondo blanco para el canvas del modal */
+         }
+
+        .modal-close-button {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--color-text-secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1; /* Elimina espacio de línea extra */
+            transition: background-color 0.2s ease, color 0.2s ease;
+             z-index: 1001; /* Asegura que esté por encima del canvas */
+        }
+        .modal-close-button:hover {
+            background-color: #eee;
+            color: var(--color-text-primary);
+        }
+        /* ---------------------------------------------------- */
+
+
+        /* Media Query para responsividad básica */
+        @media (max-width: 600px) {
+             body {
+                padding: var(--spacing-sm); /* Reduce padding general */
+             }
+             .container {
+                 margin-top: var(--spacing-sm);
+                 margin-bottom: var(--spacing-sm);
+             }
+             h1 { font-size: 1.6em; }
+             h2 { font-size: 1.1em; }
+             p { font-size: 0.9em; }
+             form, .preview-section {
+                padding: var(--spacing-sm); /* Reduce padding en secciones */
+             }
+              /* file-input-group en pantallas pequeñas ocupa todo el ancho */
+             .file-input-group {
+                 width: 100%;
+                 padding: var(--spacing-sm);
+                 margin-bottom: var(--spacing-sm);
+                 flex: 1 1 100%; /* Asegura que ocupe el 100% en móvil */
+             }
+
+             .file-input-group label {
+                 flex-direction: row; /* Mantén label y thumbnail en línea */
+                 align-items: center;
+             }
+
+             .adjust-controls {
+                 text-align: center; /* Centra los controles */
+             }
+             .adjust-controls > span {
+                display: block; /* Texto de ajuste en su propia línea */
+                margin-right: 0;
+                margin-bottom: var(--spacing-xs);
+             }
+             .adjust-buttons {
+                  margin: 0 var(--spacing-xs) var(--spacing-xs) var(--spacing-xs); /* Espacio y margen abajo */
+             }
+              .adjust-controls button[data-action="reset"] {
+                margin-left: 0; /* Quita margen extra en móvil */
+             }
+
+             .message {
+                 width: calc(100% - var(--spacing-sm) * 2); /* Ajusta ancho del mensaje */
+             }
+
+              /* Swap controls en móviles - COPIADO DEL CÓDIGO 7 FOTOS */
+             .swap-controls {
+                 display: block; /* Ocupa todo el ancho en móvil */
+                 margin-left: auto;
+                 margin-right: auto;
+             }
+              .swap-controls label, .swap-controls button {
+                   display: block; /* Apila label y botones de swap */
+                   margin: var(--spacing-xs) auto; /* Espacio entre ellos y centrado */
+              }
+
+              /* Modal en pantallas pequeñas - COPIADO DEL CÓDIGO 7 FOTOS */
+             .modal-content {
+                 padding: var(--spacing-sm); /* Reduce padding del modal */
+             }
+             .modal-close-button {
+                 width: 25px;
+                 height: 25px;
+                 font-size: 1em;
+             }
+             #largePreviewCanvas {
+                  /* En móvil, permite que el canvas ocupe un poco más del alto si es necesario para evitar demasiado scroll vertical en el modal */
+                  max-height: calc(100vh - var(--spacing-sm) * 4);
+             }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pliego 9+1 (10 Fotos)</h1>
+        <p>Selecciona 10 fotos de alta calidad para generar tu pliego (9 pequeñas, 1 grande).</p>
+
+        <!-- Nuevo div envolvente para el formulario -->
+        <div class="form-section">
+            <h2>1. Carga tus fotos</h2>
+             <p>Utiliza los cargadores numerados del 1 al 10 para cada ranura. Ranuras 1-9 para las fotos pequeñas (en 3x3), Ranura 10 para la foto grande. Una vez cargada la foto, usa los botones de ajuste.</p>
+            <form id="uploadForm">
+                <!-- Nuevo div envolvente para los grupos de input, permite flexbox -->
+                <div class="input-area">
+                    <!-- Campos de archivo individuales para cada ranura (10 en total) -->
+                    <!-- Ranuras 1-9 (Página Izquierda Base, 3x3) -->
+                    <div class="file-input-group">
+                        <label for="photo_slot_0">
+                             <img id="thumb_0" class="thumbnail" src="" alt="Miniatura 1">
+                             <span>Ranura 1</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_0" id="photo_slot_0" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="0">
+                             <span>Ajustar Ranura 1:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                    <div class="file-input-group">
+                        <label for="photo_slot_1">
+                            <img id="thumb_1" class="thumbnail" src="" alt="Miniatura 2">
+                            <span>Ranura 2</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_1" id="photo_slot_1" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="1">
+                             <span>Ajustar Ranura 2:</span>
+                              <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                              <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                    <div class="file-input-group">
+                        <label for="photo_slot_2">
+                             <img id="thumb_2" class="thumbnail" src="" alt="Miniatura 3">
+                             <span>Ranura 3</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_2" id="photo_slot_2" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="2">
+                             <span>Ajustar Ranura 3:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                    <div class="file-input-group">
+                        <label for="photo_slot_3">
+                            <img id="thumb_3" class="thumbnail" src="" alt="Miniatura 4">
+                            <span>Ranura 4</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_3" id="photo_slot_3" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="3">
+                             <span>Ajustar Ranura 4:</span>
+                              <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                              <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                     <div class="file-input-group">
+                        <label for="photo_slot_4">
+                             <img id="thumb_4" class="thumbnail" src="" alt="Miniatura 5">
+                             <span>Ranura 5</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_4" id="photo_slot_4" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="4">
+                             <span>Ajustar Ranura 5:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                    <div class="file-input-group">
+                        <label for="photo_slot_5">
+                             <img id="thumb_5" class="thumbnail" src="" alt="Miniatura 6">
+                             <span>Ranura 6</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_5" id="photo_slot_5" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="5">
+                             <span>Ajustar Ranura 6:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                     <div class="file-input-group">
+                        <label for="photo_slot_6">
+                             <img id="thumb_6" class="thumbnail" src="" alt="Miniatura 7">
+                             <span>Ranura 7</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_6" id="photo_slot_6" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="6">
+                             <span>Ajustar Ranura 7:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                    <div class="file-input-group">
+                        <label for="photo_slot_7">
+                            <img id="thumb_7" class="thumbnail" src="" alt="Miniatura 8">
+                            <span>Ranura 8</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_7" id="photo_slot_7" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="7">
+                             <span>Ajustar Ranura 8:</span>
+                              <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                              <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+                     <div class="file-input-group">
+                        <label for="photo_slot_8">
+                            <img id="thumb_8" class="thumbnail" src="" alt="Miniatura 9">
+                            <span>Ranura 9</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_8" id="photo_slot_8" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="8">
+                             <span>Ajustar Ranura 9:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+
+                    <!-- Ranura 10 (Página Derecha Base, Grande) -->
+                    <div class="file-input-group">
+                        <label for="photo_slot_9">
+                             <img id="thumb_9" class="thumbnail" src="" alt="Miniatura 10">
+                             <span>Ranura 10</span> <!-- Envuelto en span -->
+                        </label>
+                        <input type="file" name="photo_slot_9" id="photo_slot_9" accept="image/png, image/jpeg, image/webp">
+                         <div class="adjust-controls" data-slot-index="9">
+                             <span>Ajustar Ranura 10:</span>
+                             <div class="adjust-buttons"><button type="button" data-action="zoom-in">+</button><button type="button" data-action="zoom-out">-</button></div>
+                             <div class="adjust-buttons"><button type="button" data-action="pan-up">↑</button><button type="button" data-action="pan-down">↓</button><button type="button" data-action="pan-left">←</button><button type="button" data-action="pan-right">→</button></div>
+                             <button type="button" data-action="reset">Reset</button>
+                         </div>
+                    </div>
+
+
+                </div> <!-- Fin .input-area -->
+
+                <button type="submit" id="generateBtn">Generar Pliego Completo (Alta Resolución)</button>
+            </form>
+        </div> <!-- Fin .form-section -->
+
+        <!-- Mensajes de error y carga -->
+        <div id="loading" class="message loading">Procesando... por favor espera. Esto puede tardar unos segundos.</div>
+        <div id="error" class="message error"></div>
+
+
+         <!-- Nuevo div envolvente para la sección de previsualización -->
+         <div class="preview-section">
+              <h2>2. Previsualización y Ajuste</h2>
+               <p>Revisa el encuadre de las fotos. Si necesitas ajustar el zoom o la posición de alguna imagen, utiliza los botones que aparecen junto a su cargador de archivo.</p>
+
+              <!-- Controles para intercambiar páginas - COPIADO DEL CÓDIGO 7 FOTOS -->
+             <div class="swap-controls">
+                 <label>Disposición del Pliego:</label>
+                 <button type="button" id="defaultLayoutBtn" class="active">Ranuras 1-9 Izq, Ranura 10 Der</button>
+                 <button type="button" id="swappedLayoutBtn">Ranura 10 Izq, Ranuras 1-9 Der</button>
+             </div>
+
+             <!-- Botón para la previsualización grande - AÑADIDO -->
+             <button type="button" id="largePreviewBtn" disabled>Ver Previsualización Grande</button>
+
+
+              <div id="previewContainer">
+                   <!-- El canvas de previsualización -->
+                  <canvas id="previewCanvas"></canvas>
+              </div>
+         </div> <!-- Fin .preview-section -->
+
+
+    </div> <!-- Fin .container -->
+
+    <!-- El canvas de alta resolución (se crea/usa en JS, no es visible) -->
+    <canvas id="finalCanvas" style="display:none;"></canvas>
+
+    <!-- --- Ventana Modal para la Previsualización Grande - AÑADIDO --- -->
+    <div class="modal-overlay" id="largePreviewModal">
+        <div class="modal-content">
+            <canvas id="largePreviewCanvas"></canvas>
+            <button class="modal-close-button" id="closeModalBtn">×</button>
+        </div>
+    </div>
+    <!-- ---------------------------------------------------- -->
+
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loadingMessage = document.getElementById('loading');
+        const errorMessage = document.getElementById('error');
+        const generateBtn = document.getElementById('generateBtn');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        const finalCanvas = document.getElementById('finalCanvas'); // Canvas para la salida final
+        const finalCtx = finalCanvas.getContext('2d');
+        const defaultLayoutBtn = document.getElementById('defaultLayoutBtn');
+        const swappedLayoutBtn = document.getElementById('swappedLayoutBtn');
+
+        // --- Elementos del Modal de Previsualización Grande - AÑADIDO ---
+        const largePreviewBtn = document.getElementById('largePreviewBtn');
+        const largePreviewModal = document.getElementById('largePreviewModal');
+        const largePreviewCanvas = document.getElementById('largePreviewCanvas');
+        const largePreviewCtx = largePreviewCanvas.getContext('2d');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        // --------------------------------------------------------------
+
+
+        // --- Especificaciones del Templete (Calculado a 300 DPI) ---
+
+        // Dimensiones del pliego completo en cm (70cm x 25cm)
+        const PLIEGO_WIDTH_CM = 70;
+        const PLIEGO_HEIGHT_CM = 25;
+        // Resolución deseada
+        const DPI = 300; // Píxeles por pulgada
+
+        // Factor de conversión de cm a píxeles
+        const CM_TO_PIXELS = DPI / 2.54;
+
+        // Calcular dimensiones del pliego FINAL en píxeles a 300 DPI
+        const PLIEGO_WIDTH = Math.round(PLIEGO_WIDTH_CM * CM_TO_PIXELS); // 70 cm -> ~8268 px
+        const PLIEGO_HEIGHT = Math.round(PLIEGO_HEIGHT_CM * CM_TO_PIXELS); // 25 cm -> ~2953 px
+        console.log(`Dimensiones del pliego final a ${DPI} DPI: ${PLIEGO_WIDTH} x ${PLIEGO_HEIGHT} píxeles`); // Para depuración
+
+
+        // Márgenes y espacios convertidos a píxeles (a 300 DPI)
+        const MARGIN_CM = 1.94; // Margen deseado en cm
+
+        // Calcular el margen en píxeles a 300 DPI
+        const OUTER_MARGIN = Math.round(MARGIN_CM * CM_TO_PIXELS); // 1.94 cm -> ~230 px
+        console.log(`Margen de ${MARGIN_CM} cm calculado como aproximadamente ${OUTER_MARGIN} píxeles a ${DPI} DPI.`); // Para depuración
+
+        // Margen interno entre fotos pequeñas (0.20 cm) convertido a píxeles a 300 DPI
+        const INNER_MARGIN_SMALL_CM = 0.20; // Margen entre fotos en la página izquierda (0.20 cm)
+        const INNER_MARGIN_SMALL = Math.round(INNER_MARGIN_SMALL_CM * CM_TO_PIXELS); // 0.20 cm -> ~24 px
+        console.log(`Margen interno pequeño de ${INNER_MARGIN_SMALL_CM} cm calculado como aproximadamente ${INNER_MARGIN_SMALL} píxeles a ${DPI} DPI.`); // Para depuración
+
+
+        // El espacio central es la suma de los márgenes internos de cada página grande (1.94cm + 1.94cm)
+        const CENTER_GAP = OUTER_MARGIN * 2; // 1.94cm de Pág Izq + 1.94cm de Pág Der = 3.88 cm -> ~460 px
+
+
+        // Área usable para las fotos después de aplicar márgenes generales
+        const USABLE_HEIGHT = PLIEGO_HEIGHT - 2 * OUTER_MARGIN; // Alto usable para fotos (descontando margen superior e inferior del pliego)
+        // Ancho usable total para las áreas de fotos (descontando 2 márgenes exteriores y el gap central)
+        const TOTAL_USABLE_WIDTH = PLIEGO_WIDTH - 2 * OUTER_MARGIN - CENTER_GAP;
+        // Cada página usable es la mitad del ancho usable total
+        const USABLE_LEFT_WIDTH = TOTAL_USABLE_WIDTH / 2;
+        const USABLE_RIGHT_WIDTH = TOTAL_USABLE_WIDTH / 2;
+
+
+        // ********** Dimensiones de las ranuras CALCULADAS para 9+1 layout **********
+        // Ranuras pequeñas (9) en la página izquierda (en 3x3)
+        // Ancho: 3 * NINE_SLOT_WIDTH + 2 * INNER_MARGIN_SMALL = USABLE_LEFT_WIDTH
+        const NINE_SLOT_WIDTH = (USABLE_LEFT_WIDTH - 2 * INNER_MARGIN_SMALL) / 3;
+        // Alto: 3 * NINE_SLOT_HEIGHT + 2 * INNER_MARGIN_SMALL = USABLE_HEIGHT
+        const NINE_SLOT_HEIGHT = (USABLE_HEIGHT - 2 * INNER_MARGIN_SMALL) / 3;
+
+
+        // Ranura grande (1) en la página derecha
+        const LARGE_SLOT_WIDTH = USABLE_RIGHT_WIDTH; // Ocupa todo el ancho usable de la página derecha
+        const LARGE_SLOT_HEIGHT = USABLE_HEIGHT; // Ocupa todo el alto usable
+
+
+        // ********** Definición BASE de las ranuras (layout predeterminado: 9 izq, 1 der) **********
+        // Las posiciones son relativas al origen (0,0) del pliego total FINAL (a 300 DPI)
+        // Estos son los datos "base" antes de aplicar el swap
+        const SLOT_DEFINITIONS_BASE = [];
+        const ROWS_NINE = 3;
+        const COLS_NINE = 3;
+
+        // Generar ranuras para la Página Izquierda (0-8) - Adaptado del primer código, usando las dimensiones de 9x9
+        for (let row = 0; row < ROWS_NINE; row++) {
+            for (let col = 0; col < COLS_NINE; col++) {
+                 const slotIndex = row * COLS_NINE + col; // 0 to 8
+                 const x = OUTER_MARGIN + col * (NINE_SLOT_WIDTH + INNER_MARGIN_SMALL);
+                 const y = OUTER_MARGIN + row * (NINE_SLOT_HEIGHT + INNER_MARGIN_SMALL);
+                 SLOT_DEFINITIONS_BASE.push({
+                     "name": `Ranura ${slotIndex + 1}`, // Nombre base
+                     "position": {x: x, y: y},
+                     "size": {width: NINE_SLOT_WIDTH, height: NINE_SLOT_HEIGHT},
+                     "isLarge": false // Indicador de si es la ranura grande
+                 });
+             }
+        }
+
+        // Agregar ranura para la Página Derecha (9) - Adaptado del segundo código
+        const startXRightPage = OUTER_MARGIN + USABLE_LEFT_WIDTH + CENTER_GAP;
+         SLOT_DEFINITIONS_BASE.push({
+             "name": "Ranura 10", // Slot 9 is Ranura 10
+             "position": {x: startXRightPage, y: OUTER_MARGIN},
+             "size": {width: LARGE_SLOT_WIDTH, height: LARGE_SLOT_HEIGHT},
+             "isLarge": true // Indicador de si es la ranura grande
+         });
+
+
+        const REQUIRED_PHOTOS = SLOT_DEFINITIONS_BASE.length; // Ahora son 10 fotos (9+1)
+
+        console.log(`Calculados a ${DPI} DPI para 10 fotos (9+1):`); // Para depuración
+        console.log("OUTER_MARGIN:", OUTER_MARGIN, "px (~1.94 cm)");
+        console.log("INNER_MARGIN_SMALL:", INNER_MARGIN_SMALL, "px (~0.20 cm)");
+        console.log("CENTER_GAP:", CENTER_GAP, "px (~3.88 cm)");
+        console.log("USABLE_HEIGHT:", USABLE_HEIGHT, "px");
+        console.log("USABLE_LEFT_WIDTH:", USABLE_LEFT_WIDTH, "px");
+        console.log("USABLE_RIGHT_WIDTH:", USABLE_RIGHT_WIDTH, "px");
+        console.log("NINE_SLOT_WIDTH:", NINE_SLOT_WIDTH, "px");
+        console.log("NINE_SLOT_HEIGHT:", NINE_SLOT_HEIGHT, "px");
+        console.log("LARGE_SLOT_WIDTH:", LARGE_SLOT_WIDTH, "px");
+        console.log("LARGE_SLOT_HEIGHT:", LARGE_SLOT_HEIGHT, "px");
+        console.log("Número total de ranuras:", REQUIRED_PHOTOS);
+        console.log("Ranura 1 (TL Izq):", SLOT_DEFINITIONS_BASE[0]);
+        console.log("Ranura 10 (Der):", SLOT_DEFINITIONS_BASE[9]);
+
+
+         // --- State for swapping pages ---
+        let isSwapped = false; // false = default layout (9 left, 1 right)
+
+
+        // --- Data Structure to hold loaded images and their drawing parameters ---
+        let loadedImagesData = Array(REQUIRED_PHOTOS).fill(null);
+        /* Structure for each item:
+           {
+             img: Image object,
+             file: File object, // Optional, but kept for context
+             sx: Source X (current),
+             sy: Source Y (current),
+             sw: Source Width (current),
+             sh: Source Height (current),
+             initialSx: Initial SX (for reset),
+             initialSy: Initial SY (for reset),
+             initialSw: Initial SW (for reset),
+             initialSh: Initial SH (for reset)
+           }
+        */
+
+        // --- Preview Canvas Scaling ---
+        const PREVIEW_MAX_WIDTH = 700;
+        // Escalar la previsualización basada en las dimensiones FINALES del pliego (a 300 DPI)
+        const previewScale = PREVIEW_MAX_WIDTH / PLIEGO_WIDTH;
+        const PREVIEW_WIDTH = PLIEGO_WIDTH * previewScale;
+        const PREVIEW_HEIGHT = PLIEGO_HEIGHT * previewScale;
+
+        previewCanvas.width = PREVIEW_WIDTH;
+        previewCanvas.height = PREVIEW_HEIGHT;
+        console.log(`Dimensiones de la previsualización: ${PREVIEW_WIDTH} x ${PREVIEW_HEIGHT} píxeles`); // Para depuración
+
+
+        // --- Step sizes for adjustments (relative to current source dimensions) ---
+        const ZOOM_STEP_PERCENT = 0.05;
+        const PAN_STEP_PERCENT = 0.02;
+
+        // --- Function to calculate initial "cover" drawImage parameters ---
+        function calculateInitialCoverParams(imgWidth, imgHeight, slotWidth, slotHeight) {
+            const scale = Math.max(slotWidth / imgWidth, slotHeight / imgHeight);
+
+            const sw = slotWidth / scale;
+            const sh = slotHeight / scale;
+            const sx = (imgWidth - sw) / 2;
+            sy = (imgHeight - sh) / 2;
+
+            return { sx, sy, sw, sh };
+        }
+
+         // --- Function to get the FINAL position and size for a slot based on swap state ---
+         // Usa las definiciones de ranura BASE (calculadas a 300 DPI) y aplica el swap
+        function getFinalSlotDrawingParams(slotIndex, scaleFactor = 1) {
+             const slot = SLOT_DEFINITIONS_BASE[slotIndex];
+             let dx = slot.position.x; // Base X
+             let dy = slot.position.y; // Base Y
+             const dw = slot.size.width;
+             const dh = slot.size.height;
+
+             // Apply swap transformation if needed
+             if (isSwapped) {
+                 const isNineGridSlot = slotIndex < 9; // Indices 0-8 are the 9 small slots
+
+                 // Calculate the total offset needed to swap pages
+                 // This offset is the distance from the start of the left page usable area
+                 // to the start of the right page usable area (or vice versa)
+                 // Start of Left Usable Area: OUTER_MARGIN
+                 // Start of Right Usable Area: OUTER_MARGIN + USABLE_LEFT_WIDTH + CENTER_GAP
+                 const pageSwapOffset = USABLE_LEFT_WIDTH + CENTER_GAP;
+
+
+                 if (isNineGridSlot) {
+                     // This slot is originally one of the 9 small ones (base left page)
+                     // Move it to the right page position
+                      dx = slot.position.x + pageSwapOffset;
+                 } else { // slotIndex === 9 (the large slot, base right page)
+                     // This slot is originally the large one (base right page)
+                     // Move it to the left page position
+                     dx = slot.position.x - pageSwapOffset;
+                 }
+                 // Y position remains the same within the usable height (relative to OUTER_MARGIN)
+                 dy = slot.position.y; // No need to calculate relative y, as it's already relative to OUTER_MARGIN top and doesn't change with horizontal swap
+             }
+
+             // Scale the final position and size for the target canvas (preview or final)
+             const finalDx = dx * scaleFactor;
+             const finalDy = dy * scaleFactor;
+             const finalDw = dw * scaleFactor;
+             const finalDh = dh * scaleFactor;
+
+             return { finalDx, finalDy, finalDw, finalDh };
+        }
+
+
+        // --- Function to draw a single image on a specific canvas context ---
+         // Usa getFinalSlotDrawingParams para obtener la posición y tamaño correctos
+        function drawImageOnCanvas(ctx, item, slotIndex, scaleFactor = 1) {
+             if (!item || !item.img) return;
+
+            const { finalDx, finalDy, finalDw, finalDh } = getFinalSlotDrawingParams(slotIndex, scaleFactor);
+
+            ctx.drawImage(
+                item.img,
+                item.sx, item.sy, item.sw, item.sh, // Source (from loadedImagesData)
+                finalDx, finalDy, finalDw, finalDh // Destination (calculated final position/size)
+            );
+        }
+
+         // --- Function to draw the outlines and numbers on a canvas context ---
+         // Dibuja contorno exterior, línea central, bordes de slots dibujados y números para slots vacíos
+         // canvasWidth, canvasHeight son las dimensiones ACTUALES del canvas de destino (escalado)
+         // scaleFactor es la relación entre las dimensiones de 300 DPI y las del canvas de destino
+        function drawSlotOutlines(ctx, canvasWidth, canvasHeight, scaleFactor) {
+
+             // ********** DIBUJAR CONTORNO EXTERIOR DEL PLIEGO COMPLETO **********
+             ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; // Color semi-transparente sutil
+             ctx.lineWidth = 1; // Grosor de línea fina (1 píxel en la previsualización)
+             ctx.strokeRect(0.5, 0.5, canvasWidth - 1, canvasHeight - 1); // Ajuste 0.5 para líneas nítidas
+             // *****************************************************************
+
+             // ********** DIBUJAR LA LÍNEA CENTRAL **********
+             ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; // Mismo color sutil
+             ctx.lineWidth = 1; // Mismo grosor fino
+             // La línea central está a la mitad del ancho TOTAL del pliego FINAL (a 300 DPI)
+             const centerLineX = (PLIEGO_WIDTH / 2) * scaleFactor;
+             ctx.beginPath();
+             ctx.moveTo(centerLineX + 0.5, 0); // Ajuste 0.5 para línea nítida
+             ctx.lineTo(centerLineX + 0.5, canvasHeight); // Extiende hasta el alto escalado de la previsualización
+             ctx.stroke();
+             // ********************************************
+
+
+             // Establecer estilo para los bordes de slots y los números
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'; // Bordes de los slots que se dibujan
+            ctx.lineWidth = 1; // Dibuja líneas de 1px en el canvas escalado
+
+            // >>>>>> MODIFICACIÓN AQUÍ: Usar tamaño fijo para la fuente del número <<<<<<
+            // Solo dibujar los números si el contexto es el de la previsualización (previewCtx o largePreviewCtx)
+            // y las ranuras están vacías.
+            if (ctx === previewCtx || ctx === largePreviewCtx) {
+                ctx.font = 'bold 30px sans-serif'; // Tamaño fijo de fuente para los números
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Color semi-transparente para números
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+            }
+
+
+            // Iterar a través de todos los slots (0-9) para dibujar los recuadros y los números
+            SLOT_DEFINITIONS_BASE.forEach((slot, index) => {
+                // Obtener los parámetros de dibujo escalados para este slot (aplica swap)
+                 const { finalDx, finalDy, finalDw, finalDh } = getFinalSlotDrawingParams(index, scaleFactor);
+
+                 // Dibujar un borde alrededor del área donde iría la imagen (la guía)
+                 // Ajuste 0.5 para líneas nítidas
+                 ctx.strokeRect(finalDx + 0.5, finalDy + 0.5, finalDw - 1, finalDh - 1);
+
+
+                // Solo dibujar el número si NO hay imagen cargada en esa ranura
+                if (!loadedImagesData[index]) {
+                    // Obtener la posición final (posiblemente swap) para el centro del número
+                    // Esto calcula el centro del área visual real donde iría la imagen
+                    const centerX = finalDx + finalDw / 2;
+                    const centerY = finalDy + finalDh / 2;
+
+                    ctx.fillText(index + 1, centerX, centerY); // Dibuja número en la posición final
+                }
+            });
+        }
+
+
+        // --- Function to update the preview canvas ---
+         // Redibuja la previsualización
+        function updatePreviewCanvas() {
+            // Clear the preview canvas (background color is set in CSS)
+            previewCtx.clearRect(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+
+            // Draw images first
+            loadedImagesData.forEach((item, index) => {
+                // drawImageOnCanvas ahora usa el index para calcular la posición final con swap
+                drawImageOnCanvas(previewCtx, item, index, previewScale);
+            });
+
+             // Draw slot outlines (contorno exterior, línea central, bordes de slots) and numbers *over* the images
+             // drawSlotOutlines usa SLOT_DEFINITIONS_BASE para la información base y getFinalSlotDrawingParams para el swap
+            drawSlotOutlines(previewCtx, PREVIEW_WIDTH, PREVIEW_HEIGHT, previewScale);
+
+
+            const allPhotosLoaded = loadedImagesData.every(item => item !== null);
+            generateBtn.disabled = !allPhotosLoaded;
+            // Habilitar el botón de previsualización grande solo si todas las fotos están cargadas - AÑADIDO
+            largePreviewBtn.disabled = !allPhotosLoaded;
+
+
+             // Actualizar el texto del botón de layout
+             if (isSwapped) {
+                 defaultLayoutBtn.classList.remove('active');
+                 swappedLayoutBtn.classList.add('active');
+             } else {
+                 defaultLayoutBtn.classList.add('active');
+                 swappedLayoutBtn.classList.remove('active');
+             }
+             defaultLayoutBtn.textContent = isSwapped ? 'Ranuras 1-9 Der, Ranura 10 Izq' : 'Ranuras 1-9 Izq, Ranura 10 Der';
+             swappedLayoutBtn.textContent = isSwapped ? 'Ranura 10 Izq, Ranuras 1-9 Der' : 'Ranuras 1-9 Der, Ranura 10 Izq';
+        }
+
+         // --- Function to apply transformation (zoom/pan/reset) to a specific slot ---
+         // Usa el tamaño de la ranura DEFINIDA en SLOT_DEFINITIONS_BASE para los cálculos de ajuste
+         function applyTransform(slotIndex, action) {
+             const item = loadedImagesData[slotIndex];
+             if (!item || !item.img) {
+                 console.warn(`No image loaded for slot ${slotIndex}. Cannot apply transform.`);
+                 return;
+             }
+
+             const imgWidth = item.img.width;
+             const imgHeight = item.img.height;
+             // Usa el tamaño de la ranura DEFINIDA en SLOT_DEFINITIONS_BASE para los límites del zoom/pan
+             const slotSize = SLOT_DEFINITIONS_BASE[slotIndex].size;
+
+
+             let { sx, sy, sw, sh } = item; // Get current params
+
+             if (action === 'reset') {
+                 sx = item.initialSx;
+                 sy = item.initialSy;
+                 sw = item.initialSw;
+                 sh = item.initialSh;
+
+             } else if (action === 'zoom-in') {
+                 const aspectRatio = sw / sh;
+                 let currentStepW = sw * ZOOM_STEP_PERCENT;
+                 let currentStepH = currentStepW / aspectRatio; // Maintain aspect ratio
+
+                 // Prevent zooming in too much (e.g., past 1 pixel dimension)
+                 if (sw - currentStepW > 1 && sh - currentStepH > 1) {
+                      sw -= currentStepW;
+                      sh -= currentStepH;
+                      sx += currentStepW / 2;
+                      sy += currentStepH / 2;
+                 }
+
+
+             } else if (action === 'zoom-out') {
+                const aspectRatio = sw / sh;
+                let currentStepW = sw * ZOOM_STEP_PERCENT;
+                let currentStepH = currentStepW / aspectRatio;
+
+                // Calculate potential new size
+                const potentialSw = sw + currentStepW;
+                const potentialSh = sh + currentStepH;
+
+                // Calculate the minimum source size needed to 'cover' the slot size
+                const minCoverParams = calculateInitialCoverParams(imgWidth, imgHeight, slotSize.width, slotSize.height);
+                const sw_min = minCoverParams.sw;
+                const sh_min = minCoverParams.sh;
+
+
+                // Prevent zooming out past the original image dimensions AND past the minimum cover size
+                // Use a small tolerance for floating point comparisons
+                // If trying to zoom out, the new size should not exceed the *original* image size
+                // AND the new size should not be *smaller* than the minimum required to cover the slot
+                if (potentialSw <= imgWidth * 1.01 && potentialSh <= imgHeight * 1.01 && // Don't exceed original image size + tolerance
+                    potentialSw >= sw_min * 0.99 && potentialSh >= sh_min * 0.99) // Don't go smaller than min cover size - tolerance
+                 {
+                     sw = potentialSw;
+                     sh = potentialSh;
+                     sx -= currentStepW / 2;
+                     sy -= currentStepH / 2;
+                 } else {
+                     // If trying to zoom out past the limit, set to the minimum cover size (which is the initial state)
+                     sw = sw_min;
+                     sh = sh_min;
+                     sx = minCoverParams.sx;
+                     sy = minCoverParams.sy;
+                 }
+
+
+             } else if (action === 'pan-left') {
+                 const stepX = sw * PAN_STEP_PERCENT;
+                 sx -= stepX;
+             } else if (action === 'pan-right') {
+                 const stepX = sw * PAN_STEP_PERCENT;
+                 sx += stepX;
+             } else if (action === 'pan-up') {
+                 const stepY = sh * PAN_STEP_PERCENT;
+                 sy -= stepY;
+             } else if (action === 'pan-down') {
+                 const stepY = sh * PAN_STEP_PERCENT;
+                 sy += stepY;
+             }
+
+             // --- Clamp sx and sy to stay within image bounds relative to sw and sh ---
+             const maxSx = Math.max(0, imgWidth - sw); // Ensure sw doesn't make maxSx negative
+             const maxSy = Math.max(0, imgHeight - sh); // Ensure sh doesn't make maxSy negative
+             sx = Math.max(0, Math.min(maxSx, sx));
+             sy = Math.max(0, Math.min(maxSy, sy));
+
+
+             // --- Update the stored parameters ---
+             item.sx = sx;
+             item.sy = sy;
+             item.sw = sw;
+             item.sh = sh;
+
+             // --- Redraw the preview ---
+             updatePreviewCanvas();
+         }
+
+
+        // --- Handle file selection for a specific slot ---
+        async function handleFileSelect(event, slotIndex) {
+            const fileInput = event.target; // Referencia al input file
+            const file = fileInput.files[0];
+            const thumbnailElement = document.getElementById(`thumb_${slotIndex}`);
+            // Buscamos el div de controles de ajuste por su data attribute
+            const adjustControlsDiv = document.querySelector(`.adjust-controls[data-slot-index="${slotIndex}"]`);
+             // Obtenemos la referencia al div file-input-group padre
+            const fileInputGroupDiv = fileInput.closest('.file-input-group'); // Usar closest para mayor seguridad
+
+            // Ocultar mensajes de error y carga al iniciar la carga de un archivo
+             errorMessage.style.display = 'none';
+             loadingMessage.style.display = 'none';
+
+
+            if (!file) {
+                // If file was cleared
+                loadedImagesData[slotIndex] = null;
+                thumbnailElement.style.display = 'none';
+                thumbnailElement.src = '';
+                 if (adjustControlsDiv) adjustControlsDiv.style.display = 'none';
+                 if (fileInputGroupDiv) fileInputGroupDiv.classList.remove('has-file');
+                 loadingMessage.style.display = 'none'; // Ocultar carga si se limpia
+                updatePreviewCanvas();
+                return;
+            }
+
+             if (!file.type.startsWith('image/')) {
+                 errorMessage.textContent = `Error: El archivo '${file.name}' para la Ranura ${slotIndex + 1} no es una imagen válida. Por favor, selecciona un archivo JPG, PNG o WebP.`;
+                 errorMessage.style.display = 'block';
+                 fileInput.value = '';
+                 loadedImagesData[slotIndex] = null;
+                 thumbnailElement.style.display = 'none';
+                 thumbnailElement.src = '';
+                 if (adjustControlsDiv) adjustControlsDiv.style.display = 'none';
+                 if (fileInputGroupDiv) fileInputGroupDiv.classList.remove('has-file');
+                 loadingMessage.style.display = 'none'; // Ocultar carga si hay error de tipo
+                 updatePreviewCanvas();
+                 return;
+            }
+
+             loadingMessage.textContent = 'Cargando imagen...'; // Mensaje específico para la carga
+             loadingMessage.style.display = 'block';
+             errorMessage.style.display = 'none';
+
+
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const image = new Image();
+                        // Es importante establecer crossOrigin ANTES de establecer src si la imagen viene de otra fuente
+                         image.crossOrigin = 'Anonymous';
+                        image.onload = () => resolve(image);
+                        image.onerror = () => reject(new Error(`No se pudo cargar la imagen '${file.name}'. El archivo podría estar corrupto o no ser un formato de imagen compatible.`));
+                        image.src = e.target.result;
+                    };
+                    reader.onerror = () => reject(new Error(`Error leyendo el archivo '${file.name}'. Por favor, inténtalo de nuevo.`));
+                    reader.readAsDataURL(file);
+                });
+
+                // Calculate initial "cover" drawing parameters for this image in its slot
+                // Usa el tamaño de la ranura definido en SLOT_DEFINITIONS_BASE (calculado a 300 DPI)
+                const slot = SLOT_DEFINITIONS_BASE[slotIndex].size;
+                const initialParams = calculateInitialCoverParams(img.width, img.height, slot.width, slot.height);
+
+                loadedImagesData[slotIndex] = {
+                    img: img,
+                    file: file, // Guardamos el objeto File por si fuera útil, aunque no lo usamos para dibujar
+                    sx: initialParams.sx,
+                    sy: initialParams.sy,
+                    sw: initialParams.sw,
+                    sh: initialParams.sh,
+                    initialSx: initialParams.sx,
+                    initialSy: initialParams.sy,
+                    initialSw: initialParams.sw,
+                    initialSh: initialParams.sh
+                 };
+
+                thumbnailElement.src = img.src;
+                thumbnailElement.style.display = 'inline-block';
+
+
+                 // Show adjustment controls
+                 if (adjustControlsDiv) adjustControlsDiv.style.display = 'block';
+                 if (fileInputGroupDiv) fileInputGroupDiv.classList.add('has-file');
+
+
+                updatePreviewCanvas(); // Redraw preview with the new image
+
+                 loadingMessage.style.display = 'none';
+
+
+            } catch (error) {
+                console.error("Error detallado en handleFileSelect:", error);
+                errorMessage.textContent = `Error al procesar la imagen para la Ranura ${slotIndex + 1}: ${error.message}`;
+                errorMessage.style.display = 'block';
+                fileInput.value = ''; // Limpiar el input para que permita cargar el mismo archivo si el usuario corrige
+                loadedImagesData[slotIndex] = null;
+                thumbnailElement.style.display = 'none';
+                thumbnailElement.src = '';
+                 if (adjustControlsDiv) adjustControlsDiv.style.display = 'none';
+                 if (fileInputGroupDiv) fileInputGroupDiv.classList.remove('has-file');
+                updatePreviewCanvas(); // Redraw preview (probably showing empty slot)
+                loadingMessage.style.display = 'none';
+            }
+        }
+
+        // --- Handle the final generation and download ---
+         // Exporta a 300 DPI, calidad 1.0, sRGB (por defecto)
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const allPhotosLoaded = loadedImagesData.every(item => item !== null);
+            if (!allPhotosLoaded) {
+                 errorMessage.textContent = `Por favor, carga las ${REQUIRED_PHOTOS} fotos antes de generar el pliego.`;
+                 errorMessage.style.display = 'block';
+                 return;
+            }
+
+            errorMessage.style.display = 'none';
+            loadingMessage.textContent = 'Generando archivo de alta resolución... esto puede tardar unos instantes.';
+            loadingMessage.style.display = 'block';
+            generateBtn.disabled = true;
+
+            try {
+                // Usar las dimensiones del pliego CALCULADAS a 300 DPI
+                finalCanvas.width = PLIEGO_WIDTH;
+                finalCanvas.height = PLIEGO_HEIGHT;
+
+                finalCtx.fillStyle = 'white';
+                finalCtx.fillRect(0, 0, PLIEGO_WIDTH, PLIEGO_HEIGHT);
+
+                loadedImagesData.forEach((item, index) => {
+                    // drawImageOnCanvas usa getFinalSlotDrawingParams para la posición final con swap
+                    drawImageOnCanvas(finalCtx, item, index, 1); // scaleFactor = 1 for final high-res
+                });
+
+                 // El canvas final NO necesita los bordes ni números para la exportación
+
+                 finalCanvas.toBlob(function(blob) {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        // Sugerir nombre de archivo que indique 300dpi y calidad 1.0 y el layout
+                        a.download = `pliego_9+1_300dpi_q1.0_${isSwapped ? '10-izq' : '9+1-izq'}.jpg`; // Added layout to filename
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                         loadingMessage.style.display = 'none';
+                          // generateBtn.disabled = false; // Habilitar de nuevo si quieres permitir generar múltiples veces
+                         alert('Pliego generado y descargado. Si no se inició la descarga, revisa la configuración de tu navegador.');
+
+
+                    } else {
+                        errorMessage.textContent = 'Error al generar la imagen para descargar. Inténtalo de nuevo.';
+                        errorMessage.style.display = 'block';
+                         loadingMessage.style.display = 'none';
+                         generateBtn.disabled = false;
+                    }
+                }, 'image/jpeg', 1.0); // Specify JPEG format and MAX quality (1.0)
+
+            } catch (error) {
+                console.error("Error detallado en submit:", error);
+                errorMessage.textContent = `Ocurrió un error inesperado durante la generación: ${error.message}`;
+                errorMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+
+         // --- Event Listener for Swap Buttons ---
+        defaultLayoutBtn.addEventListener('click', () => {
+            if (isSwapped) { // Only do something if it's currently swapped
+                isSwapped = false;
+                updatePreviewCanvas();
+            }
+        });
+
+        swappedLayoutBtn.addEventListener('click', () => {
+            if (!isSwapped) { // Only do something if it's not currently swapped
+                isSwapped = true;
+                updatePreviewCanvas();
+            }
+        });
+
+
+         // --- Functions to manage the Large Preview Modal - AÑADIDO ---
+         function openLargePreview() {
+             if (!loadedImagesData.every(item => item !== null)) {
+                 // Should be disabled by the button state, but added for safety
+                 return;
+             }
+
+             // Calculate the scale needed to draw the 300 DPI content onto the large preview canvas
+             // Let's use a scale factor that scales the 300 DPI dimensions down,
+             // for example, by 0.75 or 0.5. A factor of 0.75 seems reasonable for balance.
+             const largePreviewDrawScale = 0.75; // Draw at 75% of 300 DPI resolution for better detail in modal
+
+             const largeCanvasWidth = PLIEGO_WIDTH * largePreviewDrawScale;
+             const largeCanvasHeight = PLIEGO_HEIGHT * largePreviewDrawScale;
+
+             largePreviewCanvas.width = largeCanvasWidth;
+             largePreviewCanvas.height = largeCanvasHeight;
+
+             // Clear the large preview canvas (background color is set in CSS)
+             largePreviewCtx.clearRect(0, 0, largeCanvasWidth, largeCanvasHeight);
+
+
+             // Draw images onto the large preview canvas
+              loadedImagesData.forEach((item, index) => {
+                 drawImageOnCanvas(largePreviewCtx, item, index, largePreviewDrawScale);
+             });
+
+             // Draw slot outlines and numbers on the large preview canvas
+             // Pass the dimensions of the large canvas and its scale factor
+              drawSlotOutlines(largePreviewCtx, largeCanvasWidth, largeCanvasHeight, largePreviewDrawScale);
+
+
+             // Show the modal
+             largePreviewModal.style.display = 'flex'; // Use flex to maintain centering
+         }
+
+         function closeLargePreview() {
+             // Hide the modal
+             largePreviewModal.style.display = 'none';
+             // Optional: Clear the canvas context to free memory
+             largePreviewCtx.clearRect(0, 0, largePreviewCanvas.width, largePreviewCanvas.height);
+         }
+
+         // Close modal when clicking the close button
+         closeModalBtn.addEventListener('click', () => {
+             closeLargePreview();
+         });
+
+         // Close modal when clicking outside the modal content (on the overlay)
+         largePreviewModal.addEventListener('click', (event) => {
+             // Check if the click target is the overlay itself, not the content or canvas inside
+             if (event.target === largePreviewModal) {
+                 closeLargePreview();
+             }
+         });
+
+         // Event Listener for Large Preview Button - AÑADIDO
+         largePreviewBtn.addEventListener('click', () => {
+             openLargePreview();
+         });
+        // ---------------------------------------------------
+
+
+        // --- Initialize Event Listeners for file inputs and adjust buttons ---
+
+        // For each file input (Bucle ajustado para 10 fotos, indices 0 a 9):
+        for (let i = 0; i < REQUIRED_PHOTOS; i++) {
+             const fileInput = document.getElementById(`photo_slot_${i}`);
+             if (fileInput) {
+                 fileInput.addEventListener('change', (event) => handleFileSelect(event, i));
+
+                 // Ocultar controles de ajuste al inicio, se mostrarán en handleFileSelect si se carga un archivo
+                  const fileInputGroup = fileInput.closest('.file-input-group');
+                  const adjustControlsDiv = fileInputGroup ? fileInputGroup.querySelector('.adjust-controls') : null;
+                  if (adjustControlsDiv) adjustControlsDiv.style.display = 'none';
+
+             } else {
+                  console.error(`Input for slot ${i + 1} not found! ID: photo_slot_${i}`);
+             }
+        }
+
+
+        // For each adjustment control button:
+        document.querySelectorAll('.adjust-controls button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Usar .closest() para encontrar el div .adjust-controls padre
+                const adjustControlsDiv = button.closest('.adjust-controls');
+
+                 if (adjustControlsDiv) {
+                    const slotIndex = parseInt(adjustControlsDiv.dataset.slotIndex);
+                    const action = button.dataset.action;
+                     if (!isNaN(slotIndex)) {
+                         applyTransform(slotIndex, action);
+                     } else {
+                         console.error("Could not determine slot index for button click.");
+                     }
+                 } else {
+                      console.error("Could not find parent .adjust-controls div for button.", button);
+                 }
+
+            });
+        });
+
+
+        // Initial state: Update preview to show empty slots and disable buttons
+        generateBtn.disabled = true;
+        largePreviewBtn.disabled = true; // Deshabilitar el botón de preview grande también al inicio - AÑADIDO
+        // Inicializamos loadedImagesData a 10 nulls al inicio
+        loadedImagesData = Array(REQUIRED_PHOTOS).fill(null);
+        updatePreviewCanvas(); // Draw initial empty preview with outlines and numbers
+
+    </script>
+</body>
+</html>
