@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList</title>
+    <!-- Enlace a Google Font: Quicksand (para el título) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Enlace a Google Font: Lexend (para el resto del texto) -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+
+
+    <style>
+        /* --- Estilos Ultra Minimalistas (Modo Claro por defecto) --- */
+        body {
+            font-family: 'Lexend', sans-serif;
+            margin: 30px auto;
+            max-width: 600px;
+            background-color: white; /* Fondo claro por defecto */
+            color: black; /* Texto oscuro por defecto */
+            line-height: 1.6;
+            padding-bottom: 80px; /* Espacio extra al final para botones */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
+        }
+
+        h1 {
+            font-family: 'Quicksand', sans-serif;
+            color: black; /* Color oscuro por defecto */
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: none;
+            padding-bottom: 15px;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        #todo-list {
+            list-style: none;
+            padding: 0;
+            border-top: none;
+            margin-bottom: 30px;
+        }
+
+        .todo-item {
+            background-color: white; /* Fondo claro por defecto */
+            border-bottom: 1px solid #eee; /* Línea separadora GRIS CLARO */
+            padding: 15px 0;
+            border-radius: 0;
+            word-break: break-word;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-bottom-color 0.3s ease; /* Transición suave */
+        }
+
+        .todo-item .main-task-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 0 15px;
+        }
+
+         /* Estilo del checkbox principal */
+        .todo-item .main-task-header input[type="checkbox"] {
+             margin-right: 8px;
+             border: 1px solid black; /* Borde oscuro por defecto */
+             appearance: none;
+             -webkit-appearance: none;
+             width: 18px;
+             height: 18px;
+             background-color: white; /* Fondo claro por defecto */
+             cursor: pointer;
+             position: relative;
+             flex-shrink: 0;
+             box-sizing: border-box;
+             transition: background-color 0.3s ease, border-color 0.3s ease; /* Transición suave */
+        }
+
+         .todo-item .main-task-header input[type="checkbox"]:checked {
+              background-color: black; /* Fondo oscuro al marcar */
+              border-color: black; /* Borde oscuro al marcar */
+         }
+
+          /* Custom checkmark para checkbox principal */
+         .todo-item .main-task-header input[type="checkbox"]:checked::after {
+             content: '';
+             position: absolute;
+             top: 3px;
+             left: 5px;
+             width: 4px;
+             height: 8px;
+             border: solid white; /* Checkmark blanco */
+             border-width: 0 2px 2px 0;
+             transform: rotate(45deg);
+         }
+
+         /* Etiqueta de prioridad de color */
+        .todo-item .priority-color-label {
+             display: inline-block;
+             width: 12px;
+             height: 12px;
+             margin-right: 10px;
+             border: 1px solid #ccc; /* Borde gris claro por defecto */
+             border-radius: 0;
+             cursor: pointer;
+             flex-shrink: 0;
+             transition: border-color 0.2s ease;
+             box-sizing: border-box;
+        }
+         /* Colores de prioridad (estos no cambian en dark mode) */
+        .priority-color-label[data-color="red"] { background-color: #dc3545; border-color: #dc3545; }
+        .priority-color-label[data-color="orange"] { background-color: #fd7e14; border-color: #fd7e14; }
+        .priority-color-label[data-color="yellow"] { background-color: #ffc107; border-color: #ffc107; }
+        .priority-color-label[data-color="green"] { background-color: #28a745; border-color: #28a745; }
+        .priority-color-label[data-color="none"] { background-color: white; border-color: #ccc; }
+
+
+        /* Texto de la tarea principal */
+        .todo-item .main-task-header span {
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-grow: 1;
+            margin-right: 15px;
+            color: black; /* Color oscuro por defecto */
+            transition: color 0.3s ease; /* Transición suave */
+        }
+
+         /* Botón eliminar principal - Alineado a la derecha, discreto */
+        .todo-item .main-task-header button {
+            background: none;
+            color: red; /* Color rojo por defecto */
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+            margin-left: auto; /* Empuja a la derecha */
+        }
+
+        .todo-item .main-task-header button:hover {
+            color: darkred; /* Rojo oscuro al pasar el mouse */
+        }
+
+        /* --- Estilos UNIFICADOS para Inputs de AÑADIR --- */
+         /* Texto más pequeño y discreto */
+        #new-todo-input,
+        .todo-item .subtask-input-container input[type="text"] {
+            padding: 8px;
+            border: none;
+            border-radius: 0;
+            flex-grow: 1;
+            min-width: 150px;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+            background-color: #f8f8f8; /* Fondo gris suave por defecto */
+            color: black; /* Texto oscuro por defecto */
+            outline: none;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
+        }
+        #new-todo-input:focus,
+        .todo-item .subtask-input-container input[type="text"]:focus {
+            /* No borde rojo al enfocar */
+        }
+
+        /* --- Estilos UNIFICADOS para Botones --- */
+        /* Base style for ALL custom buttons */
+        #add-todo-button,
+        .todo-item .subtask-input-container button,
+        .todo-item .add-subtasks-toggle,
+        .todo-item .main-task-header button,
+        .todo-item .subtasks-list li button,
+        #reorder-button,
+        #dark-mode-toggle
+         {
+             background: none;
+             border: none;
+             border-radius: 0;
+             cursor: pointer;
+             transition: color 0.3s ease;
+             flex-shrink: 0;
+             /* Color base definido por cada tipo de botón (+, -, reorder) */
+        }
+        /* Hover style for ALL custom buttons */
+        #add-todo-button:hover,
+        .todo-item .subtask-input-container button:hover,
+        .todo-item .add-subtasks-toggle:hover,
+        .todo-item .main-task-header button:hover,
+        .todo-item .subtasks-list li button:hover,
+        #reorder-button:hover,
+        #dark-mode-toggle:hover
+         {
+             color: red; /* Rojo al pasar el mouse */
+        }
+
+         /* Alineación específica para el botón + Agregar Sub-tareas */
+        .todo-item .add-subtasks-toggle {
+             display: block;
+             width: fit-content;
+             margin: 10px 15px 0 auto;
+        }
+
+        /* Styles for the '+' buttons */
+        #add-todo-button,
+        .todo-item .subtask-input-container button,
+        .todo-item .add-subtasks-toggle {
+             text-transform: none;
+             letter-spacing: normal;
+             font-size: 1rem;
+             padding: 4px 10px;
+             color: black; /* Color oscuro por defecto */
+        }
+
+        /* Styles for the '-' buttons */
+         .todo-item .main-task-header button,
+         .todo-item .subtasks-list li button {
+             text-transform: none;
+             font-size: 1rem;
+             padding: 4px 10px;
+             color: red; /* Color rojo por defecto */
+         }
+
+         /* Style for the Reorder button (Icon) */
+         #reorder-button {
+             display: block;
+             width: fit-content;
+             margin: 25px 15px 0 auto;
+             font-size: 1rem;
+             color: #888; /* Color gris por defecto */
+             text-transform: none;
+             letter-spacing: normal;
+             padding: 4px 10px;
+         }
+
+         /* Style for the Dark Mode Toggle button (Icon) */
+         #dark-mode-toggle {
+             position: fixed; /* Posición fija en la pantalla */
+             bottom: 20px; /* 20px desde abajo */
+             right: 20px; /* 20px desde la derecha */
+             font-size: 1.5rem; /* Tamaño más grande para el icono */
+             color: #888; /* Color gris por defecto */
+             z-index: 1000; /* Asegura que esté por encima de otros elementos */
+             background-color: white; /* Fondo blanco por defecto */
+             border: 1px solid #ccc; /* Borde sutil */
+             border-radius: 50%; /* Forma redonda */
+             width: 40px; /* Ancho fijo */
+             height: 40px; /* Alto fijo */
+             display: flex; /* Para centrar el icono */
+             justify-content: center; /* Centrar horizontalmente */
+             align-items: center; /* Centrar verticalmente */
+             box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra sutil */
+             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
+         }
+         #dark-mode-toggle:hover {
+             color: red; /* Rojo al pasar el mouse (usando la regla unificada) */
+             /* background-color: #f0f0f0; */ /* Fondo ligeramente gris al pasar el mouse */
+         }
+
+
+        /* --- Elementos relacionados con Sub-tareas (Ocultos por defecto) --- */
+
+        /* Contenedor para input y botón de sub-tarea - Oculto por defecto, visible con clase */
+        .todo-item .subtask-input-container {
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 15px;
+            padding: 0 15px;
+            align-items: center;
+        }
+
+        /* Lista de sub-tareas - Oculto por defecto, visible con clase */
+        .todo-item .subtasks-list {
+            display: none;
+            list-style: none;
+            padding: 0 15px;
+            margin-top: 15px;
+            border-left: 1px solid #ccc; /* Línea de indentación gris claro */
+            padding-left: 30px;
+            transition: border-left-color 0.3s ease; /* Transición suave */
+        }
+
+        .todo-item .subtasks-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+         /* Estilo del checkbox de sub-tarea */
+        .todo-item .subtasks-list li input[type="checkbox"] {
+            margin-right: 10px;
+            border: 1px solid black; /* Borde oscuro por defecto */
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background-color: white; /* Fondo claro por defecto */
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Transición suave */
+        }
+
+        .todo-item .subtasks-list li input[type="checkbox"]:checked {
+             background-color: black; /* Fondo oscuro al marcar */
+             border-color: black; /* Borde oscuro al marcar */
+        }
+
+         /* Custom checkmark para checkbox de sub-tarea */
+        .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            width: 4px;
+            height: 8px;
+            border: solid white; /* Checkmark blanco */
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Texto de la sub-tarea - Color grisáceo por defecto */
+        .todo-item .subtasks-list li span {
+             flex-grow: 1;
+             margin-right: 10px;
+             color: #555; /* Color gris por defecto */
+             text-decoration: none;
+             transition: color 0.3s ease; /* Transición suave */
+        }
+
+
+        /* --- Progress Bar styles (Siempre visible) --- */
+        .todo-item .progress-container {
+            width: calc(100% - 30px);
+            height: 8px;
+            border: none;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            position: relative;
+            box-sizing: border-box;
+            margin-left: 15px;
+            background-color: #e0ffe0; /* Fondo VERDE MUY CLARITO por defecto */
+            overflow: hidden;
+            transition: background-color 0.3s ease; /* Transición suave */
+        }
+
+        .todo-item .progress-bar {
+            height: 100%;
+            background-color: #66c266; /* Verde algo más oscuro por defecto */
+            width: 0%;
+            transition: width 0.5s ease-in-out, background-color 0.3s ease; /* Transición suave */
+            box-sizing: border-box;
+        }
+
+        /* Ocultar el texto de progreso para mayor minimalismo */
+         .todo-item .progress-text { display: none; }
+
+
+         /* Estilo para cuando la lista principal está vacía */
+        #todo-list:empty:before {
+            content: "No hay tareas. ¡Agrega una!";
+            display: block;
+            text-align: center;
+            color: #888; /* Color gris por defecto */
+            margin-top: 20px;
+            font-style: italic;
+            transition: color 0.3s ease; /* Transición suave */
+        }
+
+        /* --- Clases de Visibilidad (Añadidas/Quitadas por JS para controlar CSS display) --- */
+
+        /* Ocultar si no tiene la clase show-subtask-ui */
+        .todo-item:not(.show-subtask-ui) .subtask-input-container,
+        .todo-item:not(.show-subtask-ui) .subtasks-list {
+             display: none;
+        }
+
+        /* Ocultar el botón '+ Agregar Sub-tareas' si se muestran sub-tareas */
+        .todo-item.show-subtask-ui .add-subtasks-toggle {
+             display: none;
+        }
+
+        /* Mostrar el input y botón de sub-tarea si tiene la clase */
+        .todo-item.show-subtask-ui .subtask-input-container {
+             display: flex;
+        }
+
+        /* Mostrar la lista de sub-tareas si tiene la clase */
+        .todo-item.show-subtask-ui .subtasks-list {
+             display: block;
+        }
+
+
+        /* --- Estilo para tarea COMPLETADA --- */
+        /* Color de texto gris claro para tareas completadas */
+        .todo-item.completed .main-task-header span,
+        .todo-item.completed .subtasks-list li span {
+            color: #888; /* Color gris claro por defecto */
+            text-decoration: none;
+        }
+         /* Barra de progreso verde oscuro cuando 100% y completada (sin sub-tareas) */
+        .todo-item.completed .progress-bar {
+            background-color: #28a745; /* Verde Bootstrap success (no cambia en dark mode) */
+        }
+         /* Opcional: atenuar botones al completar */
+        .todo-item.completed .main-task-header button,
+        .todo-item.completed .subtasks-list li button {
+            opacity: 0.7;
+        }
+
+         /* Estilo para el input de agregar tarea principal y su botón cuando están al final */
+         #todo-input-container {
+             display: flex;
+             gap: 10px;
+             padding: 0 15px;
+             align-items: center;
+         }
+          #todo-input-container input[type="text"] {
+              /* Ya usan el estilo unificado base */
+          }
+          #todo-input-container button {
+               /* Ya usan el estilo unificado base */
+               margin-left: auto;
+          }
+
+
+        /* --- Estilos para el MODO OSCURO --- */
+        body.dark-mode {
+            background-color: #1e1e1e; /* Fondo oscuro */
+            color: #f0f0f0; /* Texto claro */
+        }
+
+        body.dark-mode h1 {
+            color: #f0f0f0; /* Título claro */
+        }
+
+        body.dark-mode .todo-item {
+            background-color: #2d2d30; /* Fondo de item oscuro */
+            border-bottom-color: #444; /* Borde más oscuro */
+        }
+
+        body.dark-mode .todo-item .main-task-header input[type="checkbox"] {
+             border-color: #888; /* Borde del checkbox más claro */
+             background-color: #2d2d30; /* Fondo del checkbox oscuro */
+        }
+
+        body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked {
+             background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
+             border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
+        }
+
+         body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked::after {
+             border-color: solid #1e1e1e; /* Checkmark oscuro en dark mode */
+             border-width: 0 2px 2px 0;
+         }
+
+
+        body.dark-mode .todo-item .main-task-header span {
+            color: #f0f0f0; /* Texto de tarea principal claro */
+        }
+
+        /* Botones de eliminar (rojo) */
+        body.dark-mode .todo-item .main-task-header button,
+        body.dark-mode .todo-item .subtasks-list li button {
+             color: #ff6b6b; /* Rojo un poco más brillante para contraste */
+        }
+         body.dark-mode .todo-item .main-task-header button:hover,
+         body.dark-mode .todo-item .subtasks-list li button:hover {
+             color: #ffaaaa; /* Rojo más claro al pasar el mouse */
+         }
+
+
+        /* Inputs de añadir */
+        body.dark-mode #new-todo-input,
+        body.dark-mode .todo-item .subtask-input-container input[type="text"] {
+            background-color: #3c3c3c; /* Fondo de input oscuro */
+            color: #f0f0f0; /* Texto de input claro */
+        }
+         /* Placeholder color (puede variar entre navegadores) */
+        body.dark-mode #new-todo-input::placeholder,
+        body.dark-mode .todo-item .subtask-input-container input[type="text"]::placeholder {
+             color: #b0b0b0; /* Color de placeholder más claro */
+             opacity: 1; /* Asegura que no esté atenuado por defecto */
+        }
+
+
+        /* Botones de añadir (+) y mostrar sub-tareas (+) */
+        body.dark-mode #add-todo-button,
+        body.dark-mode .todo-item .subtask-input-container button,
+        body.dark-mode .add-subtasks-toggle {
+            color: #cccccc; /* Color gris claro para los '+' */
+        }
+         body.dark-mode #add-todo-button:hover,
+         body.dark-mode .todo-item .subtask-input-container button:hover,
+         body.dark-mode .add-subtasks-toggle:hover {
+             color: #ff6b6b; /* Rojo un poco más brillante al pasar el mouse */
+         }
+
+
+        /* Línea de indentación de sub-tareas */
+        body.dark-mode .todo-item .subtasks-list {
+            border-left-color: #444; /* Línea de indentación más oscura */
+        }
+
+        /* Checkbox de sub-tarea */
+        body.dark-mode .todo-item .subtasks-list li input[type="checkbox"] {
+             border-color: #888; /* Borde del checkbox más claro */
+             background-color: #2d2d30; /* Fondo del checkbox oscuro */
+        }
+         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked {
+             background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
+             border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
+         }
+         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
+             border-color: solid #1e1e1e; /* Checkmark oscuro en dark mode */
+             border-width: 0 2px 2px 0;
+         }
+
+
+        /* Texto de sub-tarea */
+        body.dark-mode .todo-item .subtasks-list li span {
+             color: #b0b0b0; /* Texto de sub-tarea gris claro */
+        }
+
+        /* Progress bar container */
+        body.dark-mode .todo-item .progress-container {
+             background-color: #3a4a3a; /* Fondo de progreso más oscuro */
+        }
+         /* Progress bar (el color de la barra en sí puede seguir siendo verde) */
+         body.dark-mode .todo-item .progress-bar {
+             background-color: #8bc34a; /* Verde un poco más brillante para contraste */
+         }
+
+
+        /* Mensaje de lista vacía */
+        body.dark-mode #todo-list:empty:before {
+            color: #b0b0b0; /* Mensaje gris claro */
+        }
+
+        /* Tarea completada (texto) */
+        body.dark-mode .todo-item.completed .main-task-header span,
+        body.dark-mode .todo-item.completed .subtasks-list li span {
+            color: #666; /* Texto gris más oscuro en dark mode para completadas */
+        }
+
+        /* Botón de Reordenar (Icono) */
+        body.dark-mode #reorder-button {
+            color: #b0b0b0; /* Icono gris claro */
+            /* background-color: #2d2d30; */ /* Fondo oscuro para el botón fijo */
+            /* border-color: #444; */ /* Borde oscuro para el botón fijo */
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.5); */ /* Sombra más oscura */
+        }
+         body.dark-mode #reorder-button:hover {
+             color: #ff6b6b; /* Rojo un poco más brillante al pasar el mouse */
+         }
+
+         /* Dark Mode Toggle Button specific styles in dark mode */
+         body.dark-mode #dark-mode-toggle {
+             background-color: #2d2d30; /* Fondo oscuro para el botón fijo */
+             border-color: #444; /* Borde oscuro para el botón fijo */
+             color: #b0b0b0; /* Icono gris claro */
+             box-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Sombra más oscura */
+         }
+         body.dark-mode #dark-mode-toggle:hover {
+             color: red; /* Rojo al pasar el mouse (usando la regla unificada) */
+         }
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Título principal -->
+    <h1>ToDoList</h1>
+
+    <!-- La lista de tareas va PRIMERO -->
+    <ul id="todo-list">
+        <!-- Las tareas se agregarán aquí dinámicamente -->
+    </ul>
+
+    <!-- El contenedor de input y botón de agregar tarea va DESPUÉS de la lista -->
+    <div id="todo-input-container">
+        <input type="text" id="new-todo-input" placeholder="Agregar nueva tarea">
+        <!-- Botón Agregar Tarea (cambiado a '+') -->
+        <button id="add-todo-button" aria-label="Agregar Tarea">+</button>
+    </div>
+
+    <!-- Botón para reordenar (icono) -->
+    <button id="reorder-button" aria-label="Reordenar tareas por prioridad">&#8597;</button>
+
+    <!-- Botón para alternar modo oscuro/claro (icono) -->
+    <button id="dark-mode-toggle" aria-label="Alternar modo oscuro/claro">&#9681;</button> <!-- Símbolo de luna -->
+
+
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const todoInput = document.getElementById('new-todo-input');
+        const addTodoButton = document.getElementById('add-todo-button');
+        const todoListContainer = document.getElementById('todo-list');
+        const reorderButton = document.getElementById('reorder-button'); // Referencia al botón de reordenar
+        const darkModeToggle = document.getElementById('dark-mode-toggle'); // Referencia al nuevo botón de dark mode
+        const body = document.body; // Referencia al body para alternar la clase
+
+        // Colores de prioridad disponibles y su orden para ciclar
+        const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
+
+        // Definir el orden numérico para la clasificación de prioridad
+        const PRIORITY_ORDER = {
+            'red': 1,
+            'orange': 2,
+            'yellow': 3,
+            'green': 4,
+            'none': 5 // Las tareas sin color van al final
+        };
+
+
+        // --- Funciones para Local Storage ---
+
+        function saveTodos(todosArray) {
+            try {
+                // console.log("Guardando todos:", JSON.stringify(todosArray)); // Diagnóstico
+                localStorage.setItem('todos', JSON.stringify(todosArray));
+            } catch (e) {
+                console.error("Error al guardar en localStorage:", e);
+                // Opcional: mostrar un mensaje al usuario
+                // alert("No se pudo guardar la lista de tareas.");
+            }
+        }
+
+        function loadTodos() {
+            try {
+                const storedTodos = localStorage.getItem('todos');
+                // console.log("Cargando de localStorage:", storedTodos); // Diagnóstico
+                if (storedTodos) {
+                    const todos = JSON.parse(storedTodos);
+                    // Asegurarse de que las tareas antiguas tengan las propiedades necesarias
+                    return todos.map(todo => ({
+                        text: todo.text,
+                        completed: todo.completed || false,
+                        subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
+                            text: sub.text,
+                            completed: sub.completed || false
+                        })) : [], // Asegurar subtasks y sus propiedades
+                        showSubtaskUI: todo.showSubtaskUI || false, // Nueva propiedad con default false
+                        priorityColor: todo.priorityColor || 'none' // Nueva propiedad con default 'none'
+                    }));
+                } else {
+                    return [];
+                }
+            } catch (e) {
+                 console.error("Error al cargar de localStorage:", e);
+                 // Opcional: notificar al usuario sobre datos corruptos
+                 // alert("Error al cargar la lista de tareas. Se iniciará una nueva lista.");
+                 return []; // Si hay error, empezar con lista vacía
+            }
+        }
+
+        // --- Funciones de Lógica de la App ---
+
+        // Calcula el progreso de una tarea principal basado en sus sub-tareas
+        function calculateProgress(subtasks) {
+            if (!subtasks || subtasks.length === 0) {
+                return 0; // 0% si no hay sub-tareas
+            }
+            const completed = subtasks.filter(sub => sub.completed).length;
+            return (completed / subtasks.length) * 100;
+        }
+
+        // --- Functions for Creating DOM Elements ---
+        // Centralize the creation of recurring elements for consistency
+
+        function createMainTaskHeader(mainTask, mainIndex) {
+            const mainTaskHeader = document.createElement('div');
+            mainTaskHeader.classList.add('main-task-header');
+
+            const mainCheckbox = document.createElement('input');
+            mainCheckbox.type = 'checkbox';
+            mainCheckbox.checked = mainTask.completed;
+            // El listener ahora solo llama a toggleMainCompletion, que guarda y renderiza SIN reordenar
+            mainCheckbox.addEventListener('change', (event) => {
+                toggleMainCompletion(mainIndex, event.target.checked);
+            });
+
+            const priorityLabel = document.createElement('div');
+            priorityLabel.classList.add('priority-color-label');
+            priorityLabel.dataset.color = mainTask.priorityColor;
+            priorityLabel.title = `Prioridad: ${mainTask.priorityColor.charAt(0).toUpperCase() + mainTask.priorityColor.slice(1)}`;
+            // El listener ahora solo llama a cyclePriorityColor, que guarda y renderiza SIN reordenar
+            priorityLabel.addEventListener('click', () => {
+                cyclePriorityColor(mainIndex);
+            });
+
+            const mainTaskSpan = document.createElement('span');
+            mainTaskSpan.textContent = mainTask.text;
+
+            const deleteMainButton = document.createElement('button');
+            deleteMainButton.textContent = '-'; // Cambiado a '-'
+            deleteMainButton.setAttribute('aria-label', 'Eliminar tarea'); // Añadir para accesibilidad
+
+            // El listener ahora solo llama a deleteTodo, que guarda y renderiza SIN reordenar
+            deleteMainButton.addEventListener('click', () => {
+                 if ((mainTask.subtasks && mainTask.subtasks.length > 0) || mainTask.completed) {
+                     if (!confirm(`¿Estás seguro de eliminar la tarea "${mainTask.text}"?`)) {
+                         return;
+                     }
+                 }
+                deleteTodo(mainIndex);
+            });
+
+            mainTaskHeader.appendChild(mainCheckbox);
+            mainTaskHeader.appendChild(priorityLabel);
+            mainTaskHeader.appendChild(mainTaskSpan);
+            mainTaskHeader.appendChild(deleteMainButton);
+
+            return mainTaskHeader;
+        }
+
+        function createProgressBar(mainTask) {
+             const progressContainer = document.createElement('div');
+             progressContainer.classList.add('progress-container');
+
+             const progressBar = document.createElement('div');
+             progressBar.classList.add('progress-bar');
+
+             let progressPercentage = 0;
+             if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                 progressPercentage = calculateProgress(mainTask.subtasks);
+             } else if (mainTask.completed && (!mainTask.subtasks || mainTask.subtasks.length === 0)) {
+                 progressPercentage = 100;
+             }
+             progressBar.style.width = `${progressPercentage}%`;
+
+             // Texto de progreso oculto por CSS
+             // const progressText = document.createElement('div');
+             // progressText.classList.add('progress-text');
+             // progressText.textContent = `${Math.round(progressPercentage)}%`;
+
+             progressContainer.appendChild(progressBar);
+             // progressContainer.appendChild(progressText);
+
+             return progressContainer;
+        }
+
+        function createAddSubtasksToggle(mainIndex) {
+             const addSubtasksToggle = document.createElement('button');
+             addSubtasksToggle.classList.add('add-subtasks-toggle'); // Ya usa el estilo de botón de añadir discreto
+             addSubtasksToggle.textContent = '+'; // Cambiado a '+'
+             addSubtasksToggle.setAttribute('aria-label', 'Mostrar/Ocultar sección de sub-tareas'); // Añadir para accesibilidad
+
+             // El listener ahora solo llama a toggleSubtaskSection, que guarda y renderiza SIN reordenar
+             addSubtasksToggle.addEventListener('click', () => {
+                 toggleSubtaskSection(mainIndex, true);
+             });
+             return addSubtasksToggle;
+        }
+
+        function createSubtasksList(mainTask, mainIndex) {
+            const subtasksList = document.createElement('ul');
+            subtasksList.classList.add('subtasks-list');
+
+            if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                mainTask.subtasks.forEach((subtask, subIndex) => {
+                    const subtaskItem = document.createElement('li');
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = subtask.completed;
+                    // El listener ahora solo llama a toggleSubtaskCompletion, que guarda y renderiza SIN reordenar
+                    checkbox.addEventListener('change', () => {
+                        toggleSubtaskCompletion(mainIndex, subIndex);
+                    });
+
+                    const subtaskSpan = document.createElement('span');
+                    subtaskSpan.textContent = subtask.text;
+
+                    const deleteSubtaskButton = document.createElement('button');
+                    deleteSubtaskButton.textContent = '-'; // Cambiado a '-'
+                    deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea'); // Añadir para accesibilidad
+
+                    // El listener ahora solo llama a deleteSubtask, que guarda y renderiza SIN reordenar
+                    deleteSubtaskButton.addEventListener('click', () => {
+                        deleteSubtask(mainIndex, subIndex);
+                    });
+
+                    subtaskItem.appendChild(checkbox);
+                    subtaskItem.appendChild(subtaskSpan);
+                    subtaskItem.appendChild(deleteSubtaskButton);
+                    subtasksList.appendChild(subtaskItem); // CORRECTO: Adjuntar el item a la lista de sub-tareas
+                });
+            }
+            return subtasksList;
+        }
+
+        function createSubtaskInputContainer(mainIndex) {
+             const subtaskInputContainer = document.createElement('div');
+             subtaskInputContainer.classList.add('subtask-input-container'); // Ya usa display: flex y align-items: center;
+
+             const subtaskInput = document.createElement('input');
+             subtaskInput.type = 'text';
+             subtaskInput.placeholder = 'Agregar nueva sub-tarea...';
+             // subtaskInput ya usa el estilo unificado para inputs de añadir
+
+             const addSubtaskButton = document.createElement('button');
+             addSubtaskButton.textContent = '+'; // Cambiado a '+'
+             addSubtaskButton.setAttribute('aria-label', 'Agregar sub-tarea'); // Añadir para accesibilidad
+
+             // addSubtaskButton ya usa el estilo unificado para botones de añadir
+             // No necesita margin-left: auto aquí, ya que el contenedor es flex y el input tiene flex-grow: 1
+
+             // El listener ahora solo llama a addSubtask, que guarda y renderiza SIN reordenar
+             addSubtaskButton.addEventListener('click', () => {
+                 addSubtask(mainIndex, subtaskInput);
+             });
+              subtaskInput.addEventListener('keypress', (event) => {
+                  if (event.key === 'Enter') {
+                      event.preventDefault();
+                      addSubtaskButton.click();
+                  }
+              });
+
+             subtaskInputContainer.appendChild(subtaskInput);
+             subtaskInputContainer.appendChild(addSubtaskButton);
+
+             return subtaskInputContainer;
+        }
+
+
+        // Función para renderizar (mostrar) la lista completa de tareas en el HTML
+        // Esta función AHORA SOLO RENDERIZA el array que recibe, NO LO ORDENA.
+        function renderTodos(todosArray) {
+            // console.log("Renderizando todos:", todosArray); // Diagnóstico
+
+            // --- Lógica de Ordenación por Prioridad ELIMINADA de aquí ---
+            // todosArray.sort((a, b) => { ... });
+            // --- Fin Lógica de Ordenación ELIMINADA ---
+
+
+            todoListContainer.innerHTML = ''; // Limpiar la lista actual
+
+            if (todosArray.length === 0) {
+                // CSS se encarga del mensaje de lista vacía
+                // Limpiar el input de agregar tarea principal por si acaso estaba lleno
+                todoInput.value = '';
+                return;
+            }
+
+            // Usamos el array tal cual está (ya sea el cargado, el modificado, o el ordenado por el botón)
+            todosArray.forEach((mainTask, mainIndex) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('todo-item');
+                // console.log(`Tarea ${mainIndex} (${mainTask.text}): Completed=${mainTask.completed}, ShowSubtaskUI=${mainTask.showSubtaskUI}, Priority=${mainTask.priorityColor}, Subtasks=${mainTask.subtasks.length}`); // Diagnóstico
+
+                // Añadir clases CSS según el estado
+                if (mainTask.completed) {
+                    listItem.classList.add('completed');
+                }
+                 // Añadir la clase para controlar la visibilidad de la sección de sub-tareas
+                 if (mainTask.showSubtaskUI) {
+                    listItem.classList.add('show-subtask-ui');
+                 }
+
+                // Agregar los elementos a la tarea principal (li) en el orden deseado
+                listItem.appendChild(createMainTaskHeader(mainTask, mainIndex));
+                listItem.appendChild(createProgressBar(mainTask));
+                listItem.appendChild(createAddSubtasksToggle(mainIndex)); // Botón para activar sub-tareas (ahora solo '+')
+                listItem.appendChild(createSubtasksList(mainTask, mainIndex)); // Lista de sub-tareas
+                listItem.appendChild(createSubtaskInputContainer(mainIndex)); // Input/Button para añadir sub-tarea (ahora solo '+')
+
+                // Agregar el elemento de lista principal a la lista principal en el HTML
+                todoListContainer.appendChild(listItem);
+
+                 // Enfocar el input de sub-tarea si se acaba de mostrar la sección
+                 // Solo si la sección DEBE estar visible y no hay sub-tareas iniciales.
+                 // La lógica de encontrar el elemento por índice ahora es más fiable
+                 // porque renderTodos no reordena automáticamente.
+                 if (mainTask.showSubtaskUI && (mainTask.subtasks === undefined || mainTask.subtasks.length === 0)) {
+                     setTimeout(() => {
+                        // Encontrar el elemento de lista recién creado usando el índice del array
+                        const listItemElement = todoListContainer.children[mainIndex];
+                        if (listItemElement) {
+                            const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                            if (inputElement) {
+                                // console.log("Intentando enfocar input de sub-tarea..."); // Diagnóstico
+                                inputElement.focus();
+                            } else {
+                                // console.log("Input de sub-tarea no encontrado para enfocar."); // Diagnóstico
+                            }
+                        }
+                     }, 50); // Un pequeño retraso (ej. 50ms) puede ayudar
+                 }
+            });
+             // Limpiar el input de agregar tarea principal después de renderizar la lista
+             todoInput.value = '';
+        }
+
+         // --- Funciones de Manipulación de Datos y Lógica de Completado ---
+
+        // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
+        function toggleSubtaskSection(mainTaskIndex, show) {
+            // console.log(`toggleSubtaskSection: Tarea ${mainTaskIndex}, Show: ${show}`); // Diagnóstico
+            const todos = loadTodos();
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                const mainTask = todos[mainTaskIndex];
+                mainTask.showSubtaskUI = show;
+                // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
+                if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
+                }
+
+                saveTodos(todos);
+                renderTodos(todos); // Renderiza el estado actual SIN reordenar
+            } else {
+                 console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
+            }
+        }
+
+        // Función para ciclar el color de prioridad de una tarea principal
+        function cyclePriorityColor(mainTaskIndex) {
+             // console.log(`Ciclando color para tarea ${mainTaskIndex}`); // Diagnóstico
+             const todos = loadTodos();
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const currentColors = PRIORITY_COLORS; // ['none', 'red', 'orange', 'yellow', 'green']
+                 // Asegurar que priorityColor es un string válido antes de buscar el índice
+                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string'
+                                      ? todos[mainTaskIndex].priorityColor
+                                      : 'none'; // Usar 'none' si es null, undefined o no string
+                 const currentIndex = currentColors.indexOf(currentColor);
+                 const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
+                 todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
+                 // console.log(`Nuevo color para tarea ${mainTaskIndex}: ${todos[mainIndex].priorityColor}`); // Diagnóstico
+
+                 saveTodos(todos);
+                 renderTodos(todos); // Renderiza el estado actual SIN reordenar
+             } else {
+                  console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
+             }
+        }
+
+
+        // Función para agregar una nueva tarea principal
+        function addTodo() {
+            const newTodoText = todoInput.value.trim();
+
+            if (newTodoText === '') {
+                alert('Por favor, ingresa el nombre de la tarea.');
+                return;
+            }
+
+            const todos = loadTodos();
+
+            todos.push({
+                text: newTodoText,
+                completed: false,
+                subtasks: [], // Siempre array vacío inicialmente
+                showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
+                priorityColor: 'none' // Color de prioridad por defecto
+            });
+
+            saveTodos(todos);
+            renderTodos(todos); // Renderiza el estado actual SIN reordenar
+            // Limpiar el input de agregar tarea principal aquí también para consistencia
+            todoInput.value = '';
+            // console.log("Tarea principal agregada:", todos); // Diagnóstico
+        }
+
+        // Función para agregar una sub-tarea a una tarea principal específica
+        function addSubtask(mainTaskIndex, subtaskInput) {
+             const newSubtaskText = subtaskInput.value.trim();
+
+             if (newSubtaskText === '') {
+                 alert('Por favor, ingresa el nombre de la sub-tarea.');
+                 // console.log(`No se agregó sub-tarea a tarea ${mainTaskIndex}: texto vacío.`); // Diagnóstico
+                 return;
+             }
+             // console.log(`Agregando sub-tarea "${newSubtaskText}" a tarea ${mainTaskIndex}`); // Diagnóstico
+
+             const todos = loadTodos();
+
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+
+                 // Asegurarse de que subtasks es un array antes de pushear
+                 if (!Array.isArray(mainTask.subtasks)) {
+                     mainTask.subtasks = [];
+                 }
+
+                 mainTask.subtasks.push({
+                     text: newSubtaskText,
+                     completed: false
+                 });
+
+                 // Al añadir una sub-tarea, la tarea principal ya no puede considerarse "completada"
+                 // si ahora tiene sub-tareas pendientes. Desmarcamos si estaba marcada.
+                 if (mainTask.completed) {
+                     mainTask.completed = false;
+                 }
+
+                 // Asegurarse de que la sección de sub-tareas está visible (ya debería estarlo al llegar aquí)
+                 mainTask.showSubtaskUI = true; // Redundante si se llama desde el input de sub-tarea, pero seguro.
+
+                 saveTodos(todos);
+                 renderTodos(todos); // Renderiza el estado actual SIN reordenar
+
+                 // Limpiar el input y enfocarlo
+                 subtaskInput.value = '';
+                 // console.log("Sub-tarea agregada y renderizada. Intentando enfocar input."); // Diagnóstico
+                 // Usamos el índice original ya que renderTodos no reordena automáticamente
+                 const listItemElement = todoListContainer.children[mainTaskIndex];
+                 if (listItemElement) {
+                     const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                     if (inputElement) {
+                         setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso para asegurar que el DOM esté listo
+                     }
+                 }
+
+
+             } else {
+                 console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
+             }
+        }
+
+        // Función para eliminar una tarea principal
+        function deleteTodo(indexToDelete) {
+            // console.log(`Eliminando tarea principal ${indexToDelete}`); // Diagnóstico
+            const todos = loadTodos();
+
+            if (indexToDelete >= 0 && indexToDelete < todos.length) {
+                todos.splice(indexToDelete, 1);
+
+                saveTodos(todos);
+                renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                // console.log("Tarea principal eliminada:", todos); // Diagnóstico
+            } else {
+                console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
+            }
+        }
+
+        // Función para eliminar una sub-tarea
+        function deleteSubtask(mainTaskIndex, subtaskIndexToDelete) {
+             // console.log(`Eliminando sub-tarea ${subtaskIndexToDelete} de tarea principal ${mainTaskIndex}`); // Diagnóstico
+             const todos = loadTodos();
+
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                 if (Array.isArray(mainTask.subtasks) && subtaskIndexToDelete >= 0 && subtaskIndexToDelete < mainTask.subtasks.length) {
+                     mainTask.subtasks.splice(subtaskIndexToDelete, 1);
+
+                     // Después de eliminar, recalcular el estado de completado de la tarea principal
+                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
+
+                     if (mainTask.subtasks.length === 0) {
+                         // Si no quedan sub-tareas, desmarcar la principal y ocultar la sección de sub-tareas
+                         mainTask.completed = false;
+                         mainTask.showSubtaskUI = false; // Ocultar sección si no hay subs
+                     } else {
+                         // Si aún quedan sub-tareas, actualizar el estado principal si es necesario
+                         mainTask.completed = allSubtasksCompleted;
+                     }
+
+                     saveTodos(todos);
+                     renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                     // console.log("Sub-tarea eliminada. Tarea principal actualizada:", mainTask); // Diagnóstico
+                 } else {
+                     console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
+                 }
+             } else {
+                  console.error("Índice de tarea principal inválido para eliminar sub-tarea:", mainTaskIndex);
+             }
+        }
+
+        // Función para cambiar el estado de completado de una sub-tarea
+        function toggleSubtaskCompletion(mainTaskIndex, subtaskIndexToToggle) {
+             // console.log(`Cambiando estado de sub-tarea ${subtaskIndexToToggle} en tarea principal ${mainTaskIndex}`); // Diagnóstico
+             const todos = loadTodos();
+
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                  if (Array.isArray(mainTask.subtasks) && subtaskIndexToToggle >= 0 && subtaskIndexToToggle < mainTask.subtasks.length) {
+                     mainTask.subtasks[subtaskIndexToToggle].completed = !mainTask.subtasks[subtaskIndexToToggle].completed;
+
+                     // Recalcular si todas las sub-tareas están completadas
+                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
+
+                     // Auto-marca/desmarca la tarea principal si HAY sub-tareas
+                     if (mainTask.subtasks.length > 0) {
+                          mainTask.completed = allSubtasksCompleted;
+                     }
+                     // Si no tiene sub-tareas, el checkbox principal se controla solo manualmente.
+
+
+                     saveTodos(todos);
+                     renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                     // console.log("Estado sub-tarea cambiado. Tarea principal actualizada:", mainTask); // Diagnóstico
+                 } else {
+                     console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
+                 }
+             } else {
+                 console.error("Índice de tarea principal inválido para cambiar estado de sub-tarea:", mainTaskIndex);
+             }
+        }
+
+         // Función para cambiar el estado de completado de la TAREA PRINCIPAL
+        function toggleMainCompletion(mainTaskIndex, isChecked) {
+             // console.log(`Cambiando estado de tarea principal ${mainTaskIndex} a ${isChecked}`); // Diagnóstico
+             const todos = loadTodos();
+
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+
+                 mainTask.completed = isChecked;
+
+                 // Si la tarea principal tiene sub-tareas, sincronizar el estado de sus sub-tareas
+                 if (Array.isArray(mainTask.subtasks) && mainTask.subtasks.length > 0) {
+                     mainTask.subtasks.forEach(subtask => {
+                         subtask.completed = isChecked;
+                     });
+                 }
+                 // Si no tiene sub-tareas, solo se actualiza el estado principal.
+
+
+                 saveTodos(todos);
+                 renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                 // console.log("Estado tarea principal cambiado:", mainTask); // Diagnóstico
+             } else {
+                  console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
+             }
+        }
+
+        // --- Dark Mode Toggle Functionality ---
+        function enableDarkMode() {
+            body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+            // --- CORRECCIÓN AQUÍ ---
+            darkModeToggle.innerHTML = '&#9728;'; // Usar innerHTML para el símbolo de sol
+            darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
+        }
+
+        function disableDarkMode() {
+            body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+             darkModeToggle.innerHTML = '&#9681;'; // Usar innerHTML para el símbolo de luna
+             darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
+        }
+
+        function toggleDarkMode() {
+            if (body.classList.contains('dark-mode')) {
+                disableDarkMode();
+            } else {
+                enableDarkMode();
+            }
+        }
+
+        // --- Event Listeners Globales ---
+
+        addTodoButton.addEventListener('click', addTodo);
+
+        todoInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addTodo();
+            }
+        });
+
+        // --- Event Listener para el botón de Reordenar ---
+        reorderButton.addEventListener('click', () => {
+            const todos = loadTodos(); // Cargar el estado actual
+            // Aplicar la lógica de ordenación
+            todos.sort((a, b) => {
+                const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
+                const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
+                return rankA - rankB; // Orden ascendente por rank (menor rank = mayor prioridad)
+            });
+            saveTodos(todos); // Guardar el array ya ordenado
+            renderTodos(todos); // Renderizar la lista en el nuevo orden
+            // console.log("Lista reordenada por prioridad:", todos); // Diagnóstico
+        });
+
+        // --- Event Listener para el botón de Dark Mode ---
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+
+        // --- Inicialización ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // console.log("DOM cargado. Inicializando..."); // Diagnóstico
+
+            // Cargar la preferencia de tema al inicio
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                enableDarkMode(); // Aplicar modo oscuro si estaba guardado
+            } else {
+                disableDarkMode(); // Asegurar modo claro si no hay preferencia o es 'light'
+            }
+
+            const initialTodos = loadTodos();
+            renderTodos(initialTodos); // Renderiza la lista inicial (en el orden en que se guardó)
+        });
+
+    </script>
+
+</body>
+</html>
