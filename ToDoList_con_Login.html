@@ -1,5 +1,3 @@
---- START OF FILE ToDoList.html ---
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -774,7 +772,7 @@
                         completed: typeof todo.completed === 'boolean' ? todo.completed : false, // Ensure boolean
                         subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
                             text: sub.text || 'Sub-tarea sin nombre', // Default text
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false // Ensure boolean
+                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [], // Ensure subtasks is an array and clean its items
                         showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false, // Ensure boolean with default false
                         priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none', // Ensure valid color with default 'none'
