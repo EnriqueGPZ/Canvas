@@ -51,6 +51,9 @@
             word-break: break-word;
             box-sizing: border-box;
             transition: background-color 0.3s ease, border-bottom-color 0.3s ease; /* Transición suave */
+            /* --- MODIFICACIÓN AQUÍ: Añadir margen inferior para separar items --- */
+            margin-bottom: 10px; /* Espacio entre tareas */
+            /* --- FIN MODIFICACIÓN --- */
         }
 
         .todo-item .main-task-header {
@@ -290,11 +293,11 @@
          }
 
 
-        /* --- Elementos relacionados con Sub-tareas (Ocultos por defecto) --- */
+        /* --- Elementos relacionados con Sub-tareas --- */
 
-        /* Contenedor para input y botón de sub-tarea - Oculto por defecto, visible con clase */
+        /* Contenedor para input y botón de sub-tarea - Oculto por defecto */
         .todo-item .subtask-input-container {
-            display: none;
+            display: none; /* Oculto por defecto */
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 15px;
@@ -302,9 +305,9 @@
             align-items: center;
         }
 
-        /* Lista de sub-tareas - Oculto por defecto, visible con clase */
+        /* Lista de sub-tareas - Visible por defecto si tiene contenido */
         .todo-item .subtasks-list {
-            display: none;
+            /* display: none; REMOVED - La lista siempre es visible si tiene elementos */
             list-style: none;
             padding: 0 15px;
             margin-top: 15px;
@@ -404,26 +407,17 @@
 
         /* --- Clases de Visibilidad (Añadidas/Quitadas por JS para controlar CSS display) --- */
 
-        /* Ocultar si no tiene la clase show-subtask-ui */
-        .todo-item:not(.show-subtask-ui) .subtask-input-container,
-        .todo-item:not(.show-subtask-ui) .subtasks-list {
-             display: none;
-        }
-
-        /* Ocultar el botón '+ Agregar Sub-tareas' si se muestran sub-tareas */
-        .todo-item.show-subtask-ui .add-subtasks-toggle {
-             display: none;
-        }
-
-        /* Mostrar el input y botón de sub-tarea si tiene la clase */
+        /* Mostrar el input y botón de sub-tarea si tiene la clase show-subtask-ui */
         .todo-item.show-subtask-ui .subtask-input-container {
-             display: flex;
+             display: flex; /* Mostrar el input container */
         }
 
-        /* Mostrar la lista de sub-tareas si tiene la clase */
-        .todo-item.show-subtask-ui .subtasks-list {
-             display: block;
+        /* Ocultar el botón '+ Agregar Sub-tareas' si se muestra el input */
+        .todo-item.show-subtask-ui .add-subtasks-toggle {
+             display: none; /* Ocultar el toggle button */
         }
+
+        /* La lista de sub-tareas (.subtasks-list) ya NO se controla con .show-subtask-ui */
 
 
         /* --- Estilo para tarea COMPLETADA --- */
@@ -449,7 +443,9 @@
              cursor: default;
          }
           .todo-item.completed .main-task-header input[type="date"]:hover,
-          .todo-item.completed .main-task-header input[type="date"]:focus {
+          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:hover, /* Asegurar que no cambie en hover en dark mode completada */
+          .todo-item.completed .main-task-header input[type="date"]:focus,
+          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:focus { /* Asegurar que no cambie en focus en dark mode completada */
               color: #aaa; /* Mantener gris claro al pasar el mouse/enfocar */
               text-decoration: none;
               cursor: default;
@@ -582,7 +578,7 @@
 
         /* Progress bar container */
         body.dark-mode .todo-item .progress-container {
-             background-color: #3a4a3a; /* Fondo de progreso más oscuro */
+             background-color: #3a4a4a; /* Fondo de progreso más oscuro */
         }
          /* Progress bar (el color de la barra en sí puede seguir siendo verde) */
          body.dark-mode .todo-item .progress-bar {
@@ -604,10 +600,6 @@
          body.dark-mode .todo-item.completed .main-task-header input[type="date"] {
              color: #555; /* Gris más oscuro */
          }
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:hover,
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:focus {
-              color: #555; /* Mantener gris más oscuro */
-          }
 
 
         /* Botón de Reordenar (Icono) */
@@ -768,7 +760,7 @@
                         text: todo.text || 'Tarea sin nombre', // Default text if missing
                         completed: typeof todo.completed === 'boolean' ? todo.completed : false, // Ensure boolean
                         subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre', // Default text
+                            text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [], // Ensure subtasks is an array and clean its items
                         showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false, // Ensure boolean with default false
@@ -972,7 +964,7 @@
              addSubtasksToggle.textContent = '+'; // Cambiado a '+'
              addSubtasksToggle.setAttribute('aria-label', 'Mostrar/Ocultar sección de sub-tareas'); // Añadir para accesibilidad
 
-             // --- MODIFICACIÓN AQUÍ: Listener para alternar visibilidad ---
+             // --- MODIFICACIÓN AQUÍ: Listener para alternar visibilidad del INPUT ---
              addSubtasksToggle.addEventListener('click', () => {
                  // Cargar el estado actual
                  const todos = loadTodos();
@@ -981,9 +973,10 @@
                      const currentState = mainTask.showSubtaskUI;
                      const newState = !currentState; // Invertir el estado actual
 
-                     mainTask.showSubtaskUI = newState; // Aplicar el nuevo estado
+                     mainTask.showSubtaskUI = newState; // Aplicar el nuevo estado (solo afecta al input/toggle via CSS)
 
                      // Si se muestra la sección y no hay sub-tareas, inicializar el array
+                     // (Esto asegura que el array exista si se añade una sub-tarea)
                      if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
                          mainTask.subtasks = [];
                      }
@@ -992,7 +985,7 @@
                      saveTodos(todos);
                      renderTodos(todos);
 
-                     // Si se acaba de mostrar, intentar enfocar el input de sub-tarea
+                     // Si se acaba de mostrar el input, intentar enfocarlo
                      if (newState) {
                           // Usamos el índice original ya que renderTodos no reordena automáticamente
                           const listItemElement = todoListContainer.children[mainIndex];
@@ -1016,6 +1009,10 @@
         function createSubtasksList(mainTask, mainIndex) {
             const subtasksList = document.createElement('ul');
             subtasksList.classList.add('subtasks-list');
+
+            // La lista de sub-tareas siempre se crea, su visibilidad la controla el navegador
+            // si está vacía o no tiene elementos <li>.
+            // Ya no usamos la clase show-subtask-ui para ocultarla.
 
             if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                 mainTask.subtasks.forEach((subtask, subIndex) => {
@@ -1113,7 +1110,8 @@
                 if (mainTask.completed) {
                     listItem.classList.add('completed');
                 }
-                 // Añadir la clase para controlar la visibilidad de la sección de sub-tareas
+                 // Añadir la clase para controlar la visibilidad del INPUT de sub-tareas
+                 // La visibilidad de la LISTA de sub-tareas ya NO depende de esta clase.
                  if (mainTask.showSubtaskUI) {
                     listItem.classList.add('show-subtask-ui');
                  }
@@ -1121,135 +1119,23 @@
                 // Agregar los elementos a la tarea principal (li) en el orden deseado
                 listItem.appendChild(createMainTaskHeader(mainTask, mainIndex));
                 listItem.appendChild(createProgressBar(mainTask));
-                listItem.appendChild(createAddSubtasksToggle(mainIndex)); // Botón para activar sub-tareas (ahora solo '+')
-                listItem.appendChild(createSubtasksList(mainTask, mainIndex)); // Lista de sub-tareas
-                listItem.appendChild(createSubtaskInputContainer(mainIndex)); // Input/Button para añadir sub-tarea (ahora solo '+')
+                listItem.appendChild(createAddSubtasksToggle(mainIndex)); // Botón para activar/desactivar input
+                listItem.appendChild(createSubtasksList(mainTask, mainIndex)); // Lista de sub-tareas (siempre presente en el DOM)
+                listItem.appendChild(createSubtaskInputContainer(mainIndex)); // Input/Button para añadir sub-tarea (siempre presente en el DOM)
 
                 // Agregar el elemento de lista principal a la lista principal en el HTML
                 todoListContainer.appendChild(listItem);
 
-                 // Enfocar el input de sub-tarea si se acaba de mostrar la sección
-                 // Solo si la sección DEBE estar visible y no hay sub-tareas iniciales.
-                 // La lógica de encontrar el elemento por índice ahora es más fiable
-                 // porque renderTodos no reordena automáticamente.
-                 // NOTA: Esta lógica de enfoque se ha movido al listener del botón '+'
-                 // para que solo ocurra cuando el usuario *hace clic* para mostrar la sección.
-                 // Si la sección ya estaba visible al cargar (showSubtaskUI: true en los datos),
+                 // NOTA: La lógica de enfocar el input de sub-tarea se ha movido al listener del botón '+'
+                 // para que solo ocurra cuando el usuario *hace clic* para mostrar el input.
+                 // Si el input ya estaba visible al cargar (showSubtaskUI: true en los datos),
                  // no queremos enfocar automáticamente.
-                 /*
-                 if (mainTask.showSubtaskUI && (mainTask.subtasks === undefined || mainTask.subtasks.length === 0)) {
-                     setTimeout(() => {
-                        // Encontrar el elemento de lista recién creado usando el índice del array
-                        const listItemElement = todoListContainer.children[mainIndex];
-                        if (listItemElement) {
-                            const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                            if (inputElement) {
-                                // console.log("Intentando enfocar input de sub-tarea..."); // Diagnóstico
-                                inputElement.focus();
-                            } else {
-                                // console.log("Input de sub-tarea no encontrado para enfocar."); // Diagnóstico
-                            }
-                        }
-                     }, 50); // Un pequeño retraso (ej. 50ms) puede ayudar
-                 }
-                 */
             });
              // Limpiar el input de agregar tarea principal después de renderizar la lista
              if (todoInput) todoInput.value = ''; // Check if todoInput exists
         }
 
          // --- Funciones de Manipulación de Datos y Lógica de Completado ---
-
-        // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
-        // NOTA: Esta función ya no se usa directamente por el botón '+'.
-        // La lógica de alternar se ha movido al listener del botón en createAddSubtasksToggle.
-        // Se mantiene por si se usa en otro lugar, pero podría eliminarse si no es así.
-        /*
-        function toggleSubtaskSection(mainTaskIndex, show) {
-            // console.log(`toggleSubtaskSection: Tarea ${mainTaskIndex}, Show: ${show}`); // Diagnóstico
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                const mainTask = todos[mainTaskIndex];
-                mainTask.showSubtaskUI = show;
-                // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
-                if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
-                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
-                }
-
-                saveTodos(todos); // Guardar cambios (LS + Firestore)
-                renderTodos(todos); // Renderiza el estado actual SIN reordenar
-            } else {
-                 console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
-            }
-        }
-        */
-
-
-        // Función para ciclar el color de prioridad de una tarea principal
-        function cyclePriorityColor(mainTaskIndex) {
-             // console.log(`Ciclando color para tarea ${mainTaskIndex}`); // Diagnóstico
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const currentColors = PRIORITY_COLORS; // ['none', 'red', 'orange', 'yellow', 'green']
-                 // Asegurar que priorityColor es un string válido antes de buscar el índice
-                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string'
-                                      ? todos[mainTaskIndex].priorityColor
-                                      : 'none'; // Usar 'none' si es null, undefined o no string
-                 const currentIndex = currentColors.indexOf(currentColor);
-                 const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
-                 todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
-                 // console.log(`Nuevo color para tarea ${mainTaskIndex}: ${todos[mainIndex].priorityColor}`); // Diagnóstico
-
-                 saveTodos(todos); // Guardar cambios (LS + Firestore)
-                 renderTodos(todos); // Renderiza el estado actual SIN reordenar
-             } else {
-                  console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
-             }
-        }
-
-        // --- Nuevo: Función para actualizar la fecha de una tarea principal ---
-        function updateTaskDate(mainTaskIndex, newDateValue) {
-            // console.log(`Actualizando fecha para tarea ${mainTaskIndex} a ${newDateValue}`); // Diagnóstico
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                // Guardar null si el valor está vacío (el usuario borró la fecha)
-                todos[mainTaskIndex].date = newDateValue || null;
-
-                saveTodos(todos); // Guardar cambios (LS + Firestore)
-                renderTodos(todos); // Renderiza el estado actual SIN reordenar
-                // console.log("Fecha de tarea actualizada:", todos[mainTaskIndex]); // Diagnóstico
-            } else {
-                 console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
-            }
-        }
-
-
-        // Función para agregar una nueva tarea principal
-        function addTodo() {
-            const newTodoText = todoInput.value.trim();
-
-            if (newTodoText === '') {
-                alert('Por favor, ingresa el nombre de la tarea.');
-                return;
-            }
-
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-
-            todos.push({
-                text: newTodoText,
-                completed: false,
-                subtasks: [], // Siempre array vacío inicialmente
-                showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
-                priorityColor: 'none', // Color de prioridad por defecto
-                date: null // --- Nuevo: Fecha inicialmente nula ---
-            });
-
-            saveTodos(todos); // Guardar cambios (LS + Firestore)
-            renderTodos(todos); // Renderiza el estado actual SIN reordenar
-            // Limpiar el input de agregar tarea principal aquí también para consistencia
-            if (todoInput) todoInput.value = ''; // Check if todoInput exists
-            // console.log("Tarea principal agregada:", todos); // Diagnóstico
-        }
 
         // Función para agregar una sub-tarea a una tarea principal específica
         function addSubtask(mainTaskIndex, subtaskInput) {
@@ -1283,24 +1169,17 @@
                      mainTask.completed = false;
                  }
 
-                 // Asegurarse de que la sección de sub-tareas está visible (ya debería estarlo al llegar aquí)
-                 mainTask.showSubtaskUI = true; // Redundante si se llama desde el input de sub-tarea, pero seguro.
+                 // --- MODIFICACIÓN AQUÍ: Ocultar el input de sub-tarea después de añadir ---
+                 mainTask.showSubtaskUI = false;
+                 // --- FIN MODIFICACIÓN ---
+
 
                  saveTodos(todos); // Guardar cambios (LS + Firestore)
                  renderTodos(todos); // Renderiza el estado actual SIN reordenar
 
-                 // Limpiar el input y enfocarlo
+                 // Limpiar el input (ya no se enfoca automáticamente aquí)
                  subtaskInput.value = '';
-                 // console.log("Sub-tarea agregada y renderizada. Intentando enfocar input."); // Diagnóstico
-                 // Usamos el índice original ya que renderTodos no reordena automáticamente
-                 const listItemElement = todoListContainer.children[mainTaskIndex];
-                 if (listItemElement) {
-                     const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                     if (inputElement) {
-                         setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso para asegurar que el DOM esté listo
-                     }
-                 }
-
+                 // console.log("Sub-tarea agregada y renderizada. Input oculto."); // Diagnóstico
 
              } else {
                  console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
@@ -1339,7 +1218,7 @@
                      if (mainTask.subtasks.length === 0) {
                          // Si no quedan sub-tareas, desmarcar la principal y ocultar la sección de sub-tareas
                          mainTask.completed = false;
-                         mainTask.showSubtaskUI = false; // Ocultar sección si no hay subs
+                         // mainTask.showSubtaskUI = false; // Ya no ocultamos el input si se borra la última sub-tarea
                      } else {
                          // Si aún quedan sub-tareas, actualizar el estado principal si es necesario
                          mainTask.completed = allSubtasksCompleted;
@@ -1597,7 +1476,7 @@
                         return rankA - rankB; // Orden ascendente por rank (menor rank = mayor prioridad)
                     });
                     saveTodos(todos); // Guardar el array ya ordenado (LS + Firestore)
-                    renderTodos(todos); // Renderizar la lista en el nuevo orden
+                    renderTodos(todos); // Renderiza el estado actual SIN reordenar
                     // console.log("Lista reordenada por prioridad y fecha:", todos); // Diagnóstico
                 });
             }
