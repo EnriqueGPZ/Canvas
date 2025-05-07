@@ -704,9 +704,6 @@
     <button id="dark-mode-toggle" aria-label="Alternar modo oscuro/claro">◑</button> <!-- Símbolo de luna -->
 
 
-    <!-- TODO: Add Firebase SDK scripts here if not using type="module" -->
-    <!-- If using type="module", imports are handled within the script tag -->
-
     <script type="module">
         // 1. Importar los módulos necesarios de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
@@ -975,10 +972,44 @@
              addSubtasksToggle.textContent = '+'; // Cambiado a '+'
              addSubtasksToggle.setAttribute('aria-label', 'Mostrar/Ocultar sección de sub-tareas'); // Añadir para accesibilidad
 
-             // El listener ahora solo llama a toggleSubtaskSection, que guarda y renderiza SIN reordenar
+             // --- MODIFICACIÓN AQUÍ: Listener para alternar visibilidad ---
              addSubtasksToggle.addEventListener('click', () => {
-                 toggleSubtaskSection(mainIndex, true);
+                 // Cargar el estado actual
+                 const todos = loadTodos();
+                 if (mainIndex >= 0 && mainIndex < todos.length) {
+                     const mainTask = todos[mainIndex];
+                     const currentState = mainTask.showSubtaskUI;
+                     const newState = !currentState; // Invertir el estado actual
+
+                     mainTask.showSubtaskUI = newState; // Aplicar el nuevo estado
+
+                     // Si se muestra la sección y no hay sub-tareas, inicializar el array
+                     if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                         mainTask.subtasks = [];
+                     }
+
+                     // Guardar y renderizar
+                     saveTodos(todos);
+                     renderTodos(todos);
+
+                     // Si se acaba de mostrar, intentar enfocar el input de sub-tarea
+                     if (newState) {
+                          // Usamos el índice original ya que renderTodos no reordena automáticamente
+                          const listItemElement = todoListContainer.children[mainIndex];
+                          if (listItemElement) {
+                              const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                              if (inputElement) {
+                                  setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
+                              }
+                          }
+                     }
+
+                 } else {
+                      console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
+                 }
              });
+             // --- FIN MODIFICACIÓN ---
+
              return addSubtasksToggle;
         }
 
@@ -1101,6 +1132,11 @@
                  // Solo si la sección DEBE estar visible y no hay sub-tareas iniciales.
                  // La lógica de encontrar el elemento por índice ahora es más fiable
                  // porque renderTodos no reordena automáticamente.
+                 // NOTA: Esta lógica de enfoque se ha movido al listener del botón '+'
+                 // para que solo ocurra cuando el usuario *hace clic* para mostrar la sección.
+                 // Si la sección ya estaba visible al cargar (showSubtaskUI: true en los datos),
+                 // no queremos enfocar automáticamente.
+                 /*
                  if (mainTask.showSubtaskUI && (mainTask.subtasks === undefined || mainTask.subtasks.length === 0)) {
                      setTimeout(() => {
                         // Encontrar el elemento de lista recién creado usando el índice del array
@@ -1116,6 +1152,7 @@
                         }
                      }, 50); // Un pequeño retraso (ej. 50ms) puede ayudar
                  }
+                 */
             });
              // Limpiar el input de agregar tarea principal después de renderizar la lista
              if (todoInput) todoInput.value = ''; // Check if todoInput exists
@@ -1124,6 +1161,10 @@
          // --- Funciones de Manipulación de Datos y Lógica de Completado ---
 
         // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
+        // NOTA: Esta función ya no se usa directamente por el botón '+'.
+        // La lógica de alternar se ha movido al listener del botón en createAddSubtasksToggle.
+        // Se mantiene por si se usa en otro lugar, pero podría eliminarse si no es así.
+        /*
         function toggleSubtaskSection(mainTaskIndex, show) {
             // console.log(`toggleSubtaskSection: Tarea ${mainTaskIndex}, Show: ${show}`); // Diagnóstico
             const todos = loadTodos(); // Cargar estado actual (desde LS)
@@ -1141,6 +1182,8 @@
                  console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
             }
         }
+        */
+
 
         // Función para ciclar el color de prioridad de una tarea principal
         function cyclePriorityColor(mainTaskIndex) {
