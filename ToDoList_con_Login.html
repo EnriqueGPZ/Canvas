@@ -85,7 +85,7 @@
               border-color: black; /* Borde oscuro al marcar */
          }
 
-          /* Custom checkmark para checkbox principal */
+          /* Custom checkmark para checkbox principal (Modo Claro) */
          .todo-item .main-task-header input[type="checkbox"]:checked::after {
              content: '';
              position: absolute;
@@ -205,8 +205,7 @@
         .todo-item .main-task-header button,
         .todo-item .subtasks-list li button,
         #reorder-button,
-        #dark-mode-toggle,
-        #data-management button /* Incluir botones de gestión de datos */
+        #dark-mode-toggle
          {
              background: none;
              border: none;
@@ -223,8 +222,7 @@
         .todo-item .main-task-header button:hover,
         .todo-item .subtasks-list li button:hover,
         #reorder-button:hover,
-        #dark-mode-toggle:hover,
-        #data-management button:hover /* Incluir botones de gestión de datos */
+        #dark-mode-toggle:hover
          {
              color: red; /* Rojo al pasar el mouse */
         }
@@ -344,7 +342,7 @@
              border-color: black; /* Borde oscuro al marcar */
         }
 
-         /* Custom checkmark para checkbox de sub-tarea */
+         /* Custom checkmark para checkbox de sub-tarea (Modo Claro) */
         .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
             content: '';
             position: absolute;
@@ -356,6 +354,7 @@
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
+
 
         /* Texto de la sub-tarea - Color grisáceo por defecto */
         .todo-item .subtasks-list li span {
@@ -493,10 +492,12 @@
              border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
         }
 
+         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox principal (Modo Oscuro) --- */
          body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked::after {
-             border-color: solid #1e1e1e; /* Checkmark oscuro en dark mode */
-             border-width: 0 2px 2px 0;
+             border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
+             border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
          }
+         /* --- FIN MODIFICACIÓN --- */
 
 
         body.dark-mode .todo-item .main-task-header span {
@@ -565,10 +566,12 @@
              background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
              border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
          }
+         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox de sub-tarea (Modo Oscuro) --- */
          body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
-             border-color: solid #1e1e1e; /* Checkmark oscuro en dark mode */
-             border-width: 0 2px 2px 0;
+             border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
+             border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
          }
+         /* --- FIN MODIFICACIÓN --- */
 
 
         /* Texto de sub-tarea */
@@ -596,10 +599,14 @@
         body.dark-mode .todo-item.completed .subtasks-list li span {
             color: #666; /* Texto gris más oscuro en dark mode para completadas */
         }
-         /* Atenuar el input de fecha en tareas completadas en modo oscuro */
+         /* Atenuar el input de fecha en tareas completadas */
          body.dark-mode .todo-item.completed .main-task-header input[type="date"] {
              color: #555; /* Gris más oscuro */
          }
+          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:hover,
+          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:focus {
+              color: #555; /* Mantener gris más oscuro */
+          }
 
 
         /* Botón de Reordenar (Icono) */
@@ -625,40 +632,7 @@
          }
 
          /* --- Estilos para la sección de Gestión de Datos (Importar/Exportar) --- */
-         #data-management {
-             text-align: center; /* Centrar los botones */
-             margin-top: 30px; /* Espacio arriba */
-             font-size: 0.85rem; /* Tamaño de texto pequeño */
-             color: #888; /* Color gris discreto por defecto */
-             transition: color 0.3s ease;
-         }
-
-         #data-management button {
-             background: none;
-             border: none;
-             padding: 0 10px; /* Padding pequeño */
-             cursor: pointer;
-             font-family: 'Lexend', sans-serif; /* Usar la fuente Lexend */
-             font-size: 0.85rem; /* Asegurar tamaño pequeño */
-             color: inherit; /* Heredar el color del contenedor padre */
-             transition: color 0.3s ease;
-         }
-
-         #data-management button:hover {
-             color: red; /* Usar el color rojo de hover unificado */
-             text-decoration: underline; /* Añadir subrayado al pasar el mouse */
-         }
-
-         /* Estilos de modo oscuro para la sección de gestión de datos */
-         body.dark-mode #data-management {
-             color: #b0b0b0; /* Gris más claro en modo oscuro */
-         }
-         body.dark-mode #data-management button {
-             color: inherit; /* Heredar del padre */
-         }
-         body.dark-mode #data-management button:hover {
-             color: #ff6b6b; /* Rojo más brillante en modo oscuro */
-         }
+         /* REMOVED: #data-management styles */
 
 
     </style>
@@ -684,12 +658,7 @@
     <button id="reorder-button" aria-label="Reordenar tareas por prioridad">↕</button>
 
     <!-- Sección para Importar/Exportar datos -->
-    <div id="data-management">
-        <button id="export-data-button" aria-label="Exportar datos">Exportar</button>
-        <button id="import-data-button" aria-label="Importar datos">Importar</button>
-        <!-- Input de archivo oculto para la importación -->
-        <input type="file" id="import-file-input" accept=".json" style="display: none;">
-    </div>
+    <!-- REMOVED: <div id="data-management"> ... </div> -->
 
 
     <!-- Botón para alternar modo oscuro/claro (icono) -->
@@ -720,17 +689,16 @@
         const tareasRef = collection(db, "tareas"); // Referencia a la colección "tareas"
 
         // Obtener referencias a los elementos del DOM (ahora dentro del módulo)
-        const todoInput = document.getElementById('new-todo-input');
-        const addTodoButton = document.getElementById('add-todo-button');
-        const todoListContainer = document.getElementById('todo-list');
-        const reorderButton = document.getElementById('reorder-button');
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const body = document.body;
-
-        // Referencias a los nuevos elementos de gestión de datos
-        const exportDataButton = document.getElementById('export-data-button');
-        const importDataButton = document.getElementById('import-data-button');
-        const importFileInput = document.getElementById('import-file-input');
+        // Declarar estas variables aquí para que estén disponibles en todo el módulo
+        let todoInput;
+        let addTodoButton;
+        let todoListContainer;
+        let reorderButton;
+        let darkModeToggle;
+        let body;
+        // REMOVED: let exportDataButton;
+        // REMOVED: let importDataButton;
+        // REMOVED: let importFileInput;
 
 
         // Colores de prioridad disponibles y su orden para ciclar
@@ -773,7 +741,7 @@
             } catch (e) {
                  console.error("Error al cargar de localStorage:", e);
                  // Opcional: notificar al usuario sobre datos corruptos
-                 alert("Error al cargar la lista de tareas desde Local Storage. Intentando cargar desde la nube.");
+                 // alert("Error al cargar la lista de tareas desde Local Storage. Intentando cargar desde la nube.");
                  return []; // Si hay error, empezar con lista vacía localmente
             }
         }
@@ -1086,11 +1054,11 @@
         function renderTodos(todosArray) {
             // console.log("Renderizando todos:", todosArray); // Diagnóstico
 
-            // --- Lógica de Ordenación por Prioridad ELIMINADA de aquí ---
-            // todosArray.sort((a, b) => { ... });
-            // --- Fin Lógica de Ordenación ELIMINADA ---
 
-
+            if (!todoListContainer) {
+                 console.error("Error: todoListContainer no encontrado.");
+                 return;
+            }
             todoListContainer.innerHTML = ''; // Limpiar la lista actual
 
             if (todosArray.length === 0) {
@@ -1295,7 +1263,7 @@
 
         // --- Dark Mode Toggle Functionality ---
         function enableDarkMode() {
-            body.classList.add('dark-mode');
+            if (body) body.classList.add('dark-mode');
             localStorage.setItem('theme', 'dark');
             if (darkModeToggle) { // Check if element exists
                 darkModeToggle.innerHTML = '☀'; // Usar innerHTML para el símbolo de sol
@@ -1304,7 +1272,7 @@
         }
 
         function disableDarkMode() {
-            body.classList.remove('dark-mode');
+            if (body) body.classList.remove('dark-mode');
             localStorage.setItem('theme', 'light');
             if (darkModeToggle) { // Check if element exists
                  darkModeToggle.innerHTML = '◑'; // Usar innerHTML para el símbolo de luna
@@ -1313,122 +1281,34 @@
         }
 
         function toggleDarkMode() {
-            if (body.classList.contains('dark-mode')) {
+            if (body && body.classList.contains('dark-mode')) {
                 disableDarkMode();
             } else {
                 enableDarkMode();
             }
         }
 
-        // --- Funciones de Importación/Exportación ---
-
-        // Función para exportar los datos a un archivo JSON
-        function exportData() {
-            try {
-                const todos = loadTodos(); // Cargar los datos actuales (desde LS, que debería estar sincronizado)
-                const dataStr = JSON.stringify(todos, null, 2); // Convertir a JSON con formato legible
-                const blob = new Blob([dataStr], { type: 'application/json' }); // Crear un Blob
-                const url = URL.createObjectURL(blob); // Crear una URL para el Blob
-
-                const a = document.createElement('a'); // Crear un enlace temporal
-                a.href = url;
-                // Generar un nombre de archivo con la fecha actual
-                const date = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
-                a.download = `todolist_export_${date}.json`; // Nombre del archivo
-
-                // Simular un clic en el enlace para iniciar la descarga
-                document.body.appendChild(a); // Necesario para Firefox
-                a.click();
-
-                // Limpiar después de la descarga
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url); // Liberar la URL del Blob
-
-                console.log("Datos exportados correctamente.");
-                // Opcional: Mostrar un mensaje discreto al usuario
-                // alert("Datos exportados correctamente.");
-
-            } catch (e) {
-                console.error("Error al exportar datos:", e);
-                alert("Error al exportar los datos.");
-            }
-        }
-
-        // Función para manejar la selección del archivo de importación
-        async function handleFileSelect(event) { // Make async because saveTodos is async
-            const file = event.target.files[0]; // Obtener el primer archivo seleccionado
-
-            if (!file) {
-                return; // No se seleccionó ningún archivo
-            }
-
-            const reader = new FileReader(); // Crear un lector de archivos
-
-            // Cuando el archivo se haya leído
-            reader.onload = async (event) => { // Make async because saveTodos is async
-                try {
-                    const fileContent = event.target.result;
-                    const parsedData = JSON.parse(fileContent); // Parsear el contenido JSON
-
-                    // Validación básica: Asegurarse de que es un array
-                    if (!Array.isArray(parsedData)) {
-                        alert("El archivo seleccionado no contiene un formato de lista válido.");
-                        console.error("Datos importados no son un array:", parsedData);
-                        return;
-                    }
-
-                    // Limpiar y validar la estructura de los datos importados
-                    const cleanedData = parsedData.map(todo => ({
-                        text: todo.text || 'Tarea sin nombre',
-                        completed: typeof todo.completed === 'boolean' ? todo.completed : false,
-                        subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [],
-                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
-                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
-                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null // Validate imported date
-                    }));
+        // --- Funciones de Importación/Exportación (REMOVED) ---
+        // REMOVED: exportData function
+        // REMOVED: handleFileSelect function
 
 
-                    // Opcional: Confirmar al usuario antes de sobrescribir
-                    if (loadTodos().length > 0) { // Solo si ya hay tareas locales
-                         if (!confirm("¿Estás seguro de importar los datos? Esto reemplazará tu lista actual.")) {
-                             return; // Cancelar si el usuario no confirma
-                         }
-                    }
+        // --- Inicialización y Event Listeners Globales ---
 
-
-                    await saveTodos(cleanedData); // Guardar los datos importados (limpios) - Esto guarda en LS y Firestore
-                    renderTodos(cleanedData); // Renderizar la lista con los datos importados
-                    alert("Datos importados correctamente.");
-                    console.log("Datos importados y renderizados.");
-
-                } catch (e) {
-                    console.error("Error al procesar el archivo importado:", e);
-                    alert("Error al leer o procesar el archivo. Asegúrate de que sea un archivo JSON válido.");
-                } finally {
-                    // Limpiar el valor del input de archivo para que el evento 'change' se dispare
-                    // si se selecciona el mismo archivo de nuevo.
-                    if (importFileInput) importFileInput.value = ''; // Check if element exists
-                }
-            };
-
-            // Manejar errores de lectura del archivo
-            reader.onerror = (event) => {
-                console.error("Error al leer el archivo:", event.target.error);
-                alert("Error al leer el archivo.");
-                 if (importFileInput) importFileInput.value = ''; // Check if element exists, Limpiar input en caso de error
-            };
-
-            reader.readAsText(file); // Leer el archivo como texto
-        }
-
-
-        // --- Event Listeners Globales (Ahora dentro del módulo y DOMContentLoaded) ---
-
-        document.addEventListener('DOMContentLoaded', async () => { // Make async to await loadTodosOnline
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log("DOM cargado. Inicializando..."); // Diagnóstico
+
+            // Obtener referencias a los elementos del DOM *después* de que el DOM esté cargado
+            todoInput = document.getElementById('new-todo-input');
+            addTodoButton = document.getElementById('add-todo-button');
+            todoListContainer = document.getElementById('todo-list');
+            reorderButton = document.getElementById('reorder-button');
+            darkModeToggle = document.getElementById('dark-mode-toggle');
+            body = document.body;
+            // REMOVED: exportDataButton = document.getElementById('export-data-button');
+            // REMOVED: importDataButton = document.getElementById('import-data-button');
+            // REMOVED: importFileInput = document.getElementById('import-file-input');
+
 
             // Cargar la preferencia de tema al inicio (no depende de los datos)
             const savedTheme = localStorage.getItem('theme');
@@ -1439,10 +1319,18 @@
             }
 
             // Cargar los datos desde Firestore (con fallback a Local Storage)
-            const initialTodos = await loadTodosOnline(); // Await the async function
+            let initialTodos = [];
+            try {
+                 initialTodos = await loadTodosOnline(); // Await the async function
+            } catch (e) {
+                 console.error("Error fatal al cargar datos iniciales:", e);
+                 alert("No se pudieron cargar las tareas. Se iniciará una lista vacía.");
+                 initialTodos = []; // Asegurar que initialTodos es un array vacío en caso de error
+            }
+
             renderTodos(initialTodos); // Renderiza la lista inicial
 
-            // --- Attach Event Listeners AFTER DOM is ready ---
+            // --- Attach Event Listeners AFTER DOM is ready and references are obtained ---
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
 
             if (todoInput) {
@@ -1483,20 +1371,19 @@
 
 
             // --- Event Listener para el botón de Dark Mode ---
-            if (darkModeToggle) darkModeToggle.addEventListener('click', toggleDarkMode);
-
-            // --- Event Listeners para Importar/Exportar ---
-            if (exportDataButton) exportDataButton.addEventListener('click', exportData);
-
-            // El botón de importar solo simula un clic en el input de archivo oculto
-            if (importDataButton && importFileInput) {
-                importDataButton.addEventListener('click', () => {
-                    importFileInput.click();
-                });
+            if (darkModeToggle) {
+                 darkModeToggle.addEventListener('click', toggleDarkMode);
+                 console.log("Dark mode toggle listener attached."); // Diagnóstico
+            } else {
+                 console.error("Dark mode toggle button not found."); // Diagnóstico
             }
 
-            // El input de archivo real escucha el evento 'change'
-            if (importFileInput) importFileInput.addEventListener('change', handleFileSelect);
+
+            // --- Event Listeners para Importar/Exportar (REMOVED) ---
+            // REMOVED: if (exportDataButton) exportDataButton.addEventListener('click', exportData);
+            // REMOVED: if (importDataButton && importFileInput) { ... }
+            // REMOVED: if (importFileInput) importFileInput.addEventListener('change', handleFileSelect);
+
 
              console.log("Inicialización completa."); // Diagnóstico
         });
