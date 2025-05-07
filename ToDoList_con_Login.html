@@ -1105,6 +1105,97 @@
 
          // --- Funciones de Manipulación de Datos y Lógica de Completado ---
 
+        // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
+        // NOTA: Esta función ya no se usa directamente por el botón '+'.
+        // La lógica de alternar se ha movido al listener del botón en createAddSubtasksToggle.
+        // Se mantiene por si se usa en otro lugar, pero podría eliminarse si no es así.
+        /*
+        function toggleSubtaskSection(mainTaskIndex, show) {
+            // console.log(`toggleSubtaskSection: Tarea ${mainTaskIndex}, Show: ${show}`); // Diagnóstico
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                const mainTask = todos[mainTaskIndex];
+                mainTask.showSubtaskUI = show;
+                // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
+                if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
+                }
+
+                saveTodos(todos); // Guardar cambios (LS + Firestore)
+                renderTodos(todos); // Renderiza el estado actual SIN reordenar
+            } else {
+                 console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
+            }
+        }
+        */
+
+
+        // Función para ciclar el color de prioridad de una tarea principal
+        function cyclePriorityColor(mainTaskIndex) {
+             // console.log(`Ciclando color para tarea ${mainTaskIndex}`); // Diagnóstico
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const currentColors = PRIORITY_COLORS; // ['none', 'red', 'orange', 'yellow', 'green']
+                 // Asegurar que priorityColor es un string válido antes de buscar el índice
+                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string'
+                                      ? todos[mainTaskIndex].priorityColor
+                                      : 'none'; // Usar 'none' si es null, undefined o no string
+                 const currentIndex = currentColors.indexOf(currentColor);
+                 const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
+                 todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
+                 // console.log(`Nuevo color para tarea ${mainTaskIndex}: ${todos[mainIndex].priorityColor}`); // Diagnóstico
+
+                 saveTodos(todos); // Guardar cambios (LS + Firestore)
+                 renderTodos(todos); // Renderiza el estado actual SIN reordenar
+             } else {
+                  console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
+             }
+        }
+
+        // --- Nuevo: Función para actualizar la fecha de una tarea principal ---
+        function updateTaskDate(mainTaskIndex, newDateValue) {
+            // console.log(`Actualizando fecha para tarea ${mainTaskIndex} a ${newDateValue}`); // Diagnóstico
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                // Guardar null si el valor está vacío (el usuario borró la fecha)
+                todos[mainTaskIndex].date = newDateValue || null;
+
+                saveTodos(todos); // Guardar cambios (LS + Firestore)
+                renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                // console.log("Fecha de tarea actualizada:", todos[mainTaskIndex]); // Diagnóstico
+            } else {
+                 console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
+            }
+        }
+
+
+        // Función para agregar una nueva tarea principal
+        function addTodo() {
+            const newTodoText = todoInput.value.trim();
+
+            if (newTodoText === '') {
+                alert('Por favor, ingresa el nombre de la tarea.');
+                return;
+            }
+
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+
+            todos.push({
+                text: newTodoText,
+                completed: false,
+                subtasks: [], // Siempre array vacío inicialmente
+                showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
+                priorityColor: 'none', // Color de prioridad por defecto
+                date: null // --- Nuevo: Fecha inicialmente nula ---
+            });
+
+            saveTodos(todos); // Guardar cambios (LS + Firestore)
+            renderTodos(todos); // Renderiza el estado actual SIN reordenar
+            // Limpiar el input de agregar tarea principal aquí también para consistencia
+            if (todoInput) todoInput.value = ''; // Check if todoInput exists
+            // console.log("Tarea principal agregada:", todos); // Diagnóstico
+        }
+
         // Función para agregar una sub-tarea a una tarea principal específica
         function addSubtask(mainTaskIndex, subtaskInput) {
              const newSubtaskText = subtaskInput.value.trim();
@@ -1325,7 +1416,7 @@
             } catch (e) {
                  console.error("Error fatal al cargar datos iniciales:", e);
                  alert("No se pudieron cargar las tareas. Se iniciará una lista vacía.");
-                 initialTodos = []; // Asegurar que initialTodos es un array vacío en caso de error
+                 initialTodos = loadTodos(); // Fallback a Local Storage si la carga online falla
             }
 
             renderTodos(initialTodos); // Renderiza la lista inicial
@@ -1364,7 +1455,7 @@
                         return rankA - rankB; // Orden ascendente por rank (menor rank = mayor prioridad)
                     });
                     saveTodos(todos); // Guardar el array ya ordenado (LS + Firestore)
-                    renderTodos(todos); // Renderiza el estado actual SIN reordenar
+                    renderTodos(todos); // Renderiza la lista en el nuevo orden
                     // console.log("Lista reordenada por prioridad y fecha:", todos); // Diagnóstico
                 });
             }
