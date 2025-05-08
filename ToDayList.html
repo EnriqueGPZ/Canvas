@@ -38,6 +38,8 @@
             --legend-text-color: #666;
             --sort-button-color: #555;
             --sort-button-hover-color: #3498db; /* Color de hover para el botón de ordenar */
+            --completion-icon-bg-color: #f1c40f; /* <-- Nuevo: Color de fondo para el icono de completado */
+            --completion-icon-color: white; /* <-- Nuevo: Color del icono de completado */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -57,6 +59,7 @@
             --completed-text-color: #7f8c8d;
             --progress-bg: #4a627a;
             --progress-bar-color: #8bc34a; /* Color de barra de progreso en dark mode */
+            --progress-bar-completed-color: #8bc34a; /* Color de barra de progreso completada en dark mode */
             --empty-list-color: #bdc3c7;
             --fixed-button-bg: #34495e;
             --fixed-button-border: #4a627a;
@@ -65,6 +68,8 @@
             --sort-button-color: #bdc3c7;
             --sort-button-hover-color: #3498db; /* Mantenido el color de hover de ordenar */
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
+            --completion-icon-bg-color: #f39c12; /* <-- Nuevo: Color de fondo para el icono de completado en dark mode */
+            --completion-icon-color: white; /* <-- Nuevo: Color del icono de completado en dark mode */
         }
 
         /* --- Estilos Generales --- */
@@ -144,6 +149,8 @@
             /* --- Añadido: Borde izquierdo más grueso por defecto --- */
             border-left: 5px solid var(--border-color);
             padding-left: 10px; /* Ajusta el padding izquierdo para compensar el borde */
+            position: relative; /* <-- Añadido: Necesario para posicionar el mensaje de completado */
+            overflow: hidden; /* <-- Añadido: Para recortar el mensaje si se desborda */
         }
          .todo-item:last-child {
              margin-bottom: 0; /* El último ítem no necesita margen inferior si la lista lo tiene */
@@ -293,7 +300,7 @@
         /* --- Cabecera de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
-            align-items: baseline; /* <-- ALINEA POR LA LÍNEA BASE */
+            align-items: baseline; /* ALINEA POR LA LÍNEA BASE */
             margin-bottom: 15px; /* Espacio antes de la barra de progreso o sub-tareas */
             padding: 0; /* Sin padding extra aquí */
             gap: 10px; /* Espacio entre checkbox, etiqueta de prioridad y el nuevo task-body */
@@ -303,7 +310,7 @@
              /* hereda de .custom-checkbox, aquí puedes anular si es necesario */
              border-color: var(--text-color);
              background-color: var(--item-bg);
-             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
+             /* margin-top: 3px; */ /* Ya no es necesario con baseline */
         }
          .todo-item .main-task-header input[type="checkbox"]:checked {
               background-color: var(--text-color);
@@ -321,7 +328,7 @@
              flex-shrink: 0; /* No se encoge */
              transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
-             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
+             /* margin-top: 3px; */ /* Ya no es necesario con baseline */
         }
          .todo-item .priority-color-label:hover {
              transform: scale(1.1); /* Efecto sutil al pasar el mouse */
@@ -636,6 +643,43 @@
           #todo-input-container #reorder-button {
                margin-left: auto; /* Empuja el botón de reordenar a la derecha */
           }
+
+        /* --- Añadido: Estilos para el mensaje de completado temporal --- */
+        .completion-message {
+            position: absolute;
+            top: 50%; /* Centrar verticalmente */
+            left: 50%; /* Centrar horizontalmente */
+            transform: translate(-50%, -50%) scale(0.5); /* Iniciar pequeño y centrado */
+            /* font-size: 3em; */ /* <-- ELIMINADO: El tamaño se aplica al contenedor ahora */
+            /* color: var(--completion-icon-color); */ /* <-- ELIMINADO: El color del icono se aplica al i */
+            opacity: 0; /* Inicialmente invisible */
+            pointer-events: none; /* No bloquea clics debajo */
+            z-index: 500; /* Asegura que esté por encima de la tarjeta */
+            transition: all 0.3s ease-out; /* Transición para animación */
+
+            /* --- Nuevos estilos para el círculo amarillo --- */
+            background-color: var(--completion-icon-bg-color); /* Color de fondo amarillo */
+            border-radius: 50%; /* Forma de círculo */
+            width: 50px; /* Tamaño del círculo */
+            height: 50px; /* Tamaño del círculo */
+            display: flex; /* Para centrar el icono dentro */
+            justify-content: center; /* Centrar horizontalmente el icono */
+            align-items: center; /* Centrar verticalmente el icono */
+        }
+
+        /* Estilo para el icono dentro del mensaje de completado */
+        .completion-message i {
+            font-size: 1.8em; /* Tamaño del icono dentro del círculo */
+            color: var(--completion-icon-color); /* Color blanco para el icono */
+            line-height: 1; /* Asegura la alineación vertical del icono */
+        }
+
+
+        .completion-message.show {
+            opacity: 1; /* Hacer visible */
+            transform: translate(-50%, -50%) scale(1); /* Aumentar tamaño a normal */
+        }
+
 
         /* ------------------------------------------------------------- */
         /* --- AJUSTES PARA PANTALLAS PEQUEÑAS (MÓVILES) --- */
@@ -1277,26 +1321,7 @@
                      mainTask.subtasks.splice(subtaskIndex, 1);
                      // Recalcular estado de completado de la tarea principal
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-                     mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompleted : false; // Si no quedan sub-tareas, no está completada por sub-tareas
-
-                     saveTaskToFirestore(mainTask);
-                     syncAndRender();
-                 } else {
-                     console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
-                 }
-             } else {
-                  console.error("Tarea principal no encontrada para eliminar sub-tarea:", mainTaskId);
-             }
-        }
-
-        function toggleSubtaskCompletion(mainTaskId, subtaskId) {
-             const mainTask = findTaskById(mainTaskId);
-             if (mainTask && Array.isArray(mainTask.subtasks)) {
-                const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
-                if (subtask) {
-                     subtask.completed = !subtask.completed;
-                     // Recalcular estado de completado de la tarea principal
-                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(s => s.completed);
+                     const wasCompleted = mainTask.completed; // Guardar estado anterior
                      if (mainTask.subtasks.length > 0) {
                           mainTask.completed = allSubtasksCompleted;
                      } else { // Si no hay sub-tareas, el checkbox principal no depende de ellas
@@ -1305,6 +1330,12 @@
 
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
+
+                     // --- Añadido: Mostrar mensaje si la tarea principal acaba de ser completada ---
+                     // Asegurarse de que solo se muestre si la tarea principal se completa (ya sea por sub-tareas o directamente)
+                     if (!wasCompleted && mainTask.completed) {
+                         showCompletionMessage(mainTask.id);
+                     }
                  } else {
                      console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
@@ -1316,6 +1347,7 @@
         function toggleMainCompletion(taskId, isChecked) {
              const task = findTaskById(taskId);
              if (task) {
+                 const wasCompleted = task.completed; // Guardar estado anterior
                  task.completed = isChecked;
                  // Si la tarea principal se marca como completada/incompleta, afectar sub-tareas
                  if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
@@ -1325,6 +1357,11 @@
                  }
                  saveTaskToFirestore(task);
                  syncAndRender();
+
+                 // --- Añadido: Mostrar mensaje si la tarea principal acaba de ser completada ---
+                 if (!wasCompleted && task.completed) {
+                     showCompletionMessage(task.id);
+                 }
              } else {
                   console.error("Tarea principal inválida para cambiar estado:", taskId);
              }
@@ -1400,6 +1437,42 @@
 
              syncAndRender(); // Renderizar la UI con el orden actualizado localmente
         }
+
+        // --- Añadido: Función para mostrar el mensaje de completado ---
+        function showCompletionMessage(taskId) {
+            const listItem = todoListContainer.querySelector(`li[data-task-id="${taskId}"]`);
+            if (!listItem) return;
+
+            // Evitar múltiples mensajes si se hace clic rápido
+            if (listItem.querySelector('.completion-message')) {
+                return;
+            }
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('completion-message');
+            // Usamos fa-thumbs-up para el pulgar arriba, o fa-check-circle si prefieres el check
+            messageElement.innerHTML = '<i class="fas fa-thumbs-up"></i>'; // Icono de pulgar arriba
+
+            listItem.appendChild(messageElement);
+
+            // Forzar un reflow para asegurar que la transición se aplique
+            void messageElement.offsetWidth;
+
+            // Añadir la clase 'show' para iniciar la transición de entrada
+            messageElement.classList.add('show');
+
+            // Establecer temporizador para eliminar el mensaje
+            setTimeout(() => {
+                // Eliminar la clase 'show' para iniciar la transición de salida (fade-out)
+                messageElement.classList.remove('show');
+
+                // Esperar a que termine la transición antes de eliminar el elemento del DOM
+                messageElement.addEventListener('transitionend', () => {
+                    messageElement.remove();
+                }, { once: true }); // Usar { once: true } para que el listener se elimine automáticamente
+            }, 1500); // Mostrar durante 1.5 segundos (ajusta este valor si quieres más/menos tiempo)
+        }
+
 
         // --- THEME ---
         function enableDarkMode() {
