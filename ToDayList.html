@@ -212,14 +212,14 @@
              align-items: center;
              justify-content: center;
              text-decoration: none;
-             color: var(--button-color); /* Color base para todos los app-button */
+             color: var(--button-color); /* Color base para todos los app-button (apagado) */
              /* Padding y font-size para iconos de acción se definen más abajo */
              /* Padding y font-size para botones principales se definen aquí */
              padding: 10px 15px;
              font-size: 1.1rem;
          }
          .app-button:hover:not(:disabled) {
-             color: var(--button-hover-color);
+             color: var(--button-hover-color); /* Color de hover general (más vivo) */
          }
          .app-button:focus {
               outline: 2px solid var(--button-hover-color);
@@ -384,7 +384,7 @@
 
         .todo-item .main-task-header .task-actions-group {
             display: flex;
-            align-items: center;
+            align-items: center; /* Alinea los iconos verticalmente en el centro */
             gap: 5px; /* Espacio consistente entre los iconos/acciones */
             margin-left: auto; /* Empuja el grupo a la derecha */
             flex-shrink: 0; /* Evita que el grupo se encoja demasiado */
@@ -398,7 +398,7 @@
          .todo-item .subtasks-list li .subtask-move-button i, /* Apuntar al <i> dentro del botón */
          .todo-item .subtasks-list li .delete-button i /* Apuntar al <i> dentro del botón */
          {
-             font-size: 1rem; /* Tamaño base uniforme */
+             font-size: 1rem; /* Tamaño base uniforme (como la papelera de subtarea) */
              /* Padding se aplica al elemento clicable, no al <i> */
          }
 
@@ -419,7 +419,7 @@
              transition: color 0.2s ease;
          }
           .todo-item .main-task-header .task-actions-group .date-icon:hover:not(.completed) {
-              color: var(--button-hover-color); /* Color de hover general */
+              color: var(--button-hover-color); /* Color de hover general (más vivo) */
           }
 
          /* Ocultar el input de fecha de forma que siga siendo funcional */
@@ -445,7 +445,7 @@
         .todo-item .main-task-header .task-actions-group .link-button {
             /* font-size y padding ya definidos arriba */
             opacity: 1; /* Visibles por defecto */
-            color: var(--button-color); /* Color base */
+            color: var(--button-color); /* Color base (apagado) */
         }
          .todo-item .main-task-header .task-actions-group .link-button.link-on {
             color: var(--button-hover-color); /* Color más vivo cuando tiene link */
@@ -458,10 +458,10 @@
          /* Estilo para el botón de eliminar */
         .todo-item .main-task-header .task-actions-group .delete-button {
              /* font-size y padding ya definidos arriba */
-             color: var(--delete-button-color); /* Color base */
+             color: var(--delete-button-color); /* Color base (apagado) - usa la variable que ya apunta a --button-color */
         }
          .todo-item .main-task-header .task-actions-group .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color);
+             color: var(--delete-button-hover-color); /* Color de hover (más vivo) */
          }
 
 
@@ -501,7 +501,7 @@
         }
         .todo-item .subtasks-list li {
             display: flex;
-            align-items: center;
+            align-items: center; /* Alinea los elementos verticalmente en el centro */
             margin-bottom: 8px;
             font-size: 0.95rem;
             gap: 5px; /* Espacio consistente entre los elementos de la subtarea */
@@ -523,31 +523,6 @@
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
-         /* Contenedor para los iconos de acción de la subtarea */
-         .todo-item .subtasks-list li .subtask-actions-row {
-             display: flex;
-             align-items: center;
-             gap: 5px; /* Espacio consistente entre los iconos */
-             flex-shrink: 0;
-             margin-left: auto; /* Empuja el grupo a la derecha */
-         }
-
-         /* Estilos para iconos de acción en subtareas */
-         .todo-item .subtasks-list li .subtask-move-button,
-         .todo-item .subtasks-list li .delete-button {
-             /* font-size y padding ya definidos arriba */
-             color: var(--button-color);
-         }
-         .todo-item .subtasks-list li .subtask-move-button:hover:not(:disabled) {
-             color: var(--button-hover-color);
-         }
-         .todo-item .subtasks-list li .delete-button {
-             /* font-size y padding ya definidos arriba */
-             color: var(--delete-button-color);
-         }
-         .todo-item .subtasks-list li .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color);
-         }
 
         .todo-item .subtasks-list li span {
              flex-grow: 1;
@@ -557,6 +532,32 @@
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
         }
+
+         /* Contenedor para los iconos de acción de la subtarea */
+         .todo-item .subtasks-list li .subtask-actions-row {
+             display: flex;
+             align-items: center; /* Alinea los iconos verticalmente en el centro */
+             gap: 5px; /* Espacio consistente entre los iconos */
+             flex-shrink: 0;
+             margin-left: auto; /* Empuja el grupo a la derecha */
+         }
+
+         /* Estilos para botones de acción en subtareas */
+         .todo-item .subtasks-list li .subtask-move-button,
+         .todo-item .subtasks-list li .delete-button {
+             /* font-size y padding ya definidos arriba */
+             color: var(--button-color); /* Color base (apagado) */
+         }
+         .todo-item .subtasks-list li .subtask-move-button:hover:not(:disabled) {
+             color: var(--button-hover-color); /* Color de hover (más vivo) */
+         }
+         .todo-item .subtasks-list li .delete-button {
+             /* font-size y padding ya definidos arriba */
+             color: var(--delete-button-color); /* Color base (apagado) - usa la variable que ya apunta a --button-color */
+         }
+         .todo-item .subtasks-list li .delete-button:hover:not(:disabled) {
+             color: var(--delete-button-hover-color); /* Color de hover (más vivo) */
+         }
 
 
         .todo-item .progress-container {
@@ -611,11 +612,18 @@
         .todo-item.completed .subtasks-list li .subtask-move-button, /* Desactivar botones de mover */
         .todo-item.completed .subtasks-list li .delete-button, /* Desactivar papelera sub-tarea */
         .todo-item.completed .main-task-header .task-actions-group .date-icon, /* Aplicar opacidad al icono de fecha */
+        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off, /* Link apagado en completada */
         .todo-item.completed .main-task-header .task-actions-group .delete-button /* Aplicar opacidad al botón de eliminar principal */
          {
             opacity: 0.7;
             cursor: default;
          }
+         /* Link ON en completada debe mantener cursor pointer y opacidad > 0.7 */
+         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
+             opacity: 0.8;
+             cursor: pointer;
+         }
+
 
         /* Asegurar color y quitar efectos de hover/focus para elementos completados */
         .todo-item.completed .priority-color-label:hover,
@@ -623,38 +631,35 @@
         .todo-item.completed .subtasks-list li .subtask-move-button:hover,
         .todo-item.completed .subtasks-list li .delete-button:hover,
         .todo-item.completed .main-task-header .task-actions-group .date-icon:hover, /* Hover en icono de fecha completada */
+        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off:hover, /* Hover en link apagado completada */
         .todo-item.completed .main-task-header .task-actions-group .delete-button:hover {
              color: inherit; /* Vuelve al color heredado (color completado o color base con opacidad) */
              text-decoration: none;
              transform: none;
              cursor: default;
         }
-
-         /* Manejo específico para el link button en tareas completadas */
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
-            opacity: 0.8; /* Ligeramente más visible */
-            cursor: pointer; /* Mantener cursor de link */
-            color: var(--completed-text-color); /* Usar color de completado */
-        }
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-on:hover {
-            opacity: 1; /* Aumentar opacidad en hover */
-            color: var(--button-hover-color); /* Usar color de hover general */
-        }
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off {
-            opacity: 0.4;
-            cursor: default;
-            color: var(--completed-text-color); /* Usar color de completado */
-        }
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off:hover {
-             color: var(--completed-text-color); /* Mantener color de completado */
-             opacity: 0.4;
-        }
+         /* Hover en link ON completada */
+         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on:hover {
+             color: var(--button-hover-color); /* Usar color de hover general */
+             opacity: 1;
+             text-decoration: none;
+             transform: none;
+             cursor: pointer;
+         }
 
 
-         /* Color del icono de fecha en tareas completadas */
-        .todo-item.completed .main-task-header .task-actions-group .date-icon {
+         /* Color de los iconos de acción en tareas completadas */
+        .todo-item.completed .main-task-header .task-actions-group .date-icon,
+        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off,
+        .todo-item.completed .main-task-header .task-actions-group .delete-button,
+        .todo-item.completed .subtasks-list li .subtask-move-button,
+        .todo-item.completed .subtasks-list li .delete-button {
              color: var(--completed-text-color); /* Usar color de texto completado */
         }
+        /* Color del link ON en tareas completadas */
+         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
+             color: var(--completed-text-color); /* Usar color de texto completado */
+         }
 
 
          .todo-item.completed .main-task-header input[type="checkbox"] {
@@ -1158,7 +1163,7 @@
                      if (task.completed) return; // No permitir agregar subtareas a tareas completadas
                      task.showSubtaskUI = !task.showSubtaskUI;
                      // Si se activa la UI y no hay subtareas, inicializa el array
-                     if (task.showSubtasks && (!Array.isArray(task.subtasks) || task.subtasks.length === 0)) {
+                     if (task.showSubtaskUI && (!Array.isArray(task.subtasks) || task.subtasks.length === 0)) {
                          task.subtasks = [];
                      }
                      saveTaskToFirestore(task);
