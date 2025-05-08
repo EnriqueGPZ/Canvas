@@ -1509,7 +1509,7 @@
 
              saveTodos(todos).then(() => { // Esperar a que guarde online
                  renderTodos(todos); // Renderiza la lista en el nuevo orden
-                 alert("Tareas reordenadas.");
+                 // *** ELIMINADO: alert("Tareas reordenadas."); ***
              })
              .catch(e => console.error("Error guardando performManualSort:", e)); // Capturar error de guardado
         }
@@ -1594,7 +1594,7 @@
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) return dateA - dateB;
 
-                 const orderA = a.order || 0;
+                 const orderA = a.order || 0; // Usar 0 si order no existe (para data vieja)
                  const orderB = b.order || 0;
                  return orderA - orderB;
              });
