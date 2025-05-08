@@ -37,7 +37,7 @@
             --fixed-button-bg: #ffffff;
             --fixed-button-border: #ccc;
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            --legend-text-color: #666;
+            --legend-text-color: #666; /* Color de la leyenda */
             --sort-button-color: #555;
             --sort-button-hover-color: #3498db; /* Color de hover para el botón de ordenar */
             --footer-text-color: #aaa; /* Color para el texto del footer */
@@ -77,7 +77,7 @@
             --fixed-button-bg: #34495e;
             --fixed-button-border: #4a627a;
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.4);
-            --legend-text-color: #a0a0a0;
+            --legend-text-color: #a0a0a0; /* Color de la leyenda en dark mode */
             --sort-button-color: #bdc3c7;
             --sort-button-hover-color: #3498db; /* Mantenido el color de hover de ordenar */
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
@@ -144,8 +144,8 @@
 
         #priority-legend {
             text-align: center;
-            font-size: 0.75rem;
-            color: var(--legend-text-color);
+            font-size: 0.75rem; /* Tamaño de referencia */
+            color: var(--legend-text-color); /* Color de referencia */
             margin-top: 30px;
             margin-bottom: 20px;
             display: flex;
@@ -403,37 +403,47 @@
             opacity: 1;
         }
 
+        /* --- Estilos para el input de fecha (restaurado y modificado) --- */
         .todo-item .main-task-header .task-body input[type="date"] {
             background: none;
             border: none;
             padding: 0;
-            font-family: 'Lexend', sans-serif;
-            font-size: 0.85rem;
-            color: var(--placeholder-color); /* Color por defecto cuando está vacío */
+            font-family: 'Lexend', sans-serif; /* Aseguramos la fuente */
+            font-size: 0.75rem; /* Tamaño EXACTO igual a la leyenda */
+            color: var(--legend-text-color); /* Color EXACTO igual a la leyenda (para ambos estados, vacío y con fecha) */
+            font-weight: normal; /* Peso EXACTO igual a la leyenda */
             cursor: pointer;
             flex-shrink: 0;
             outline: none;
-            /* Quitar transiciones de background, border, box-shadow */
             transition: color 0.2s ease;
+            /* Asegurar que el input date nativo no muestre nada visualmente por defecto */
+            /* Esto ayuda a que solo se vea el texto y el icono nativo al hacer clic */
+            appearance: none;
+            -webkit-appearance: none;
+            /* Ocultar indicadores nativos */
+            ::-webkit-calendar-picker-indicator { opacity: 0; }
+            ::-webkit-inner-spin-button { display: none; }
+            ::-webkit-clear-button { display: none; }
         }
-        /* Estilo para fecha válida (no vacía) */
-         .todo-item .main-task-header .task-body input[type="date"]:valid {
-             color: var(--text-color); /* Color por defecto cuando tiene fecha */
-         }
+
+        /* Eliminamos el estilo :valid para que siempre use var(--legend-text-color) */
+        /* .todo-item .main-task-header .task-body input[type="date"]:valid {
+             color: var(--text-color);
+         } */
+
         /* Estilo para hover/focus */
         .todo-item .main-task-header .task-body input[type="date"]:hover,
         .todo-item .main-task-header .task-body input[type="date"]:focus {
              color: var(--button-hover-color); /* Color de hover general */
              text-decoration: underline;
          }
-         /* Estilo para hover/focus en tareas completadas */
-         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
-         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
-              color: var(--button-hover-color); /* Mantener color de hover general */
-         }
 
-        /* --- ELIMINADO: Estilos específicos para .date-today --- */
-        /* Estos estilos ahora se aplicarán directamente en JS */
+        /* Estilo para la fecha de hoy (aplicado por JS) */
+        .todo-item .main-task-header .task-body input[type="date"].date-today {
+            /* El color y font-weight se aplican directamente en JS */
+            /* color: var(--priority-color-of-this-task); */
+            /* font-weight: bold; */
+        }
 
 
         .todo-item .main-task-header .task-body .task-actions-group .delete-button {
@@ -480,7 +490,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
-            font-size: 0.95rem;
+            font-size: 0.95rem; /* Tamaño de las subtareas */
             gap: 5px;
         }
          .todo-item .subtasks-list li:last-child {
@@ -611,7 +621,7 @@
         .todo-item.completed .subtasks-list li .app-button:hover,
         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
-            color: inherit; /* Revertir al color de completado */
+            color: inherit; /* Revertir al color de completado (opacity 0.7) */
             text-decoration: none;
             transform: none;
         }
@@ -921,21 +931,23 @@
                 const todayString = getTodayDateString();
                 const isToday = task.date === todayString;
 
+                // Resetear estilos primero
+                dateInput.style.color = ''; // Esto hará que use el color definido en CSS (var(--legend-text-color))
+                dateInput.style.fontWeight = '';
+                dateInput.classList.remove('date-today'); // Limpiar clase por si acaso
+
                 if (isToday && !task.completed) {
                     // Obtener el color del borde izquierdo (color de prioridad)
                     const computedStyle = getComputedStyle(listItemElement);
                     const priorityColor = computedStyle.borderLeftColor;
 
+                    // Aplicar highlight
                     dateInput.style.color = priorityColor;
                     dateInput.style.fontWeight = 'bold';
-                    // Asegurarse de que no tenga estilos de .date-today si existieran por error
-                    dateInput.classList.remove('date-today');
-                } else {
-                    // Si no es hoy o está completada, resetear estilos
-                    dateInput.style.color = ''; // Esto hará que use el color por defecto (:valid o .completed)
-                    dateInput.style.fontWeight = '';
-                    dateInput.classList.remove('date-today'); // Limpiar clase por si acaso
+                    // No necesitamos añadir una clase específica si aplicamos estilos directos
+                    // dateInput.classList.add('date-today');
                 }
+                 // La opacidad para tareas completadas se maneja en CSS
             }
         }
         // --- FIN FUNCIÓN MODIFICADA ---
@@ -1018,6 +1030,7 @@
                 }
             });
 
+            // --- RESTAURADO: Input de fecha directo ---
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
             dateInput.classList.add('task-date-input');
@@ -1031,6 +1044,8 @@
                      // --- LLAMAR A LA FUNCIÓN DE RESALTADO DESPUÉS DE ACTUALIZAR ---
                      const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
                      if (listItemElement) {
+                         // Necesitamos actualizar el objeto task en memoria antes de llamar a updateDateHighlight
+                         task.date = event.target.value || null;
                          updateDateHighlight(listItemElement, task);
                      }
                      // --- FIN LLAMADA ---
@@ -1038,6 +1053,8 @@
                      event.target.value = task.date || ''; // Revertir si está completada
                  }
             });
+            // --- FIN RESTAURADO ---
+
 
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button');
@@ -1055,7 +1072,7 @@
             });
 
             taskActionsGroup.appendChild(linkButton);
-            taskActionsGroup.appendChild(dateInput);
+            taskActionsGroup.appendChild(dateInput); /* Añadir el input directo */
             taskActionsGroup.appendChild(deleteMainButton);
 
             taskBody.appendChild(mainTaskSpan);
@@ -1063,9 +1080,7 @@
 
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
-            taskBody.appendChild(taskActionsGroup); // Asegurarse de que taskActionsGroup esté dentro de taskBody
-            mainTaskHeader.appendChild(taskBody); // Asegurarse de que taskBody esté dentro de mainTaskHeader
-
+            mainTaskHeader.appendChild(taskBody);
 
             return mainTaskHeader;
         }
