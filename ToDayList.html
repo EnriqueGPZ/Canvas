@@ -285,7 +285,7 @@
             align-items: center; /* Centra verticalmente los items */
             margin-bottom: 15px; /* Espacio antes de la barra de progreso o sub-tareas */
             padding: 0; /* Sin padding extra aquí */
-            gap: 10px; /* Espacio entre checkbox, etiqueta de prioridad y texto */
+            gap: 10px; /* Espacio entre checkbox, etiqueta de prioridad y el nuevo task-content */
         }
         /* Estilos específicos para el checkbox dentro de la cabecera (si es necesario) */
         .todo-item .main-task-header input[type="checkbox"] {
@@ -320,39 +320,50 @@
         .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
         .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
-        /* Texto de la tarea principal */
-        .todo-item .main-task-header span {
+        /* --- Nuevo contenedor para el texto y las acciones --- */
+        .todo-item .main-task-header .task-content {
+            display: flex; /* Es un contenedor flex para su contenido (texto y acciones) */
+            flex-grow: 1; /* Ocupa todo el espacio disponible en la línea del main-task-header */
+            align-items: center; /* Alinea verticalmente el texto y las acciones */
+            gap: 10px; /* Espacio entre el texto y el grupo de acciones */
+            min-width: 0; /* Permite que este contenedor se encoja si es necesario */
+            flex-wrap: wrap; /* Permite que el texto y las acciones envuelvan dentro de él */
+        }
+
+
+        /* Texto de la tarea principal (ahora dentro de .task-content) */
+        .todo-item .main-task-header .task-content span {
             font-weight: 700;
             font-size: 1.1rem;
-            flex-grow: 1; /* El texto ocupa el espacio disponible */
+            flex-grow: 1; /* El texto ocupa el espacio disponible dentro de .task-content */
             color: var(--text-color);
             transition: color 0.3s ease, text-decoration 0.3s ease;
             min-width: 0; /* Importante para que flex-grow funcione con word-break */
             word-break: break-word; /* Permite que el texto largo se rompa y no desborde */
         }
 
-        /* Grupo de acciones de la tarea (iconos a la derecha) */
-        .todo-item .main-task-header .task-actions-group {
+        /* Grupo de acciones de la tarea (iconos a la derecha, ahora dentro de .task-content) */
+        .todo-item .main-task-header .task-content .task-actions-group {
             display: flex;
             align-items: center; /* Alinea iconos verticalmente */
             gap: 5px; /* Espacio entre iconos de acción */
-            margin-left: auto; /* Empuja el grupo a la derecha (en layout de una línea) */
+            margin-left: auto; /* Empuja el grupo a la derecha dentro de .task-content */
             flex-shrink: 0; /* Evita que se encoja */
         }
 
         /* Botón de enlace */
-        .todo-item .main-task-header .link-button {
+        .todo-item .main-task-header .task-content .link-button {
             color: var(--button-color);
             padding: 6px; /* Padding más pequeño para iconos solos */
             font-size: 1.1rem; /* Tamaño del icono */
             opacity: 0.5; /* Opacidad por defecto para indicar "apagado" o no activo */
         }
-        .todo-item .main-task-header .link-button.link-on {
+        .todo-item .main-task-header .task-content .link-button.link-on {
             opacity: 1; /* Opacidad completa si hay enlace */
         }
 
         /* Input de fecha */
-        .todo-item .main-task-header input[type="date"] {
+        .todo-item .main-task-header .task-content input[type="date"] {
             background: none;
             border: none;
             padding: 0; /* Sin padding extra */
@@ -365,23 +376,23 @@
             transition: color 0.2s ease;
             /* width: auto;  Podrías definir un ancho si es necesario, pero auto suele funcionar */
         }
-        .todo-item .main-task-header input[type="date"]:hover,
-        .todo-item .main-task-header input[type="date"]:focus {
+        .todo-item .main-task-header .task-content input[type="date"]:hover,
+        .todo-item .main-task-header .task-content input[type="date"]:focus {
              color: var(--button-hover-color);
              text-decoration: underline; /* Indica interactividad */
          }
          /* Cuando tiene una fecha válida */
-         .todo-item .main-task-header input[type="date"]:valid {
+         .todo-item .main-task-header .task-content input[type="date"]:valid {
              color: var(--text-color);
          }
          /* Estilos para fecha en tareas completadas */
-         .todo-item.completed .main-task-header input[type="date"]:valid:hover,
-         .todo-item.completed .main-task-header input[type="date"]:valid:focus {
+         .todo-item.completed .main-task-header .task-content input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header .task-content input[type="date"]:valid:focus {
               color: var(--button-hover-color); /* Permite hover en completadas si es útil */
          }
 
         /* Botón de eliminar tarea principal */
-        .todo-item .main-task-header .task-actions-group .delete-button {
+        .todo-item .main-task-header .task-content .task-actions-group .delete-button {
              padding: 6px; /* Consistente con link-button */
              font-size: 1.2rem; /* Icono un poco más grande */
         }
@@ -534,34 +545,34 @@
         /* Opacidad y cursor para elementos no interactivos en tareas completadas */
         .todo-item.completed .priority-color-label,
         .todo-item.completed .subtasks-list li .app-button,
-        .todo-item.completed .main-task-header .task-actions-group input[type="date"] {
+        .todo-item.completed .main-task-header .task-content input[type="date"] { /* Ajustado selector */
             opacity: 0.7;
             cursor: default; /* Cursor por defecto */
         }
 
-        .todo-item.completed .main-task-header .task-actions-group .delete-button {
+        .todo-item.completed .main-task-header .task-content .task-actions-group .delete-button { /* Ajustado selector */
             opacity: 0.7; /* Mantiene opacidad consistente */
             /* cursor: default; <- Heredado */
         }
-        .todo-item.completed .main-task-header .task-actions-group .delete-button:hover {
+        .todo-item.completed .main-task-header .task-content .task-actions-group .delete-button:hover { /* Ajustado selector */
             opacity: 0.7; /* Sin cambio de opacidad al hacer hover */
             color: var(--delete-button-color); /* Sin cambio de color al hacer hover */
         }
 
         /* Comportamiento específico para el botón de enlace en tareas completadas */
-        .todo-item.completed .main-task-header .link-button.link-on {
+        .todo-item.completed .main-task-header .task-content .link-button.link-on { /* Ajustado selector */
             opacity: 0.8; /* Ligeramente más opaco si hay enlace */
             cursor: pointer; /* Permitir clic si hay enlace */
         }
-        .todo-item.completed .main-task-header .link-button.link-on:hover {
+        .todo-item.completed .main-task-header .task-content .link-button.link-on:hover { /* Ajustado selector */
             color: var(--button-hover-color); /* Permitir hover si hay enlace */
             opacity: 1; /* Opacidad completa al hacer hover */
         }
-        .todo-item.completed .main-task-header .link-button.link-off {
+        .todo-item.completed .main-task-header .task-content .link-button.link-off { /* Ajustado selector */
             opacity: 0.4; /* Más tenue si no hay enlace */
             cursor: default; /* No interactivo */
         }
-        .todo-item.completed .main-task-header .link-button.link-off:hover {
+        .todo-item.completed .main-task-header .task-content .link-button.link-off:hover { /* Ajustado selector */
             color: var(--button-color); /* Sin cambio de color */
             opacity: 0.4; /* Sin cambio de opacidad */
         }
@@ -569,8 +580,8 @@
         /* Anular hover/focus en elementos deshabilitados de tareas completadas */
         .todo-item.completed .priority-color-label:hover,
         .todo-item.completed .subtasks-list li .app-button:hover,
-        .todo-item.completed .main-task-header .task-actions-group input[type="date"]:hover,
-        .todo-item.completed .main-task-header .task-actions-group input[type="date"]:focus {
+        .todo-item.completed .main-task-header .task-content input[type="date"]:hover, /* Ajustado selector */
+        .todo-item.completed .main-task-header .task-content input[type="date"]:focus { /* Ajustado selector */
             color: inherit; /* Hereda el color (que ya está atenuado) */
             text-decoration: none; /* Sin subrayado */
             transform: none; /* Sin transformación (ej. scale) */
@@ -618,40 +629,49 @@
         @media (max-width: 500px) { /* Aplica estilos cuando el ancho de la ventana es <= 500px */
             .todo-item .main-task-header {
                 flex-wrap: wrap; /* Permite que los elementos internos se envuelvan */
-                row-gap: 8px;    /* Espacio vertical entre la línea del título y la línea de acciones */
+                row-gap: 8px;    /* Espacio vertical entre la línea del checkbox/color y la línea del task-content si envuelve */
             }
 
-            /* El span del título ya tiene flex-grow: 1, lo cual es bueno.
-               Al quitar width: 100% del grupo de acciones, el título podrá
-               ocupar el espacio restante en la primera línea. */
-            .todo-item .main-task-header span {
-                /* flex-grow: 1; /* Ya está definido arriba */
-                /* min-width: 0; /* Ya está definido arriba */
+            /* El nuevo contenedor task-content ahora ocupa el espacio restante en la primera línea
+               y envuelve su propio contenido (texto y acciones) */
+            .todo-item .main-task-header .task-content {
+                 flex-wrap: wrap; /* Asegura que el texto y las acciones envuelvan dentro de task-content */
+                 gap: 8px; /* Ajusta el espacio entre el texto y las acciones cuando envuelven */
+                 /* flex-grow: 1; */ /* Ya está definido arriba */
+                 /* min-width: 0; */ /* Ya está definido arriba */
             }
 
-            .todo-item .main-task-header .task-actions-group {
-                /* width: 100%; */ /* <-- Eliminado: Ya no forzamos el grupo a una nueva línea */
-                margin-left: auto; /* <-- Restaurado: Permite que se empuje a la derecha si cabe */
-                justify-content: flex-end; /* Alinea los iconos a la derecha dentro de su contenedor (ya sea en la 1ª o 2ª línea) */
-                display: flex; /* Asegura que sea un contenedor flex para usar 'order' */
-                align-items: center; /* Alinea verticalmente los items dentro del grupo */
-                gap: 5px; /* Espacio entre los elementos del grupo */
-                flex-shrink: 0; /* Evita que se encoja */
+            /* El texto de la tarea principal ahora es un flex item dentro de task-content */
+            .todo-item .main-task-header .task-content span {
+                 /* flex-grow: 1; */ /* Ya está definido arriba */
+                 /* min-width: 0; */ /* Ya está definido arriba */
+                 /* word-break: break-word; */ /* Ya está definido arriba */
+            }
+
+            /* El grupo de acciones ahora es un flex item dentro de task-content */
+            .todo-item .main-task-header .task-content .task-actions-group {
+                /* width: 100%; */ /* <-- Eliminado */
+                margin-left: 0; /* <-- Elimina el 'auto' para que no se separe cuando envuelve */
+                justify-content: flex-end; /* Alinea los iconos a la derecha dentro de su contenedor (task-actions-group) */
+                /* display: flex; */ /* Ya está definido */
+                /* align-items: center; */ /* Ya está definido */
+                /* gap: 5px; */ /* Ya está definido */
+                /* flex-shrink: 0; */ /* Ya está definido */
             }
 
             /* Ajustar el input de fecha para que no sea demasiado ancho y se vea mejor */
-            .todo-item .main-task-header input[type="date"] {
+            .todo-item .main-task-header .task-content input[type="date"] { /* Ajustado selector */
                 min-width: 110px; /* Un ancho mínimo para que se vea bien la fecha */
                 flex-grow: 0;     /* No queremos que crezca y empuje otros iconos */
                 order: 1; /* Coloca el input de fecha primero en el grupo de acciones */
             }
 
             /* Aplicar orden a los botones para que link y delete queden juntos al final */
-            .todo-item .main-task-header .task-actions-group .link-button {
+            .todo-item .main-task-header .task-content .link-button { /* Ajustado selector */
                 order: 2; /* Coloca el botón de enlace después de la fecha */
             }
 
-            .todo-item .main-task-header .task-actions-group .delete-button {
+            .todo-item .main-task-header .task-content .delete-button { /* Ajustado selector */
                 order: 3; /* Coloca el botón de eliminar al final */
             }
 
@@ -871,6 +891,10 @@
                  }
             });
 
+            // --- START NEW WRAPPER ---
+            const taskContent = document.createElement('div');
+            taskContent.classList.add('task-content');
+
             const mainTaskSpan = document.createElement('span');
             mainTaskSpan.textContent = mainTask.text;
             mainTaskSpan.title = mainTask.text;
@@ -947,13 +971,21 @@
                 deleteTodo(task.id);
             });
 
-            mainTaskHeader.appendChild(mainCheckbox);
-            mainTaskHeader.appendChild(priorityLabel);
-            mainTaskHeader.appendChild(mainTaskSpan);
+            // Append elements to the actions group
             taskActionsGroup.appendChild(linkButton);
             taskActionsGroup.appendChild(dateInput);
             taskActionsGroup.appendChild(deleteMainButton);
-            mainTaskHeader.appendChild(taskActionsGroup);
+
+            // Append text and actions group to the new task-content wrapper
+            taskContent.appendChild(mainTaskSpan);
+            taskContent.appendChild(taskActionsGroup);
+            // --- END NEW WRAPPER ---
+
+
+            // Append checkbox, priority label, and the new task-content wrapper to the main header
+            mainTaskHeader.appendChild(mainCheckbox);
+            mainTaskHeader.appendChild(priorityLabel);
+            mainTaskHeader.appendChild(taskContent); // Append the new wrapper
 
             return mainTaskHeader;
         }
