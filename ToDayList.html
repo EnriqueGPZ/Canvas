@@ -43,6 +43,11 @@
             --footer-text-color: #aaa; /* Color para el texto del footer */
             --medal-color: #ffd700; /* Color para el icono de medalla */
             --medal-text-color: var(--text-color);
+
+            /* Nuevas variables para el control de fecha */
+            --date-control-color: var(--button-color);
+            --date-control-hover-color: var(--button-hover-color);
+            --date-control-empty-color: var(--placeholder-color);
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -75,6 +80,11 @@
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
             --footer-text-color: #666; /* Color para el texto del footer en dark mode */
             --medal-text-color: var(--text-color);
+
+            /* Nuevas variables para el control de fecha en dark mode */
+            --date-control-color: var(--button-color);
+            --date-control-hover-color: var(--button-hover-color);
+            --date-control-empty-color: var(--placeholder-color);
         }
 
         /* --- Estilos Generales --- */
@@ -387,30 +397,59 @@
             opacity: 1;
         }
 
-        .todo-item .main-task-header .task-body input[type="date"] {
-            background: none;
-            border: none;
-            padding: 0;
-            font-family: 'Lexend', sans-serif;
+        /* --- Estilos para el nuevo control de fecha (icono + texto) --- */
+        .todo-item .task-date-control {
+            display: inline-flex; /* Usar flex para alinear icono y texto */
+            align-items: center;
+            gap: 5px; /* Espacio entre icono y texto */
             font-size: 0.85rem;
-            color: var(--placeholder-color);
+            color: var(--date-control-color); /* Color por defecto */
             cursor: pointer;
-            flex-shrink: 0;
-            outline: none;
+            position: relative; /* Necesario para posicionar el input invisible */
+            padding: 4px 0; /* Pequeño padding para el área clicable */
             transition: color 0.2s ease;
+            flex-shrink: 0;
         }
-        .todo-item .main-task-header .task-body input[type="date"]:hover,
-        .todo-item .main-task-header .task-body input[type="date"]:focus {
-             color: var(--button-hover-color);
-             text-decoration: underline;
+         .todo-item .task-date-control:hover {
+             color: var(--date-control-hover-color);
          }
-         .todo-item .main-task-header .task-body input[type="date"]:valid {
-             color: var(--text-color);
+         .todo-item .task-date-control .date-text {
+             /* Estilos para el texto de la fecha */
+             white-space: nowrap; /* Evita que la fecha se rompa en varias líneas */
          }
-         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
-         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
-              color: var(--button-hover-color);
+         .todo-item .task-date-control .date-text.empty {
+             /* Estilos cuando no hay fecha seleccionada */
+             color: var(--date-control-empty-color);
+             font-style: italic;
          }
+
+        .todo-item .task-date-control input[type="date"] {
+            /* Hacer el input invisible pero clicable */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Completamente transparente */
+            cursor: pointer;
+            z-index: 1; /* Asegura que esté por encima del icono y texto */
+            padding: 0; /* Eliminar padding nativo */
+            margin: 0; /* Eliminar margen nativo */
+            border: none; /* Eliminar borde nativo */
+            background: transparent; /* Fondo transparente */
+        }
+
+        /* Asegurar que el input date nativo no muestre nada visualmente */
+        .todo-item .task-date-control input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+        }
+        .todo-item .task-date-control input[type="date"]::-webkit-inner-spin-button {
+            display: none;
+        }
+        .todo-item .task-date-control input[type="date"]::-webkit-clear-button {
+            display: none;
+        }
+
 
         .todo-item .main-task-header .task-body .task-actions-group .delete-button {
              padding: 6px;
@@ -479,9 +518,7 @@
         .todo-item .subtasks-list li span {
              flex-grow: 1;
              margin-right: 5px;
-             /* --- CAMBIO SOLICITADO: Color de texto de subtareas --- */
-             color: var(--button-color); /* Ahora usa el color de los botones/iconos apagados */
-             /* --- FIN CAMBIO SOLICITADO --- */
+             color: var(--button-color);
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
@@ -552,11 +589,22 @@
         }
 
         .todo-item.completed .priority-color-label,
-        .todo-item.completed .subtasks-list li .app-button,
-        .todo-item.completed .main-task-header .task-body input[type="date"] {
+        .todo-item.completed .subtasks-list li .app-button {
             opacity: 0.7;
             cursor: default;
         }
+         /* Deshabilitar el control de fecha en tareas completadas */
+        .todo-item.completed .task-date-control {
+             opacity: 0.7;
+             cursor: default;
+        }
+         .todo-item.completed .task-date-control:hover {
+             color: var(--date-control-color); /* No cambiar color al hacer hover si está completada */
+         }
+         .todo-item.completed .task-date-control input[type="date"] {
+             pointer-events: none; /* Evita clics en el input invisible */
+         }
+
 
         .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button {
             opacity: 0.7;
@@ -584,9 +632,7 @@
         }
 
         .todo-item.completed .priority-color-label:hover,
-        .todo-item.completed .subtasks-list li .app-button:hover,
-        .todo-item.completed .main-task-header .task-body input[type="date"]:hover,
-        .todo-item.completed .main-task-header .task-body input[type="date"]:focus {
+        .todo-item.completed .subtasks-list li .app-button:hover {
             color: inherit;
             text-decoration: none;
             transform: none;
@@ -649,10 +695,11 @@
                 margin-left: auto;
                 justify-content: flex-end;
             }
-            .todo-item .main-task-header .task-body input[type="date"] {
-                min-width: 110px;
-                flex-grow: 0;
-                order: 1;
+             /* Ajustar el orden del control de fecha en móvil si es necesario */
+            .todo-item .task-date-control {
+                order: 1; /* Ponerlo antes de los botones de enlace y eliminar */
+                flex-grow: 0; /* No permitir que crezca */
+                min-width: 110px; /* Darle un ancho mínimo */
             }
             .todo-item .main-task-header .task-body .link-button {
                 order: 2;
@@ -965,20 +1012,64 @@
                 }
             });
 
+            // --- INICIO CAMBIO UX FECHA ---
+            const dateControl = document.createElement('div');
+            dateControl.classList.add('task-date-control');
+            dateControl.title = 'Establecer fecha';
+
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
-            dateInput.classList.add('task-date-input');
             dateInput.value = mainTask.date || '';
-            dateInput.title = 'Establecer fecha';
+
+            const calendarIcon = document.createElement('i');
+            calendarIcon.classList.add('fas', 'fa-calendar-alt');
+
+            const dateTextSpan = document.createElement('span');
+            dateTextSpan.classList.add('date-text');
+
+            // Función para actualizar el texto visible de la fecha
+            const updateDateText = (dateValue) => {
+                if (dateValue) {
+                    try {
+                        // Formatear la fecha para mostrarla de forma legible
+                        const dateObj = new Date(dateValue + 'T00:00:00'); // Añadir T00:00:00 para evitar problemas de zona horaria
+                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                        dateTextSpan.textContent = dateObj.toLocaleDateString('es-ES', options);
+                        dateTextSpan.classList.remove('empty');
+                    } catch (e) {
+                        console.error("Error formateando fecha:", dateValue, e);
+                        dateTextSpan.textContent = 'Fecha inválida';
+                        dateTextSpan.classList.add('empty');
+                    }
+                } else {
+                    dateTextSpan.textContent = 'Establecer fecha'; // Texto indicativo cuando no hay fecha
+                    dateTextSpan.classList.add('empty');
+                }
+            };
+
+            // Inicializar el texto visible
+            updateDateText(mainTask.date);
+
+            // Event listener para el input date (se dispara cuando el usuario selecciona una fecha)
             dateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
                  if (!task.completed) {
-                     updateTaskDate(task.id, event.target.value);
+                     const newDateValue = event.target.value;
+                     updateTaskDate(task.id, newDateValue); // Actualiza el objeto y guarda en Firestore
+                     updateDateText(newDateValue); // Actualiza el texto visible inmediatamente
                  } else {
+                     // Si la tarea está completada, revertir el valor del input date si cambia
                      event.target.value = task.date || '';
                  }
             });
+
+            // Añadir elementos al contenedor de fecha
+            dateControl.appendChild(dateInput); // El input invisible primero para que cubra
+            dateControl.appendChild(calendarIcon);
+            dateControl.appendChild(dateTextSpan);
+            // --- FIN CAMBIO UX FECHA ---
+
 
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button');
@@ -996,7 +1087,7 @@
             });
 
             taskActionsGroup.appendChild(linkButton);
-            taskActionsGroup.appendChild(dateInput);
+            taskActionsGroup.appendChild(dateControl); // Usar el nuevo control de fecha
             taskActionsGroup.appendChild(deleteMainButton);
 
             taskBody.appendChild(mainTaskSpan);
@@ -1008,6 +1099,8 @@
 
             return mainTaskHeader;
         }
+
+        // ... (el resto de las funciones como createProgressBar, createAddSubtasksToggle, etc. no necesitan cambios mayores) ...
 
         function createProgressBar(mainTask) {
              const progressContainer = document.createElement('div');
@@ -1210,7 +1303,11 @@
                  if (task.completed) return;
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task);
-                syncAndRender();
+                // No llamamos a syncAndRender() aquí, ya que el event listener del input date
+                // ya actualiza el texto visible y saveTaskToFirestore guarda los datos.
+                // Si necesitas re-renderizar toda la lista por alguna otra razón (ej: orden),
+                // podrías llamarlo, pero para solo actualizar la fecha en la UI, no es necesario.
+                // syncAndRender();
             } else {
                  console.error("Tarea no encontrada para actualizar fecha:", taskId);
              }
@@ -1348,10 +1445,8 @@
 
                 if (isChecked) {
                     task.completedDate = today;
-                    // --- INICIO CAMBIO SOLICITADO ---
                     // Cuando se marca como completada, quitar la etiqueta de color
                     task.priorityColor = 'none';
-                    // --- FIN CAMBIO SOLICITADO ---
 
                     if (!wasCompletedTodayBefore) {
                        updateMedalCount(1);
