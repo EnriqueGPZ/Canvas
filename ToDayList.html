@@ -322,17 +322,16 @@
 
         .todo-item .main-task-header {
             display: flex;
-            /* --- CAMBIO SOLICITADO: Alineación vertical centrada --- */
-            align-items: center; /* Alinea todos los elementos hijos verticalmente en el centro */
-            /* --- FIN CAMBIO SOLICITADO --- */
+            align-items: center; 
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
+            flex-wrap: nowrap; /* <--- MODIFICACIÓN: Evita que los hijos directos se envuelvan */
         }
          /* Asegura que el checkbox y la etiqueta de prioridad se alineen bien (align-self ya no es tan crítico con align-items: center en el padre, pero no molesta) */
          .todo-item .main-task-header > input[type="checkbox"],
          .todo-item .main-task-header > .priority-color-label {
-             align-self: center; /* Centra verticalmente estos elementos (redundante pero seguro) */
+             align-self: center; 
          }
 
         .todo-item .main-task-header input[type="checkbox"] {
@@ -368,13 +367,11 @@
         .todo-item .main-task-header .task-body {
             display: flex;
             flex-grow: 1;
-            align-items: center; /* Alinea el span y actions-group verticalmente */
-            /* --- CAMBIO SOLICITADO: Añadir align-self --- */
-            align-self: center; /* Asegura que este div se centre verticalmente dentro del flex padre */
-            /* --- FIN CAMBIO SOLICITADO --- */
+            align-items: center; 
+            align-self: center; 
             gap: 10px;
             min-width: 0;
-            flex-wrap: wrap; /* Permite que los elementos se envuelvan en móvil */
+            flex-wrap: wrap; 
         }
 
         .todo-item .main-task-header .task-body span {
@@ -389,57 +386,53 @@
 
         .todo-item .main-task-header .task-actions-group {
             display: flex;
-            align-items: center; /* Alinea los iconos verticalmente en el centro */
-            gap: 5px; /* Espacio consistente entre los iconos/acciones */
-            margin-left: auto; /* Empuja el grupo a la derecha */
-            flex-shrink: 0; /* Evita que el grupo se encoja demasiado */
-            position: relative; /* Necesario para posicionar el input oculto */
+            align-items: center; 
+            gap: 5px; 
+            margin-left: auto; 
+            flex-shrink: 0; 
+            position: relative; 
         }
 
          /* Estilos para TODOS los iconos visuales (el <i> elemento) */
          .todo-item .main-task-header .task-actions-group .date-icon,
-         .todo-item .main-task-header .task-actions-group .link-button i, /* Apuntar al <i> dentro del botón */
-         .todo-item .main-task-header .task-actions-group .delete-button i, /* Apuntar al <i> dentro del botón */
-         .todo-item .subtasks-list li .subtask-move-button i, /* Apuntar al <i> dentro del botón */
-         .todo-item .subtasks-list li .delete-button i /* Apuntar al <i> dentro del botón */
+         .todo-item .main-task-header .task-actions-group .link-button i, 
+         .todo-item .main-task-header .task-actions-group .delete-button i, 
+         .todo-item .subtasks-list li .subtask-move-button i, 
+         .todo-item .subtasks-list li .delete-button i 
          {
-             font-size: 1rem; /* Tamaño base uniforme (como la papelera de subtarea) */
-             /* Padding se aplica al elemento clicable, no al <i> */
+             font-size: 1rem; 
          }
 
          /* Padding para los elementos clicables que contienen los iconos */
-         .todo-item .main-task-header .task-actions-group .date-icon, /* Icono de fecha es el elemento clicable */
+         .todo-item .main-task-header .task-actions-group .date-icon, 
          .todo-item .main-task-header .task-actions-group .link-button,
          .todo-item .main-task-header .task-actions-group .delete-button,
          .todo-item .subtasks-list li .subtask-move-button,
          .todo-item .subtasks-list li .delete-button {
-             padding: 6px; /* Padding consistente para área de toque */
+             padding: 6px; 
          }
 
 
          /* Estilo específico para el icono de fecha */
          .todo-item .main-task-header .task-actions-group .date-icon {
              cursor: pointer;
-             color: var(--button-color); /* Color por defecto (apagado) */
+             color: var(--button-color); 
              transition: color 0.2s ease;
          }
           .todo-item .main-task-header .task-actions-group .date-icon:hover:not(.completed) {
-              color: var(--button-hover-color); /* Color de hover general (más vivo) */
+              color: var(--button-hover-color); 
           }
 
          /* Ocultar el input de fecha de forma que siga siendo funcional */
         .todo-item .main-task-header .task-actions-group input[type="date"].task-date-input {
-            position: absolute; /* Lo saca del flujo normal */
+            position: absolute; 
             top: 0;
             left: 0;
-            /* El ancho y alto deben ser iguales o mayores que el área clicable del icono */
-            /* Calculamos el tamaño del área clicable: tamaño del icono (1rem ≈ 16px) + padding (6px + 6px = 12px) = 28px */
-            width: 28px; /* Ajusta para cubrir el área del icono con padding */
-            height: 28px; /* Ajusta para cubrir el área del icono con padding */
-            opacity: 0; /* Lo hace transparente */
-            cursor: pointer; /* Mantiene el cursor de pointer si se pasa por encima (aunque no se vea) */
-            z-index: 1; /* Asegura que esté por encima (para el click) */
-             /* Propiedades adicionales para asegurar el tamaño y posición */
+            width: 28px; 
+            height: 28px; 
+            opacity: 0; 
+            cursor: pointer; 
+            z-index: 1; 
              margin: 0;
              padding: 0;
              box-sizing: border-box;
@@ -448,12 +441,11 @@
 
          /* Estilo para el botón de link */
         .todo-item .main-task-header .task-actions-group .link-button {
-            /* font-size y padding ya definidos arriba */
-            opacity: 1; /* Visibles por defecto */
-            color: var(--button-color); /* Color base (apagado) */
+            opacity: 1; 
+            color: var(--button-color); 
         }
          .todo-item .main-task-header .task-actions-group .link-button.link-on {
-            color: var(--button-hover-color); /* Color más vivo cuando tiene link */
+            color: var(--button-hover-color); 
             opacity: 1;
          }
          .todo-item .main-task-header .task-actions-group .link-button:hover:not(:disabled) {
@@ -462,11 +454,10 @@
 
          /* Estilo para el botón de eliminar */
         .todo-item .main-task-header .task-actions-group .delete-button {
-             /* font-size y padding ya definidos arriba */
-             color: var(--delete-button-color); /* Color base (apagado) - usa la variable que ya apunta a --button-color */
+             color: var(--delete-button-color); 
         }
          .todo-item .main-task-header .task-actions-group .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color); /* Color de hover (más vivo) */
+             color: var(--delete-button-hover-color); 
          }
 
 
@@ -506,10 +497,10 @@
         }
         .todo-item .subtasks-list li {
             display: flex;
-            align-items: center; /* Alinea los elementos verticalmente en el centro */
+            align-items: center; 
             margin-bottom: 8px;
             font-size: 0.95rem;
-            gap: 5px; /* Espacio consistente entre los elementos de la subtarea */
+            gap: 5px; 
         }
          .todo-item .subtasks-list li:last-child {
              margin-bottom: 0;
@@ -531,8 +522,8 @@
 
         .todo-item .subtasks-list li span {
              flex-grow: 1;
-             margin-right: 5px; /* Espacio entre el texto y el grupo de acciones */
-             color: var(--button-color); /* Color de texto de subtareas apagado */
+             margin-right: 5px; 
+             color: var(--button-color); 
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
@@ -541,27 +532,25 @@
          /* Contenedor para los iconos de acción de la subtarea */
          .todo-item .subtasks-list li .subtask-actions-row {
              display: flex;
-             align-items: center; /* Alinea los iconos verticalmente en el centro */
-             gap: 5px; /* Espacio consistente entre los iconos */
+             align-items: center; 
+             gap: 5px; 
              flex-shrink: 0;
-             margin-left: auto; /* Empuja el grupo a la derecha */
+             margin-left: auto; 
          }
 
          /* Estilos para botones de acción en subtareas */
          .todo-item .subtasks-list li .subtask-move-button,
          .todo-item .subtasks-list li .delete-button {
-             /* font-size y padding ya definidos arriba */
-             color: var(--button-color); /* Color base (apagado) */
+             color: var(--button-color); 
          }
          .todo-item .subtasks-list li .subtask-move-button:hover:not(:disabled) {
-             color: var(--button-hover-color); /* Color de hover (más vivo) */
+             color: var(--button-hover-color); 
          }
          .todo-item .subtasks-list li .delete-button {
-             /* font-size y padding ya definidos arriba */
-             color: var(--delete-button-color); /* Color base (apagado) - usa la variable que ya apunta a --button-color */
+             color: var(--delete-button-color); 
          }
          .todo-item .subtasks-list li .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color); /* Color de hover (más vivo) */
+             color: var(--delete-button-hover-color); 
          }
 
 
@@ -614,11 +603,11 @@
         .todo-item.completed .priority-color-label,
         .todo-item.completed .add-subtasks-toggle,
         .todo-item.completed .subtasks-list li input[type="checkbox"],
-        .todo-item.completed .subtasks-list li .subtask-move-button, /* Desactivar botones de mover */
-        .todo-item.completed .subtasks-list li .delete-button, /* Desactivar papelera sub-tarea */
-        .todo-item.completed .main-task-header .task-actions-group .date-icon, /* Aplicar opacidad al icono de fecha */
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off, /* Link apagado en completada */
-        .todo-item.completed .main-task-header .task-actions-group .delete-button /* Aplicar opacidad al botón de eliminar principal */
+        .todo-item.completed .subtasks-list li .subtask-move-button, 
+        .todo-item.completed .subtasks-list li .delete-button, 
+        .todo-item.completed .main-task-header .task-actions-group .date-icon, 
+        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off, 
+        .todo-item.completed .main-task-header .task-actions-group .delete-button 
          {
             opacity: 0.7;
             cursor: default;
@@ -635,17 +624,17 @@
         .todo-item.completed .add-subtasks-toggle:hover,
         .todo-item.completed .subtasks-list li .subtask-move-button:hover,
         .todo-item.completed .subtasks-list li .delete-button:hover,
-        .todo-item.completed .main-task-header .task-actions-group .date-icon:hover, /* Hover en icono de fecha completada */
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off:hover, /* Hover en link apagado completada */
+        .todo-item.completed .main-task-header .task-actions-group .date-icon:hover, 
+        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off:hover, 
         .todo-item.completed .main-task-header .task-actions-group .delete-button:hover {
-             color: inherit; /* Vuelve al color heredado (color completado o color base con opacidad) */
+             color: inherit; 
              text-decoration: none;
              transform: none;
              cursor: default;
         }
          /* Hover en link ON completada */
          .todo-item.completed .main-task-header .task-actions-group .link-button.link-on:hover {
-             color: var(--button-hover-color); /* Usar color de hover general */
+             color: var(--button-hover-color); 
              opacity: 1;
              text-decoration: none;
              transform: none;
@@ -659,11 +648,11 @@
         .todo-item.completed .main-task-header .task-actions-group .delete-button,
         .todo-item.completed .subtasks-list li .subtask-move-button,
         .todo-item.completed .subtasks-list li .delete-button {
-             color: var(--completed-text-color); /* Usar color de texto completado */
+             color: var(--completed-text-color); 
         }
         /* Color del link ON en tareas completadas */
          .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
-             color: var(--completed-text-color); /* Usar color de texto completado */
+             color: var(--completed-text-color); 
          }
 
 
@@ -714,7 +703,7 @@
 
         @media (max-width: 500px) {
             .todo-item .main-task-header {
-                row-gap: 8px;
+                /* row-gap: 8px; */ /* Ya no es necesario si flex-wrap: nowrap está arriba */
             }
             .todo-item .main-task-header .task-body {
                  flex-wrap: wrap;
@@ -724,21 +713,20 @@
             .todo-item .main-task-header .task-actions-group {
                 margin-left: auto;
                 justify-content: flex-end;
-                /* Asegura que los elementos dentro del grupo se envuelvan si es necesario */
                 flex-wrap: wrap;
-                gap: 5px; /* Ajusta el gap si es necesario al envolver */
+                gap: 5px; 
             }
             /* Definir el orden para móvil */
             .todo-item .main-task-header .task-actions-group .date-icon {
-                 order: 1; /* Fecha primero */
+                 order: 1; 
                  flex-grow: 0;
             }
              .todo-item .main-task-header .task-actions-group .link-button {
-                 order: 2; /* Link segundo */
+                 order: 2; 
                  flex-grow: 0;
              }
              .todo-item .main-task-header .task-actions-group .delete-button {
-                 order: 3; /* Basura tercero */
+                 order: 3; 
                  flex-grow: 0;
              }
 
@@ -1571,7 +1559,7 @@
                     task.completedDate = null;
                     task.showSubtaskUI = false; // Ocultar UI de subtareas al descompletar
                     // NOTA: No restauramos el color aquí. Si se descompleta, el usuario puede
-                    // volver a asignarle una prioridad manualmente si lo desea.
+                    // volver a asignarle una prioridad manually si lo desea.
                 }
 
                 // Marcar/desmarcar todas las subtareas también
