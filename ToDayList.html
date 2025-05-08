@@ -322,15 +322,17 @@
 
         .todo-item .main-task-header {
             display: flex;
-            align-items: baseline; /* Alinea los elementos base de la fuente */
+            /* --- CAMBIO SOLICITADO: Alineación vertical centrada --- */
+            align-items: center; /* Alinea todos los elementos hijos verticalmente en el centro */
+            /* --- FIN CAMBIO SOLICITADO --- */
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
         }
-         /* Asegura que el checkbox y la etiqueta de prioridad se alineen bien */
+         /* Asegura que el checkbox y la etiqueta de prioridad se alineen bien (align-self ya no es tan crítico con align-items: center en el padre, pero no molesta) */
          .todo-item .main-task-header > input[type="checkbox"],
          .todo-item .main-task-header > .priority-color-label {
-             align-self: center; /* Centra verticalmente estos elementos */
+             align-self: center; /* Centra verticalmente estos elementos (redundante pero seguro) */
          }
 
         .todo-item .main-task-header input[type="checkbox"] {
@@ -366,7 +368,7 @@
         .todo-item .main-task-header .task-body {
             display: flex;
             flex-grow: 1;
-            align-items: center;
+            align-items: center; /* Alinea el span y actions-group verticalmente */
             gap: 10px;
             min-width: 0;
             flex-wrap: wrap; /* Permite que los elementos se envuelvan en móvil */
@@ -981,7 +983,13 @@
                     const priorityColor = computedStyle.borderLeftColor; // Color del borde izquierdo
                     dateIcon.style.color = priorityColor; // Aplica el color de prioridad al icono
                 }
-                // La opacidad para el estado completado es manejada por la clase CSS .completed
+                /*
+                // Si quieres que el icono de fecha se mantenga en color apagado si NO es hoy,
+                // incluso si la tarea tiene fecha asignada, no necesitas hacer nada aquí.
+                // Si quisieras que tuviera un color diferente (no apagado) solo por tener fecha,
+                // añadirías una regla CSS específica para .date-icon en tareas con fecha
+                // o lo harías aquí con JS. Pero el requisito es que esté apagado si no es hoy.
+                */
             }
         }
         // --- FIN FUNCIÓN MODIFICADA ---
