@@ -22,7 +22,7 @@
             --input-bg: #f8f8f8;
             --input-text-color: #333;
             --placeholder-color: #888;
-            --button-color: #555; /* Color base para iconos/botones apagados */
+            --button-color: #555; /* Color base para iconos/botones */
             --button-hover-color: #e74c3c; /* Color de hover para botones generales */
 
             /* AJUSTADO: Colores para el botón de eliminar */
@@ -199,7 +199,6 @@
         .todo-item[data-priority-color="none"] { border-left-color: var(--priority-none-color); }
 
 
-         /* Estilo general para botones/iconos de la app */
          .app-button {
              background: none;
              border: none;
@@ -207,34 +206,43 @@
              cursor: pointer;
              transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
              flex-shrink: 0;
+             padding: 6px 10px;
+             font-size: 1rem;
              line-height: 1;
              display: inline-flex;
              align-items: center;
              justify-content: center;
              text-decoration: none;
-             color: var(--button-color); /* Color base para todos los app-button (apagado) */
-             /* Padding y font-size para iconos de acción se definen más abajo */
-             /* Padding y font-size para botones principales se definen aquí */
-             padding: 10px 15px;
-             font-size: 1.1rem;
          }
-         .app-button:hover:not(:disabled) {
-             color: var(--button-hover-color); /* Color de hover general (más vivo) */
+         .app-button:hover {
+             color: var(--button-hover-color);
          }
          .app-button:focus {
               outline: 2px solid var(--button-hover-color);
               outline-offset: 2px;
          }
-         .app-button:disabled {
-             opacity: 0.5;
-             cursor: not-allowed;
-         }
-
-         /* Estilos específicos para botones principales (Agregar, Reordenar) */
-         #add-todo-button, #reorder-button {
+         .add-button {
+             color: var(--button-color);
              font-weight: bold;
          }
-
+         .add-button:hover {
+             color: var(--button-hover-color);
+         }
+         .delete-button {
+             color: var(--delete-button-color); /* Usará la variable ajustada */
+         }
+         .delete-button:hover {
+             color: var(--delete-button-hover-color); /* Usará la variable ajustada */
+         }
+         .sort-button {
+             color: var(--sort-button-color);
+             font-weight: normal;
+             padding: 10px 15px;
+             font-size: 1.1rem;
+         }
+         .sort-button:hover {
+             color: var(--sort-button-hover-color);
+         }
 
          #dark-mode-toggle {
              position: fixed;
@@ -322,18 +330,11 @@
 
         .todo-item .main-task-header {
             display: flex;
-            align-items: center; 
+            align-items: baseline;
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
-            flex-wrap: nowrap; /* <--- MODIFICACIÓN: Evita que los hijos directos se envuelvan */
         }
-         /* Asegura que el checkbox y la etiqueta de prioridad se alineen bien (align-self ya no es tan crítico con align-items: center en el padre, pero no molesta) */
-         .todo-item .main-task-header > input[type="checkbox"],
-         .todo-item .main-task-header > .priority-color-label {
-             align-self: center; 
-         }
-
         .todo-item .main-task-header input[type="checkbox"] {
              border-color: var(--text-color);
              background-color: var(--item-bg);
@@ -354,7 +355,7 @@
              transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
         }
-         .todo-item .priority-color-label:hover:not(.completed) {
+         .todo-item .priority-color-label:hover {
              transform: scale(1.1);
          }
         .priority-color-label[data-color="red"] { background-color: var(--priority-red-color); border-color: var(--priority-red-color); }
@@ -367,12 +368,12 @@
         .todo-item .main-task-header .task-body {
             display: flex;
             flex-grow: 1;
-            align-items: center; 
-            align-self: center; 
+            align-items: center;
             gap: 10px;
             min-width: 0;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
         }
+
 
         .todo-item .main-task-header .task-body span {
             font-weight: 700;
@@ -384,81 +385,61 @@
             word-break: break-word;
         }
 
-        .todo-item .main-task-header .task-actions-group {
+        .todo-item .main-task-header .task-body .task-actions-group {
             display: flex;
-            align-items: center; 
-            gap: 5px; 
-            margin-left: auto; 
-            flex-shrink: 0; 
-            position: relative; 
+            align-items: center;
+            gap: 5px;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
-         /* Estilos para TODOS los iconos visuales (el <i> elemento) */
-         .todo-item .main-task-header .task-actions-group .date-icon,
-         .todo-item .main-task-header .task-actions-group .link-button i, 
-         .todo-item .main-task-header .task-actions-group .delete-button i, 
-         .todo-item .subtasks-list li .subtask-move-button i, 
-         .todo-item .subtasks-list li .delete-button i 
-         {
-             font-size: 1rem; 
-         }
-
-         /* Padding para los elementos clicables que contienen los iconos */
-         .todo-item .main-task-header .task-actions-group .date-icon, 
-         .todo-item .main-task-header .task-actions-group .link-button,
-         .todo-item .main-task-header .task-actions-group .delete-button,
-         .todo-item .subtasks-list li .subtask-move-button,
-         .todo-item .subtasks-list li .delete-button {
-             padding: 6px; 
-         }
-
-
-         /* Estilo específico para el icono de fecha */
-         .todo-item .main-task-header .task-actions-group .date-icon {
-             cursor: pointer;
-             color: var(--button-color); 
-             transition: color 0.2s ease;
-         }
-          .todo-item .main-task-header .task-actions-group .date-icon:hover:not(.completed) {
-              color: var(--button-hover-color); 
-          }
-
-         /* Ocultar el input de fecha de forma que siga siendo funcional */
-        .todo-item .main-task-header .task-actions-group input[type="date"].task-date-input {
-            position: absolute; 
-            top: 0;
-            left: 0;
-            width: 28px; 
-            height: 28px; 
-            opacity: 0; 
-            cursor: pointer; 
-            z-index: 1; 
-             margin: 0;
-             padding: 0;
-             box-sizing: border-box;
+        .todo-item .main-task-header .task-body .link-button {
+            color: var(--button-color);
+            padding: 6px;
+            font-size: 1.1rem;
+            opacity: 0.5;
         }
-
-
-         /* Estilo para el botón de link */
-        .todo-item .main-task-header .task-actions-group .link-button {
-            opacity: 1; 
-            color: var(--button-color); 
-        }
-         .todo-item .main-task-header .task-actions-group .link-button.link-on {
-            color: var(--button-hover-color); 
+        .todo-item .main-task-header .task-body .link-button.link-on {
             opacity: 1;
+        }
+
+        .todo-item .main-task-header .task-body input[type="date"] {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.85rem;
+            color: var(--placeholder-color); /* Color por defecto cuando está vacío */
+            cursor: pointer;
+            flex-shrink: 0;
+            outline: none;
+            /* Quitar transiciones de background, border, box-shadow */
+            transition: color 0.2s ease;
+        }
+        /* Estilo para fecha válida (no vacía) */
+         .todo-item .main-task-header .task-body input[type="date"]:valid {
+             color: var(--text-color); /* Color por defecto cuando tiene fecha */
          }
-         .todo-item .main-task-header .task-actions-group .link-button:hover:not(:disabled) {
-             color: var(--button-hover-color);
+        /* Estilo para hover/focus */
+        .todo-item .main-task-header .task-body input[type="date"]:hover,
+        .todo-item .main-task-header .task-body input[type="date"]:focus {
+             color: var(--button-hover-color); /* Color de hover general */
+             text-decoration: underline;
+         }
+         /* Estilo para hover/focus en tareas completadas */
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
+              color: var(--button-hover-color); /* Mantener color de hover general */
          }
 
-         /* Estilo para el botón de eliminar */
-        .todo-item .main-task-header .task-actions-group .delete-button {
-             color: var(--delete-button-color); 
+        /* --- ELIMINADO: Estilos específicos para .date-today --- */
+        /* Estos estilos ahora se aplicarán directamente en JS */
+
+
+        .todo-item .main-task-header .task-body .task-actions-group .delete-button {
+             padding: 6px;
+             font-size: 1.2rem;
         }
-         .todo-item .main-task-header .task-actions-group .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color); 
-         }
 
 
         .todo-item .add-subtasks-toggle {
@@ -470,7 +451,7 @@
              font-weight: normal;
              color: var(--legend-text-color);
         }
-         .todo-item .add-subtasks-toggle:hover:not(:disabled) {
+         .todo-item .add-subtasks-toggle:hover {
              color: var(--button-hover-color);
          }
 
@@ -497,10 +478,10 @@
         }
         .todo-item .subtasks-list li {
             display: flex;
-            align-items: center; 
+            align-items: center;
             margin-bottom: 8px;
             font-size: 0.95rem;
-            gap: 5px; 
+            gap: 5px;
         }
          .todo-item .subtasks-list li:last-child {
              margin-bottom: 0;
@@ -519,40 +500,36 @@
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
-
         .todo-item .subtasks-list li span {
              flex-grow: 1;
-             margin-right: 5px; 
-             color: var(--button-color); 
+             margin-right: 5px;
+             /* --- CAMBIO SOLICITADO: Color de texto de subtareas --- */
+             color: var(--button-color); /* Ahora usa el color de los botones/iconos apagados */
+             /* --- FIN CAMBIO SOLICITADO --- */
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
         }
-
-         /* Contenedor para los iconos de acción de la subtarea */
-         .todo-item .subtasks-list li .subtask-actions-row {
-             display: flex;
-             align-items: center; 
-             gap: 5px; 
-             flex-shrink: 0;
-             margin-left: auto; 
+         .todo-item .subtasks-list li .subtask-move-button {
+             color: var(--button-color);
+             padding: 4px;
+             font-size: 0.9rem;
          }
-
-         /* Estilos para botones de acción en subtareas */
-         .todo-item .subtasks-list li .subtask-move-button,
-         .todo-item .subtasks-list li .delete-button {
-             color: var(--button-color); 
+         .todo-item .subtasks-list li .subtask-move-button:hover {
+             color: var(--button-hover-color);
          }
-         .todo-item .subtasks-list li .subtask-move-button:hover:not(:disabled) {
-             color: var(--button-hover-color); 
+         .todo-item .subtasks-list li .subtask-move-button:disabled {
+             opacity: 0.3;
+             cursor: not-allowed;
+             color: var(--button-color);
+         }
+         .todo-item .subtasks-list li .subtask-move-button:disabled:hover {
+             color: var(--button-color);
          }
          .todo-item .subtasks-list li .delete-button {
-             color: var(--delete-button-color); 
+             padding: 4px 8px;
+             font-size: 1rem;
          }
-         .todo-item .subtasks-list li .delete-button:hover:not(:disabled) {
-             color: var(--delete-button-hover-color); 
-         }
-
 
         .todo-item .progress-container {
             width: 100%;
@@ -589,7 +566,6 @@
              display: none;
         }
 
-        /* Estilos para tareas completadas */
         .todo-item.completed .main-task-header .task-body span,
         .todo-item.completed .subtasks-list li span {
             color: var(--completed-text-color);
@@ -599,61 +575,46 @@
             background-color: var(--progress-bar-completed-color);
         }
 
-        /* Reducir opacidad y desactivar cursores para elementos interactivos en tareas completadas */
         .todo-item.completed .priority-color-label,
-        .todo-item.completed .add-subtasks-toggle,
-        .todo-item.completed .subtasks-list li input[type="checkbox"],
-        .todo-item.completed .subtasks-list li .subtask-move-button, 
-        .todo-item.completed .subtasks-list li .delete-button, 
-        .todo-item.completed .main-task-header .task-actions-group .date-icon, 
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off, 
-        .todo-item.completed .main-task-header .task-actions-group .delete-button 
-         {
+        .todo-item.completed .subtasks-list li .app-button,
+        .todo-item.completed .main-task-header .task-body input[type="date"] {
             opacity: 0.7;
             cursor: default;
-         }
-         /* Link ON en completada debe mantener cursor pointer y opacidad > 0.7 */
-         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
-             opacity: 0.8;
-             cursor: pointer;
-         }
+        }
 
+        .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button {
+            opacity: 0.7;
+        }
+        .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button:hover {
+            opacity: 0.7;
+            color: var(--delete-button-color); /* Mantiene el color base al hacer hover en completadas */
+        }
 
-        /* Asegurar color y quitar efectos de hover/focus para elementos completados */
+        .todo-item.completed .main-task-header .task-body .link-button.link-on {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+        .todo-item.completed .main-task-header .task-body .link-button.link-on:hover {
+            color: var(--button-hover-color);
+            opacity: 1;
+        }
+        .todo-item.completed .main-task-header .task-body .link-button.link-off {
+            opacity: 0.4;
+            cursor: default;
+        }
+        .todo-item.completed .main-task-header .task-body .link-button.link-off:hover {
+            color: var(--button-color);
+            opacity: 0.4;
+        }
+
         .todo-item.completed .priority-color-label:hover,
-        .todo-item.completed .add-subtasks-toggle:hover,
-        .todo-item.completed .subtasks-list li .subtask-move-button:hover,
-        .todo-item.completed .subtasks-list li .delete-button:hover,
-        .todo-item.completed .main-task-header .task-actions-group .date-icon:hover, 
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off:hover, 
-        .todo-item.completed .main-task-header .task-actions-group .delete-button:hover {
-             color: inherit; 
-             text-decoration: none;
-             transform: none;
-             cursor: default;
+        .todo-item.completed .subtasks-list li .app-button:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
+            color: inherit; /* Revertir al color de completado */
+            text-decoration: none;
+            transform: none;
         }
-         /* Hover en link ON completada */
-         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on:hover {
-             color: var(--button-hover-color); 
-             opacity: 1;
-             text-decoration: none;
-             transform: none;
-             cursor: pointer;
-         }
-
-
-         /* Color de los iconos de acción en tareas completadas */
-        .todo-item.completed .main-task-header .task-actions-group .date-icon,
-        .todo-item.completed .main-task-header .task-actions-group .link-button.link-off,
-        .todo-item.completed .main-task-header .task-actions-group .delete-button,
-        .todo-item.completed .subtasks-list li .subtask-move-button,
-        .todo-item.completed .subtasks-list li .delete-button {
-             color: var(--completed-text-color); 
-        }
-        /* Color del link ON en tareas completadas */
-         .todo-item.completed .main-task-header .task-actions-group .link-button.link-on {
-             color: var(--completed-text-color); 
-         }
 
 
          .todo-item.completed .main-task-header input[type="checkbox"] {
@@ -670,7 +631,6 @@
           body.dark-mode .todo-item.completed .main-task-header input[type="checkbox"]:checked::after {
               border-color: var(--item-bg) !important;
           }
-
 
          #todo-input-container {
              display: flex;
@@ -703,33 +663,31 @@
 
         @media (max-width: 500px) {
             .todo-item .main-task-header {
-                /* row-gap: 8px; */ /* Ya no es necesario si flex-wrap: nowrap está arriba */
+                row-gap: 8px;
             }
             .todo-item .main-task-header .task-body {
                  flex-wrap: wrap;
                  gap: 8px;
                  align-items: center;
             }
-            .todo-item .main-task-header .task-actions-group {
+            .todo-item .main-task-header .task-body .task-actions-group {
                 margin-left: auto;
                 justify-content: flex-end;
-                flex-wrap: wrap;
-                gap: 5px; 
             }
-            /* Definir el orden para móvil */
-            .todo-item .main-task-header .task-actions-group .date-icon {
-                 order: 1; 
-                 flex-grow: 0;
+            .todo-item .main-task-header .task-body input[type="date"] {
+                min-width: 110px;
+                flex-grow: 0;
+                order: 1;
             }
-             .todo-item .main-task-header .task-actions-group .link-button {
-                 order: 2; 
-                 flex-grow: 0;
+            .todo-item .main-task-header .task-body .link-button {
+                order: 2;
+            }
+            .todo-item .main-task-header .task-body .delete-button {
+                order: 3;
+            }
+             #todo-input-container #reorder-button {
+                  margin-left: 0;
              }
-             .todo-item .main-task-header .task-actions-group .delete-button {
-                 order: 3; 
-                 flex-grow: 0;
-             }
-
         }
     </style>
 </head>
@@ -956,31 +914,28 @@
 
         // --- UI RENDERING & EVENT HANDLERS ---
 
-        // --- FUNCIÓN PARA RESALTAR FECHA DE HOY ---
+        // --- FUNCIÓN PARA RESALTAR FECHA DE HOY (MODIFICADA) ---
         function updateDateHighlight(listItemElement, task) {
-            const dateIcon = listItemElement.querySelector('.date-icon');
-
-            if (dateIcon) {
+            const dateInput = listItemElement.querySelector('.task-date-input');
+            if (dateInput) {
                 const todayString = getTodayDateString();
                 const isToday = task.date === todayString;
-                const isCompleted = task.completed;
 
-                // Resetear estilos aplicados por JS
-                dateIcon.style.color = ''; // Vuelve al color definido por CSS (.completed, default)
-
-                // Aplicar el resaltado si es hoy y no está completada, usando el color de prioridad
-                if (isToday && !isCompleted) {
+                if (isToday && !task.completed) {
+                    // Obtener el color del borde izquierdo (color de prioridad)
                     const computedStyle = getComputedStyle(listItemElement);
-                    const priorityColor = computedStyle.borderLeftColor; // Color del borde izquierdo
-                    dateIcon.style.color = priorityColor; // Aplica el color de prioridad al icono
+                    const priorityColor = computedStyle.borderLeftColor;
+
+                    dateInput.style.color = priorityColor;
+                    dateInput.style.fontWeight = 'bold';
+                    // Asegurarse de que no tenga estilos de .date-today si existieran por error
+                    dateInput.classList.remove('date-today');
+                } else {
+                    // Si no es hoy o está completada, resetear estilos
+                    dateInput.style.color = ''; // Esto hará que use el color por defecto (:valid o .completed)
+                    dateInput.style.fontWeight = '';
+                    dateInput.classList.remove('date-today'); // Limpiar clase por si acaso
                 }
-                /*
-                // Si quieres que el icono de fecha se mantenga en color apagado si NO es hoy,
-                // incluso si la tarea tiene fecha asignada, no necesitas hacer nada aquí.
-                // Si quisieras que tuviera un color diferente (no apagado) solo por tener fecha,
-                // añadirías una regla CSS específica para .date-icon en tareas con fecha
-                // o lo harías aquí con JS. Pero el requisito es que esté apagado si no es hoy.
-                */
             }
         }
         // --- FIN FUNCIÓN MODIFICADA ---
@@ -1024,40 +979,6 @@
             const taskActionsGroup = document.createElement('div');
             taskActionsGroup.classList.add('task-actions-group');
 
-            // --- INICIO: Icono de fecha y input oculto funcional ---
-            const dateIcon = document.createElement('i');
-            dateIcon.classList.add('fas', 'fa-calendar-alt', 'date-icon'); // Añadir clases
-            dateIcon.title = mainTask.date ? `Fecha: ${mainTask.date}` : 'Establecer fecha'; // Título dinámico
-
-            const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.classList.add('task-date-input'); // Mantener la clase para referencia JS/CSS
-            dateInput.value = mainTask.date || '';
-
-            // Evento para abrir el selector de fecha al hacer clic en el ICONO
-            dateIcon.addEventListener('click', () => {
-                 const task = findTaskById(mainTask.id);
-                 if (!task || task.completed) return; // No abrir si la tarea está completada o no existe
-                 // Usa showPicker() si está disponible (navegadores modernos)
-                 // Fallback para navegadores antiguos o si showPicker no funciona
-                 dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
-            });
-
-            // Evento cuando la fecha del input oculto cambia (después de seleccionar en el picker)
-            dateInput.addEventListener('change', (event) => {
-                const task = findTaskById(mainTask.id);
-                if (!task) return;
-                 if (!task.completed) {
-                     updateTaskDate(task.id, event.target.value);
-                     // updateTaskDate ya llama a updateDateHighlight y actualiza el title del icono
-                 } else {
-                     // Revertir si la tarea está completada (aunque el click en el icono ya lo impide)
-                     event.target.value = task.date || '';
-                 }
-            });
-            // --- FIN: Icono de fecha y input oculto funcional ---
-
-
             const linkButton = document.createElement('button');
             linkButton.classList.add('app-button', 'link-button');
             linkButton.innerHTML = '<i class="fas fa-link"></i>';
@@ -1097,6 +1018,26 @@
                 }
             });
 
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.classList.add('task-date-input');
+            dateInput.value = mainTask.date || '';
+            dateInput.title = 'Establecer fecha';
+            dateInput.addEventListener('change', (event) => {
+                const task = findTaskById(mainTask.id);
+                if (!task) return;
+                 if (!task.completed) {
+                     updateTaskDate(task.id, event.target.value);
+                     // --- LLAMAR A LA FUNCIÓN DE RESALTADO DESPUÉS DE ACTUALIZAR ---
+                     const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
+                     if (listItemElement) {
+                         updateDateHighlight(listItemElement, task);
+                     }
+                     // --- FIN LLAMADA ---
+                 } else {
+                     event.target.value = task.date || ''; // Revertir si está completada
+                 }
+            });
 
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button');
@@ -1113,10 +1054,8 @@
                 deleteTodo(task.id);
             });
 
-            // Añadir los elementos al grupo de acciones en el orden deseado: Fecha (Icono), Link, Basura
-            taskActionsGroup.appendChild(dateIcon); // <-- Añade solo el icono visible
-            taskActionsGroup.appendChild(dateInput); // <-- Añade el input oculto (necesario para showPicker/click)
             taskActionsGroup.appendChild(linkButton);
+            taskActionsGroup.appendChild(dateInput);
             taskActionsGroup.appendChild(deleteMainButton);
 
             taskBody.appendChild(mainTaskSpan);
@@ -1124,7 +1063,8 @@
 
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
-            mainTaskHeader.appendChild(taskBody);
+            taskBody.appendChild(taskActionsGroup); // Asegurarse de que taskActionsGroup esté dentro de taskBody
+            mainTaskHeader.appendChild(taskBody); // Asegurarse de que taskBody esté dentro de mainTaskHeader
 
 
             return mainTaskHeader;
@@ -1141,8 +1081,6 @@
                  displayedProgress = 100;
              } else if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                  const subtaskProgress = calculateSubtaskProgress(mainTask.subtasks);
-                 // Si todas las subtareas están completas, la barra llega al 90%
-                 // para indicar que la tarea principal aún no está completada.
                  displayedProgress = subtaskProgress === 100 ? 90 : subtaskProgress;
              }
              progressBar.style.width = `${displayedProgress}%`;
@@ -1159,15 +1097,13 @@
              addSubtasksToggle.addEventListener('click', () => {
                  const task = findTaskById(mainTaskId);
                  if (task) {
-                     if (task.completed) return; // No permitir agregar subtareas a tareas completadas
+                     if (task.completed) return;
                      task.showSubtaskUI = !task.showSubtaskUI;
-                     // Si se activa la UI y no hay subtareas, inicializa el array
                      if (task.showSubtaskUI && (!Array.isArray(task.subtasks) || task.subtasks.length === 0)) {
                          task.subtasks = [];
                      }
                      saveTaskToFirestore(task);
-                     syncAndRender(); // Forzar redibujo para mostrar/ocultar la UI
-                     // Enfocar el input si se muestra
+                     syncAndRender();
                      if (task.showSubtaskUI) {
                           const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
                           if (listItemElement) {
@@ -1197,10 +1133,10 @@
                     checkbox.classList.add('custom-checkbox');
                     checkbox.checked = subtask.completed;
                     if (mainTask.completed) {
-                        checkbox.disabled = true; // Deshabilitar checkbox si la tarea principal está completada
+                        checkbox.disabled = true;
                     }
                     checkbox.addEventListener('change', () => {
-                         if (!mainTask.completed) { // Solo permitir interacción si la tarea principal no está completada
+                         if (!mainTask.completed) {
                              toggleSubtaskCompletion(mainTask.id, subtask.id);
                          }
                     });
@@ -1208,13 +1144,9 @@
                     subtaskSpan.textContent = subtask.text;
                     subtaskSpan.title = subtask.text;
 
-                    // --- INICIO: Contenedor para iconos de acción de subtarea ---
-                    const subtaskActionsRow = document.createElement('div');
-                    subtaskActionsRow.classList.add('subtask-actions-row');
-
                     const moveUpButton = document.createElement('button');
                     moveUpButton.classList.add('app-button', 'subtask-move-button');
-                    moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Icono flecha arriba
+                    moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
                     moveUpButton.setAttribute('aria-label', 'Mover sub-tarea arriba');
                     moveUpButton.title = 'Mover sub-tarea arriba';
                     if (mainTask.completed || subIndex === 0) moveUpButton.disabled = true;
@@ -1224,7 +1156,7 @@
 
                     const moveDownButton = document.createElement('button');
                     moveDownButton.classList.add('app-button', 'subtask-move-button');
-                    moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>'; // Icono flecha abajo
+                    moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
                     moveDownButton.setAttribute('aria-label', 'Mover sub-tarea abajo');
                     moveDownButton.title = 'Mover sub-tarea abajo';
                     if (mainTask.completed || subIndex === mainTask.subtasks.length - 1) moveDownButton.disabled = true;
@@ -1234,25 +1166,21 @@
 
                     const deleteSubtaskButton = document.createElement('button');
                     deleteSubtaskButton.classList.add('app-button', 'delete-button');
-                    deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Icono papelera
+                    deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
                     deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea');
                     deleteSubtaskButton.title = 'Eliminar sub-tarea';
                      if (mainTask.completed) {
-                         deleteSubtaskButton.disabled = true; // Deshabilitar si la tarea principal está completada
+                         deleteSubtaskButton.disabled = true;
                      }
                     deleteSubtaskButton.addEventListener('click', () => {
                          if (!mainTask.completed) deleteSubtask(mainTask.id, subtask.id);
                     });
 
-                    subtaskActionsRow.appendChild(moveUpButton);
-                    subtaskActionsRow.appendChild(moveDownButton);
-                    subtaskActionsRow.appendChild(deleteSubtaskButton);
-                    // --- FIN: Contenedor para iconos de acción de subtarea ---
-
-
                     subtaskItem.appendChild(checkbox);
                     subtaskItem.appendChild(subtaskSpan);
-                    subtaskItem.appendChild(subtaskActionsRow); // Añadir el contenedor de acciones
+                    subtaskItem.appendChild(moveUpButton);
+                    subtaskItem.appendChild(moveDownButton);
+                    subtaskItem.appendChild(deleteSubtaskButton);
                     subtasksList.appendChild(subtaskItem);
                 });
             }
@@ -1304,31 +1232,22 @@
                 listItem.appendChild(mainTaskHeader);
                 listItem.appendChild(createProgressBar(mainTask));
 
-                // Mostrar/ocultar el toggle para agregar subtareas
                 if (!mainTask.completed) {
                     listItem.appendChild(createAddSubtasksToggle(mainTask.id));
                 } else {
-                     mainTask.showSubtaskUI = false; // Ocultar UI de subtareas si la tarea principal está completada
+                     mainTask.showSubtaskUI = false;
                 }
 
-                // Mostrar la lista de subtareas si existen
                 if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                     listItem.appendChild(createSubtasksList(mainTask));
                 }
-                 // Mostrar el input de nueva sub-tarea si la UI está activada Y la tarea principal no está completada
                 if (mainTask.showSubtaskUI && !mainTask.completed) {
                      listItem.appendChild(createSubtaskInputContainer(mainTask.id));
                 }
 
-
                 todoListContainer.appendChild(listItem);
 
                 // --- LLAMAR A LA FUNCIÓN DE RESALTADO AL RENDERIZAR ---
-                // Asegúrate de que esta llamada se hace *después* de que el listItem
-                // y sus contenidos (incluyendo el input de fecha y el icono) han sido añadidos al DOM
-                // o al menos al listItem, para que querySelector funcione.
-                // En este caso, se añade al listItem antes de añadir el listItem a la lista,
-                // lo cual es suficiente para querySelector dentro del listItem.
                 updateDateHighlight(listItem, mainTask);
                 // --- FIN LLAMADA ---
             });
@@ -1339,29 +1258,17 @@
         function cyclePriorityColor(taskId) {
              const task = findTaskById(taskId);
              if (task) {
-                 if (task.completed) return; // No permitir cambiar color si está completada
+                 if (task.completed) return;
                  const currentColors = PRIORITY_COLORS;
                  const currentColor = typeof task.priorityColor === 'string' ? task.priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
                  task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
                  saveTaskToFirestore(task);
-                 // Actualizamos el UI sin redibujar toda la lista para una mejor performance
+                 // No llamamos a syncAndRender aquí, solo actualizamos el color del borde y el highlight de fecha si aplica
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
                  if (listItemElement) {
-                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualizar el data attribute del li
-                     const priorityLabel = listItemElement.querySelector('.priority-color-label');
-                     if (priorityLabel) {
-                          priorityLabel.dataset.color = task.priorityColor; // Actualizar el data attribute de la etiqueta
-                          priorityLabel.title = `Prioridad: ${task.priorityColor.charAt(0).toUpperCase() + task.priorityColor.slice(1)}`;
-                          if (task.priorityColor === 'none') {
-                              priorityLabel.style.backgroundColor = 'transparent';
-                              priorityLabel.style.borderColor = 'var(--border-color)';
-                          } else {
-                               priorityLabel.style.backgroundColor = `var(--priority-${task.priorityColor}-color)`;
-                               priorityLabel.style.borderColor = `var(--priority-${task.priorityColor}-color)`;
-                          }
-                     }
-                     updateDateHighlight(listItemElement, task); // Re-evaluar el highlight de fecha por si cambia el color base
+                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualizar el data attribute
+                     updateDateHighlight(listItemElement, task); // Re-evaluar el highlight de fecha
                  }
              } else {
                   console.error("Tarea no encontrada para ciclar color:", taskId);
@@ -1371,18 +1278,10 @@
         function updateTaskDate(taskId, newDateValue) {
             const task = findTaskById(taskId);
             if (task) {
-                 if (task.completed) return; // No permitir cambiar fecha si está completada
+                 if (task.completed) return;
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task);
-                // La llamada a updateDateHighlight se hará dentro de saveTaskToFirestore (si llama a syncAndRender)
-                // o se puede llamar explícitamente aquí para asegurar
-                 const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
-                 if (listItemElement) {
-                     updateDateHighlight(listItemElement, task);
-                     // Actualizar el título del icono para mostrar la fecha seleccionada
-                     const dateIcon = listItemElement.querySelector('.date-icon');
-                     if(dateIcon) dateIcon.title = task.date ? `Fecha: ${task.date}` : 'Establecer fecha';
-                 }
+                // La llamada a updateDateHighlight ya está en el listener del input
             } else {
                  console.error("Tarea no encontrada para actualizar fecha:", taskId);
              }
@@ -1394,9 +1293,7 @@
                 alert('Por favor, ingresa el nombre de la tarea.');
                 return;
             }
-            // Calcular el nuevo orden para poner la nueva tarea al final
             const maxOrder = todos.length > 0 ? Math.max(...todos.map(t => t.order || 0)) : -1;
-            const newOrder = maxOrder + 1;
 
             const newTodo = {
                 id: generateLocalId(),
@@ -1409,14 +1306,12 @@
                 priorityColor: 'none',
                 date: null,
                 linkUrl: null,
-                order: newOrder // Asignar el nuevo orden
+                order: maxOrder + 1
             };
-            todos.push(newTodo); // Agregar al array local
+            todos.push(newTodo);
 
-            // Guardar en Firestore
             await saveTaskToFirestore(newTodo);
-
-            syncAndRender(); // Redibujar la lista completa
+            syncAndRender(); // syncAndRender redibujará la lista, incluyendo el highlight si la fecha es hoy
 
             if (todoInput) todoInput.value = '';
         }
@@ -1430,28 +1325,23 @@
              }
              const mainTask = findTaskById(mainTaskId);
              if (mainTask) {
-                 if (mainTask.completed) return; // No permitir agregar subtareas a tareas completadas
+                 if (mainTask.completed) return;
                  if (!Array.isArray(mainTask.subtasks)) mainTask.subtasks = [];
                  mainTask.subtasks.push({
                     id: generateLocalId(),
                     text: newSubtaskText,
                     completed: false
                 });
-                 // Si agregas una sub-tarea, la tarea principal no puede estar completada
                  mainTask.completed = false;
                  mainTask.completedDate = null;
 
                  saveTaskToFirestore(mainTask);
-                 syncAndRender(); // Redibujar la tarea principal con la nueva sub-tarea
+                 syncAndRender(); // syncAndRender redibujará la tarea principal con la nueva sub-tarea
                  subtaskInput.value = '';
-                 // Enfocar el input de nuevo después de agregar
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
                  if (listItemElement) {
                       const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                       if (inputElement) {
-                           // Usar setTimeout para asegurar que el elemento exista en el DOM después del redibujo
-                           setTimeout(() => inputElement.focus(), 0);
-                       }
+                       if (inputElement) inputElement.focus();
                  }
 
              } else {
@@ -1466,16 +1356,12 @@
 
                 const today = getTodayDateString();
                 if (taskToDelete.completed && taskToDelete.completedDate === today) {
-                    updateMedalCount(-1); // Decrementar medalla si se elimina una tarea completada hoy
+                    updateMedalCount(-1);
                 }
 
-                // Eliminar del array local
                 todos.splice(taskIndex, 1);
+                syncAndRender(); // syncAndRender redibujará la lista sin la tarea eliminada
 
-                // Redibujar la lista completa
-                syncAndRender();
-
-                // Eliminar de Firestore (de forma asíncrona)
                 if (taskToDelete.firebaseId) {
                     deleteTaskFromFirestore(taskToDelete.firebaseId);
                 }
@@ -1487,19 +1373,17 @@
         function deleteSubtask(mainTaskId, subtaskId) {
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && Array.isArray(mainTask.subtasks)) {
-                 if (mainTask.completed) return; // No permitir eliminar subtareas si la tarea principal está completada
+                 if (mainTask.completed) return;
                  const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
                  if (subtaskIndex > -1) {
                      mainTask.subtasks.splice(subtaskIndex, 1);
-                     // Si eliminas sub-tareas, la tarea principal no puede estar completada
                      mainTask.completed = false;
                      mainTask.completedDate = null;
-                     // Si no quedan subtareas, ocultar la UI de agregar subtareas
                      if (mainTask.subtasks.length === 0) {
                          mainTask.showSubtaskUI = false;
                      }
                      saveTaskToFirestore(mainTask);
-                     syncAndRender(); // Redibujar la tarea principal con las sub-tareas actualizadas
+                     syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas actualizadas
                  } else {
                      console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
                  }
@@ -1511,17 +1395,12 @@
         function toggleSubtaskCompletion(mainTaskId, subtaskId) {
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && Array.isArray(mainTask.subtasks)) {
-                 if (mainTask.completed) return; // No permitir cambiar estado si la tarea principal está completada
+                 if (mainTask.completed) return;
                 const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
                 if (subtask) {
                      subtask.completed = !subtask.completed;
-                     // Si una sub-tarea se descompleta, la principal también debe estar incompleta
-                     if (!subtask.completed) {
-                         mainTask.completed = false;
-                         mainTask.completedDate = null;
-                     }
                      saveTaskToFirestore(mainTask);
-                     syncAndRender(); // Redibujar la tarea principal con el estado de sub-tarea actualizado
+                     syncAndRender(); // syncAndRender redibujará la tarea principal con el estado de sub-tarea actualizado
                  } else {
                      console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
@@ -1543,7 +1422,6 @@
                     // Cuando se marca como completada, quitar la etiqueta de color
                     task.priorityColor = 'none';
 
-                    // Actualizar medalla si se marca como completada HOY y no lo estaba antes
                     if (!wasCompletedTodayBefore) {
                        updateMedalCount(1);
                     }
@@ -1552,17 +1430,15 @@
                         confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 } });
                     }
                 } else {
-                    // Actualizar medalla si se descompleta una tarea que estaba completada HOY
                     if (wasCompletedTodayBefore) {
                        updateMedalCount(-1);
                     }
                     task.completedDate = null;
-                    task.showSubtaskUI = false; // Ocultar UI de subtareas al descompletar
+                    task.showSubtaskUI = false;
                     // NOTA: No restauramos el color aquí. Si se descompleta, el usuario puede
-                    // volver a asignarle una prioridad manually si lo desea.
+                    // volver a asignarle una prioridad manualmente si lo desea.
                 }
 
-                // Marcar/desmarcar todas las subtareas también
                 if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
                     task.subtasks.forEach(subtask => {
                          subtask.completed = isChecked;
@@ -1570,7 +1446,7 @@
                 }
 
                 saveTaskToFirestore(task);
-                syncAndRender(); // Redibujar la tarea principal con el estado actualizado (incluyendo highlight de fecha si aplica)
+                syncAndRender(); // syncAndRender redibujará la tarea principal con el estado actualizado (incluyendo highlight de fecha si aplica)
             } else {
                 console.error("Tarea principal inválida para cambiar estado:", taskId);
             }
@@ -1579,16 +1455,15 @@
         function moveSubtask(mainTaskId, subtaskId, direction) {
             const mainTask = findTaskById(mainTaskId);
             if (mainTask && Array.isArray(mainTask.subtasks)) {
-                 if (mainTask.completed) return; // No permitir mover subtareas si la tarea principal está completada
+                 if (mainTask.completed) return;
                 const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
                 if (subtaskIndex === -1) return;
                 const newIndex = subtaskIndex + direction;
                 if (newIndex >= 0 && newIndex < mainTask.subtasks.length) {
-                    // Intercambiar elementos
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[newIndex]] =
                     [mainTask.subtasks[newIndex], mainTask.subtasks[subtaskIndex]];
                     saveTaskToFirestore(mainTask);
-                    syncAndRender(); // Redibujar la tarea principal con las sub-tareas reordenadas
+                    syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas reordenadas
                 }
             }
         }
@@ -1598,46 +1473,36 @@
 
         async function performManualSort() {
              console.log("Ejecutando reordenamiento manual...");
-             // Ordenar primero por prioridad (Urgente a Puede Esperar), luego por fecha (más cercana primero, sin fecha al final), luego por orden original
              todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
                  if (rankA !== rankB) return rankA - rankB;
-
-                 // Manejar fechas: las tareas sin fecha van al final
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) return dateA - dateB;
-
-                 // Desempate final por el orden original (si existe)
                  return (a.order || 0) - (b.order || 0);
              });
 
-             // Actualizar el campo 'order' de las tareas en Firestore para reflejar el nuevo orden
              const updatePromises = todos.map((task, index) => {
-                 // Solo actualiza si el orden ha cambiado y si la tarea ya existe en Firestore
-                 if (task.order !== index && task.firebaseId) {
-                    task.order = index; // Actualizar el orden en el array local
-                    const taskDocRef = doc(db, "tareas", task.firebaseId);
-                    // Devolver la promesa de actualización
-                    return updateDoc(taskDocRef, { order: task.order }).catch(e => {
-                         console.error(`Error actualizando orden para tarea ${task.firebaseId}:`, e);
-                    });
+                 if (task.order !== index) {
+                    task.order = index;
+                    if (task.firebaseId) {
+                        const taskDocRef = doc(db, "tareas", task.firebaseId);
+                        return updateDoc(taskDocRef, { order: task.order }).catch(e => {
+                             console.error(`Error actualizando orden para tarea ${task.firebaseId}:`, e);
+                        });
+                    }
                  }
-                 // Devolver una promesa resuelta si no hay nada que actualizar para esta tarea
                  return Promise.resolve();
-             }).filter(p => p !== undefined); // Asegurarse de que solo tenemos promesas válidas
+             }).filter(p => p !== undefined);
 
              try {
-                 // Esperar a que todas las actualizaciones de Firestore se completen
                  await Promise.all(updatePromises);
                  console.log("Órdenes actualizados en Firestore tras reordenamiento manual.");
              } catch (e) {
                  console.error("Error general al actualizar órdenes en Firestore:", e);
              }
-
-             // Redibujar la UI después de que los datos locales y, opcionalmente, Firestore estén actualizados
-             syncAndRender();
+             syncAndRender(); // syncAndRender redibujará la lista con el nuevo orden
         }
 
         // --- THEME ---
@@ -1654,7 +1519,6 @@
                 darkModeToggle.title = 'Alternar a modo claro';
             }
              // Re-renderizar para aplicar colores de prioridad correctos en modo oscuro
-             // y asegurar que los highlights de fecha se actualicen si es necesario
              syncAndRender();
         }
 
@@ -1671,7 +1535,6 @@
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
             // Re-renderizar para aplicar colores de prioridad correctos en modo claro
-            // y asegurar que los highlights de fecha se actualicen si es necesario
             syncAndRender();
         }
 
@@ -1694,7 +1557,6 @@
             body = document.body;
             medalCountDisplay = document.getElementById('medal-count');
 
-            // Aplicar tema guardado antes de cargar datos
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
                 enableDarkMode();
@@ -1702,19 +1564,15 @@
                 disableDarkMode();
             }
 
-            // Cargar datos de Firestore
             await loadTodosFromFirestore();
 
-            // Cargar y mostrar medallas
             const initialMedalData = loadAndRefreshMedalData();
             displayMedalCount(initialMedalData.count);
 
-            // Renderizar la UI inicial con los datos cargados
             renderTodosUI(); // Esto ahora llamará a updateDateHighlight para cada tarea
 
             console.log(`Renderizado inicial completo.`);
 
-            // Configurar listeners de eventos
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
             if (todoInput) {
                 todoInput.addEventListener('keypress', (event) => {
