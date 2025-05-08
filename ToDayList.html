@@ -410,15 +410,16 @@
             padding: 0;
             font-family: 'Lexend', sans-serif;
             font-size: 0.85rem;
-            color: var(--placeholder-color); /* Color por defecto cuando está vacío */
+            /* Color por defecto cuando está vacío o no es hoy y no completado */
+            color: var(--button-color); /* Usar color de botón apagado para visibilidad */
             cursor: pointer;
             flex-shrink: 0;
             outline: none;
             transition: color 0.2s ease; /* Solo transición de color */
         }
-        /* Estilo para fecha válida (no vacía) */
-         .todo-item .main-task-header .task-body input[type="date"]:valid {
-             color: var(--text-color); /* Color por defecto cuando tiene fecha */
+        /* Estilo para fecha válida (no vacía) cuando NO es hoy y NO completado */
+         .todo-item:not(.completed) .main-task-header .task-body input[type="date"]:valid {
+             color: var(--text-color); /* Color normal cuando tiene fecha y no es hoy */
          }
         /* Estilo para hover/focus */
         .todo-item .main-task-header .task-body input[type="date"]:hover,
@@ -921,21 +922,19 @@
                 const todayString = getTodayDateString();
                 const isToday = task.date === todayString;
 
+                // Resetear estilos inline primero para que las reglas CSS por defecto (:valid, :not(:valid), .completed) se apliquen
+                dateInput.style.color = '';
+                dateInput.style.fontWeight = '';
+
                 if (isToday && !task.completed) {
-                    // Obtener el color del borde izquierdo (color de prioridad)
+                    // Si es hoy y no está completada, aplicar color de prioridad y negrita
                     const computedStyle = getComputedStyle(listItemElement);
                     const priorityColor = computedStyle.borderLeftColor;
-
                     dateInput.style.color = priorityColor;
                     dateInput.style.fontWeight = 'bold';
-                    // Asegurarse de que no tenga estilos de .date-today si existieran por error
-                    dateInput.classList.remove('date-today'); // Asegurar que la clase no esté
-                } else {
-                    // Si no es hoy o está completada, resetear estilos
-                    dateInput.style.color = ''; // Esto hará que use el color por defecto (:valid o .completed)
-                    dateInput.style.fontWeight = '';
-                    dateInput.classList.remove('date-today'); // Limpiar clase por si acaso
                 }
+                // Si no es hoy O está completada, los estilos ya se resetearon arriba,
+                // permitiendo que el CSS maneje el color (var(--button-color) si vacío, var(--text-color) si válido, o var(--completed-text-color) si completada).
             }
         }
         // --- FIN FUNCIÓN MODIFICADA ---
@@ -1527,9 +1526,7 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
-             // Re-renderizar para aplicar colores de prioridad correctos en modo oscuro
-             // syncAndRender(); // Ya no es necesario redibujar todo, solo actualizar el highlight si aplica
-             // Pero sí necesitamos re-evaluar el highlight de fecha para que tome el color correcto del tema
+             // Re-evaluar el highlight de fecha para que tome el color correcto del tema
              document.querySelectorAll('.todo-item').forEach(item => {
                  const taskId = item.dataset.taskId;
                  const task = findTaskById(taskId);
@@ -1549,9 +1546,7 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
-            // Re-renderizar para aplicar colores de prioridad correctos en modo claro
-            // syncAndRender(); // Ya no es necesario redibujar todo, solo actualizar el highlight si aplica
-            // Pero sí necesitamos re-evaluar el highlight de fecha para que tome el color correcto del tema
+            // Re-evaluar el highlight de fecha para que tome el color correcto del tema
             document.querySelectorAll('.todo-item').forEach(item => {
                 const taskId = item.dataset.taskId;
                 const task = findTaskById(taskId);
