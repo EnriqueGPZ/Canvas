@@ -596,10 +596,21 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            addDoc, 
+            deleteDoc, 
+            doc, 
+            updateDoc,
+            query, 
+            orderBy,
+            enableIndexedDbPersistence 
+        } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", // Reemplaza con tu API Key si es necesario
+            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", 
             authDomain: "todolist-5cc91.firebaseapp.com",
             projectId: "todolist-5cc91",
             storageBucket: "todolist-5cc91.firebaseapp.com",
@@ -609,7 +620,19 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const tareasRef = collection(db, "tareas");
+        const tareasCollectionRef = collection(db, "tareas");
+
+        enableIndexedDbPersistence(db)
+            .then(() => console.log("Persistencia offline de Firestore habilitada."))
+            .catch((err) => {
+                if (err.code === 'failed-precondition') {
+                    console.warn("Persistencia offline de Firestore: Múltiples pestañas abiertas, la persistencia puede estar ya habilitada en otra pestaña o el navegador tiene problemas con IndexedDB en múltiples contextos.");
+                } else if (err.code === 'unimplemented') {
+                    console.warn("Persistencia offline de Firestore: El navegador actual no soporta IndexedDB o está deshabilitado.");
+                } else {
+                    console.error("Error al habilitar la persistencia offline de Firestore:", err);
+                }
+            });
 
         let todoInput;
         let addTodoButton;
@@ -618,104 +641,40 @@
         let darkModeToggle;
         let body;
 
+        let todos = []; 
+
         const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
         const PRIORITY_ORDER = { 'red': 1, 'orange': 2, 'yellow': 3, 'green': 4, 'none': 5 };
 
-        function loadTodos() {
+        // --- UTILITIES ---
+        function generateLocalId() {
+            return '_' + Math.random().toString(36).substring(2, 15);
+        }
+
+        function findTaskById(taskId) {
+            return todos.find(todo => todo.id === taskId);
+        }
+
+        function findTaskIndexById(taskId) {
+            return todos.findIndex(todo => todo.id === taskId);
+        }
+
+        // --- DATA HANDLING (FIRESTORE & LOCAL) ---
+        async function loadTodosFromFirestore() {
             try {
-                const storedTodos = localStorage.getItem('todos');
-                if (storedTodos) {
-                    const todos = JSON.parse(storedTodos);
-                    return todos.map(todo => ({
-                        firebaseId: todo.firebaseId || null,
-                        text: todo.text || 'Tarea sin nombre',
-                        completed: typeof todo.completed === 'boolean' ? todo.completed : false,
-                        subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [],
-                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
-                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
-                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
-                        linkUrl: typeof todo.linkUrl === 'string' ? todo.linkUrl : null,
-                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
-                    }));
-                } else {
-                    return [];
-                }
-            } catch (e) {
-                 console.error("Error al cargar de localStorage:", e);
-                 return [];
-            }
-        }
-
-        function saveTodosToLocalStorage(todosArray) {
-             try {
-                 localStorage.setItem('todos', JSON.stringify(todosArray));
-             } catch (e) {
-                 console.error("Error al guardar en localStorage:", e);
-             }
-        }
-
-        async function saveTodosOnline(todosArray) {
-            try {
-                const querySnapshot = await getDocs(tareasRef);
-                const deletePromises = querySnapshot.docs.map(docSnap =>
-                    deleteDoc(doc(db, "tareas", docSnap.id))
-                );
-                await Promise.all(deletePromises);
-                const addPromises = todosArray.map(todo => {
-                    const { firebaseId, ...dataToSave } = todo;
-                    return addDoc(tareasRef, dataToSave);
-                });
-                await Promise.all(addPromises);
-                console.log("Datos guardados en Firestore correctamente (operación completa).");
-            } catch (e) {
-                console.error("Error al guardar en Firestore (operación completa):", e);
-                throw e;
-            }
-        }
-
-        function saveTodos(todosArray, options = { render: true, syncOnline: true }) {
-            console.log("Guardando datos (local)...");
-            saveTodosToLocalStorage(todosArray); 
-
-            if (options.render) {
-                console.log("Renderizando UI...");
-                renderTodos(todosArray);
-            }
-
-            if (options.syncOnline) {
-                console.log("Iniciando guardado en Firestore en segundo plano...");
-                saveTodosOnline(todosArray)
-                    .then(() => {
-                        console.log("Guardado en Firestore en segundo plano completado.");
-                    })
-                    .catch(e => {
-                        console.error("Error en guardado en Firestore en segundo plano:", e);
-                    });
-            }
-        }
-
-        function calculateProgress(subtasks) {
-            if (!subtasks || subtasks.length === 0) return 0;
-            const completed = subtasks.filter(sub => sub.completed).length;
-            return (completed / subtasks.length) * 100;
-        }
-        
-        // --- CORREGIDO loadTodosOnline ---
-        async function loadTodosOnline() {
-            try {
-                console.log("Cargando de Firestore...");
-                const querySnapshot = await getDocs(tareasRef);
-                const todos = [];
+                console.log("Cargando tareas desde Firestore...");
+                const q = query(tareasCollectionRef, orderBy("order", "asc"));
+                const querySnapshot = await getDocs(q);
+                const firestoreTodos = [];
                 querySnapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                     todos.push({
-                        firebaseId: docSnap.id,
+                    firestoreTodos.push({
+                        id: data.id || docSnap.id, 
+                        firebaseId: docSnap.id,   
                         text: data.text || 'Tarea sin nombre',
                         completed: typeof data.completed === 'boolean' ? data.completed : false,
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
+                            id: sub.id || generateLocalId(), 
                             text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [],
@@ -723,21 +682,70 @@
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
                         linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
-                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // CORREGIDO: data.date en lugar de todo.date
+                        order: typeof data.order === 'number' ? data.order : Date.now() 
                     });
                 });
-                console.log("Datos cargados de Firestore:", todos);
-                saveTodosToLocalStorage(todos); // Guardar en LS después de cargar de Firebase
-                return todos;
+                todos = firestoreTodos; 
+                console.log("Tareas cargadas desde Firestore:", todos.length);
+                renderTodosUI(); 
             } catch (e) {
-                 console.error("Error al cargar de Firestore (dentro de loadTodosOnline):", e); 
-                 throw e; 
+                 console.error("Error al cargar tareas desde Firestore:", e);
+                 alert("Error al cargar tareas desde la nube. Verifica tu conexión.");
             }
         }
-        // --- FIN CORRECCIÓN ---
+        
+        async function saveTaskToFirestore(taskData) {
+            const { firebaseId, ...dataToSave } = { ...taskData }; 
 
+            if (firebaseId) { 
+                try {
+                    const taskDocRef = doc(db, "tareas", firebaseId);
+                    await updateDoc(taskDocRef, dataToSave);
+                    console.log("Tarea actualizada en Firestore:", firebaseId);
+                } catch (e) {
+                    console.error(`Error al actualizar tarea ${firebaseId} en Firestore:`, e);
+                }
+            } else { 
+                try {
+                    if (!dataToSave.id) dataToSave.id = generateLocalId();
+                    const docRef = await addDoc(tareasCollectionRef, dataToSave);
+                    console.log("Tarea agregada a Firestore con ID:", docRef.id);
+                    const taskInMem = findTaskById(dataToSave.id);
+                    if (taskInMem) {
+                        taskInMem.firebaseId = docRef.id;
+                    }
+                } catch (e) {
+                    console.error("Error al agregar nueva tarea a Firestore:", e);
+                }
+            }
+        }
 
-        function createMainTaskHeader(mainTask, mainIndex) {
+        async function deleteTaskFromFirestore(firebaseId) {
+            if (!firebaseId) {
+                console.warn("Intento de eliminar tarea sin firebaseId.");
+                return;
+            }
+            try {
+                const taskDocRef = doc(db, "tareas", firebaseId);
+                await deleteDoc(taskDocRef);
+                console.log("Tarea eliminada de Firestore:", firebaseId);
+            } catch (e) {
+                console.error(`Error al eliminar tarea ${firebaseId} de Firestore:`, e);
+            }
+        }
+        
+        function syncAndRender() {
+            renderTodosUI();
+        }
+
+        // --- UI RENDERING & EVENT HANDLERS ---
+        function calculateProgress(subtasks) {
+            if (!subtasks || subtasks.length === 0) return 0;
+            const completed = subtasks.filter(sub => sub.completed).length;
+            return (completed / subtasks.length) * 100;
+        }
+
+        function createMainTaskHeader(mainTask) {
             const mainTaskHeader = document.createElement('div');
             mainTaskHeader.classList.add('main-task-header');
 
@@ -746,7 +754,7 @@
             mainCheckbox.classList.add('custom-checkbox');
             mainCheckbox.checked = mainTask.completed;
             mainCheckbox.addEventListener('change', (event) => {
-                toggleMainCompletion(mainIndex, event.target.checked);
+                toggleMainCompletion(mainTask.id, event.target.checked);
             });
 
             const priorityLabel = document.createElement('div');
@@ -755,7 +763,7 @@
             priorityLabel.title = `Prioridad: ${mainTask.priorityColor.charAt(0).toUpperCase() + mainTask.priorityColor.slice(1)}`;
             priorityLabel.addEventListener('click', () => {
                  if (!mainTask.completed) {
-                    cyclePriorityColor(mainIndex);
+                    cyclePriorityColor(mainTask.id);
                  }
             });
 
@@ -778,14 +786,15 @@
                 linkButton.title = 'Añadir enlace';
             }
             linkButton.addEventListener('click', () => {
-                const todos = loadTodos(); 
-                const currentTask = todos[mainIndex];
-                if (currentTask.completed) {
-                    if (currentTask.linkUrl) window.open(currentTask.linkUrl, '_blank');
+                const task = findTaskById(mainTask.id);
+                if (!task) return;
+
+                if (task.completed) {
+                    if (task.linkUrl) window.open(task.linkUrl, '_blank');
                     return;
                 }
-                if (currentTask.linkUrl) {
-                    window.open(currentTask.linkUrl, '_blank');
+                if (task.linkUrl) {
+                    window.open(task.linkUrl, '_blank');
                 } else {
                     const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", "");
                     if (newUrl === null) return; 
@@ -795,11 +804,12 @@
                         if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
                             finalUrl = 'https://' + finalUrl;
                         }
-                        todos[mainIndex].linkUrl = finalUrl;
+                        task.linkUrl = finalUrl;
                     } else {
-                        todos[mainIndex].linkUrl = null;
+                        task.linkUrl = null;
                     }
-                    saveTodos(todos); 
+                    saveTaskToFirestore(task);
+                    syncAndRender(); 
                 }
             });
 
@@ -809,10 +819,12 @@
             dateInput.value = mainTask.date || '';
             dateInput.title = 'Establecer fecha';
             dateInput.addEventListener('change', (event) => {
-                 if (!mainTask.completed) {
-                    updateTaskDate(mainIndex, event.target.value);
+                const task = findTaskById(mainTask.id);
+                if (!task) return;
+                 if (!task.completed) {
+                    updateTaskDate(task.id, event.target.value);
                  } else {
-                     event.target.value = mainTask.date || '';
+                     event.target.value = task.date || ''; 
                  }
             });
 
@@ -821,12 +833,14 @@
             deleteMainButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
             deleteMainButton.setAttribute('aria-label', 'Eliminar tarea');
             deleteMainButton.addEventListener('click', () => {
-                 if ((mainTask.subtasks && mainTask.subtasks.length > 0) || mainTask.completed) {
-                     if (!confirm(`¿Estás seguro de eliminar la tarea "${mainTask.text}"?`)) {
+                const task = findTaskById(mainTask.id);
+                if (!task) return;
+                 if ((task.subtasks && task.subtasks.length > 0) || task.completed) {
+                     if (!confirm(`¿Estás seguro de eliminar la tarea "${task.text}"?`)) {
                          return;
                      }
                  }
-                deleteTodo(mainIndex);
+                deleteTodo(task.id);
             });
 
             mainTaskHeader.appendChild(mainCheckbox);
@@ -856,72 +870,74 @@
              return progressContainer;
         }
 
-        function createAddSubtasksToggle(mainIndex) {
+        function createAddSubtasksToggle(mainTaskId) {
              const addSubtasksToggle = document.createElement('button');
              addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle');
              addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i>';
              addSubtasksToggle.setAttribute('aria-label', 'Agregar sub-tarea');
              addSubtasksToggle.addEventListener('click', () => {
-                 const todos = loadTodos();
-                 if (mainIndex >= 0 && mainIndex < todos.length) {
-                     const mainTask = todos[mainIndex];
-                     const currentState = mainTask.showSubtaskUI;
-                     const newState = !currentState;
-                     mainTask.showSubtaskUI = newState;
-                     if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
-                         mainTask.subtasks = [];
+                 const task = findTaskById(mainTaskId);
+                 if (task) {
+                     task.showSubtaskUI = !task.showSubtaskUI;
+                     if (task.showSubtaskUI && (!Array.isArray(task.subtasks) || task.subtasks.length === 0)) {
+                         task.subtasks = [];
                      }
-                     saveTodos(todos); 
-                     if (newState) {
-                          setTimeout(() => {
-                            const listItemElement = todoListContainer.children[mainIndex];
-                            if (listItemElement) {
+                     saveTaskToFirestore(task); 
+                     syncAndRender();
+                     if (task.showSubtaskUI) {
+                          const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
+                          if (listItemElement) {
+                            setTimeout(() => { 
                                 const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                                if (inputElement) {
-                                    inputElement.focus();
-                                }
-                            }
-                          }, 0);
+                                if (inputElement) inputElement.focus();
+                            }, 0);
+                          }
                      }
                  } else {
-                      console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
+                      console.error("Tarea principal no encontrada para alternar UI de sub-tareas:", mainTaskId);
                  }
              });
              return addSubtasksToggle;
         }
 
-        function createSubtasksList(mainTask, mainIndex) {
+        function createSubtasksList(mainTask) {
             const subtasksList = document.createElement('ul');
             subtasksList.classList.add('subtasks-list');
             if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                 mainTask.subtasks.forEach((subtask, subIndex) => {
                     const subtaskItem = document.createElement('li');
+                    subtaskItem.dataset.subtaskId = subtask.id; 
+
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.classList.add('custom-checkbox');
                     checkbox.checked = subtask.completed;
                     checkbox.addEventListener('change', () => {
-                        toggleSubtaskCompletion(mainIndex, subIndex);
+                        toggleSubtaskCompletion(mainTask.id, subtask.id);
                     });
                     const subtaskSpan = document.createElement('span');
                     subtaskSpan.textContent = subtask.text;
+
                     const moveUpButton = document.createElement('button');
                     moveUpButton.classList.add('app-button', 'subtask-move-button');
                     moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
                     moveUpButton.setAttribute('aria-label', 'Mover sub-tarea arriba');
                     if (subIndex === 0) moveUpButton.disabled = true;
-                    moveUpButton.addEventListener('click', () => moveSubtaskUp(mainIndex, subIndex));
+                    moveUpButton.addEventListener('click', () => moveSubtaskUp(mainTask.id, subtask.id));
+
                     const moveDownButton = document.createElement('button');
                     moveDownButton.classList.add('app-button', 'subtask-move-button');
                     moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
                     moveDownButton.setAttribute('aria-label', 'Mover sub-tarea abajo');
                     if (subIndex === mainTask.subtasks.length - 1) moveDownButton.disabled = true;
-                    moveDownButton.addEventListener('click', () => moveSubtaskDown(mainIndex, subIndex));
+                    moveDownButton.addEventListener('click', () => moveSubtaskDown(mainTask.id, subtask.id));
+
                     const deleteSubtaskButton = document.createElement('button');
                     deleteSubtaskButton.classList.add('app-button', 'delete-button');
                     deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
                     deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea');
-                    deleteSubtaskButton.addEventListener('click', () => deleteSubtask(mainIndex, subIndex));
+                    deleteSubtaskButton.addEventListener('click', () => deleteSubtask(mainTask.id, subtask.id));
+
                     subtaskItem.appendChild(checkbox);
                     subtaskItem.appendChild(subtaskSpan);
                     subtaskItem.appendChild(moveUpButton);
@@ -933,7 +949,7 @@
             return subtasksList;
         }
 
-        function createSubtaskInputContainer(mainIndex) {
+        function createSubtaskInputContainer(mainTaskId) {
              const subtaskInputContainer = document.createElement('div');
              subtaskInputContainer.classList.add('subtask-input-container');
              const subtaskInput = document.createElement('input');
@@ -943,11 +959,14 @@
              addSubtaskButton.classList.add('app-button', 'add-button');
              addSubtaskButton.innerHTML = '<i class="fas fa-plus"></i>';
              addSubtaskButton.setAttribute('aria-label', 'Agregar sub-tarea');
-             addSubtaskButton.addEventListener('click', () => addSubtask(mainIndex, subtaskInput));
-              subtaskInput.addEventListener('keypress', (event) => {
+             
+             const handleAddSubtask = () => addSubtask(mainTaskId, subtaskInput);
+
+             addSubtaskButton.addEventListener('click', handleAddSubtask);
+             subtaskInput.addEventListener('keypress', (event) => {
                   if (event.key === 'Enter') {
                       event.preventDefault();
-                      addSubtaskButton.click();
+                      handleAddSubtask();
                   }
               });
              subtaskInputContainer.appendChild(subtaskInput);
@@ -955,63 +974,72 @@
              return subtaskInputContainer;
         }
 
-        function renderTodos(todosArray) {
+        function renderTodosUI() {
             if (!todoListContainer) {
                  console.error("Error: todoListContainer no encontrado.");
                  return;
             }
-            todoListContainer.innerHTML = '';
-            if (todosArray.length === 0) {
+            todoListContainer.innerHTML = ''; 
+            
+            if (todos.length === 0) {
                 if (todoInput) todoInput.value = '';
                 return;
             }
-            todosArray.forEach((mainTask, mainIndex) => {
+
+            todos.forEach((mainTask) => { 
                 const listItem = document.createElement('li');
                 listItem.classList.add('todo-item');
+                listItem.dataset.taskId = mainTask.id;
                 if (mainTask.completed) listItem.classList.add('completed');
                 if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
-                listItem.appendChild(createMainTaskHeader(mainTask, mainIndex));
+
+                listItem.appendChild(createMainTaskHeader(mainTask)); 
                 listItem.appendChild(createProgressBar(mainTask));
-                listItem.appendChild(createAddSubtasksToggle(mainIndex));
-                listItem.appendChild(createSubtasksList(mainTask, mainIndex));
-                listItem.appendChild(createSubtaskInputContainer(mainIndex));
+                listItem.appendChild(createAddSubtasksToggle(mainTask.id));
+                listItem.appendChild(createSubtasksList(mainTask)); 
+                listItem.appendChild(createSubtaskInputContainer(mainTask.id));
+
                 todoListContainer.appendChild(listItem);
             });
-             if (todoInput) todoInput.value = '';
+            if (todoInput) todoInput.value = '';
         }
 
-        function cyclePriorityColor(mainTaskIndex) {
-             const todos = loadTodos();
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+        // --- TASK ACTIONS ---
+        function cyclePriorityColor(taskId) {
+             const task = findTaskById(taskId);
+             if (task) {
                  const currentColors = PRIORITY_COLORS;
-                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string' ? todos[mainTaskIndex].priorityColor : 'none';
+                 const currentColor = typeof task.priorityColor === 'string' ? task.priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
-                 const nextIndex = (currentIndex + 1) % currentColors.length;
-                 todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
-                 saveTodos(todos);
+                 task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
+                 saveTaskToFirestore(task);
+                 syncAndRender(); 
              } else {
-                  console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
+                  console.error("Tarea no encontrada para ciclar color:", taskId);
              }
         }
 
-        function updateTaskDate(mainTaskIndex, newDateValue) {
-            const todos = loadTodos();
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                todos[mainTaskIndex].date = newDateValue || null;
-                saveTodos(todos);
+        function updateTaskDate(taskId, newDateValue) {
+            const task = findTaskById(taskId);
+            if (task) {
+                task.date = newDateValue || null;
+                saveTaskToFirestore(task);
+                syncAndRender();
             } else {
-                 console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
+                 console.error("Tarea no encontrada para actualizar fecha:", taskId);
             }
         }
 
-        function addTodo() {
+        async function addTodo() { 
             const newTodoText = todoInput.value.trim();
             if (newTodoText === '') {
                 alert('Por favor, ingresa el nombre de la tarea.');
                 return;
             }
-            const todos = loadTodos();
-            todos.push({
+            const maxOrder = todos.length > 0 ? Math.max(...todos.map(t => t.order || 0)) : -1;
+            const newTodo = {
+                id: generateLocalId(), 
+                firebaseId: null, 
                 text: newTodoText,
                 completed: false,
                 subtasks: [],
@@ -1019,144 +1047,168 @@
                 priorityColor: 'none',
                 date: null,
                 linkUrl: null,
-                order: Date.now()
-            });
-            saveTodos(todos);
+                order: maxOrder + 1 
+            };
+            todos.push(newTodo);
+            
+            await saveTaskToFirestore(newTodo);
+            syncAndRender();
+
             if (todoInput) todoInput.value = '';
         }
 
-        function addSubtask(mainTaskIndex, subtaskInput) {
+
+        function addSubtask(mainTaskId, subtaskInput) {
              const newSubtaskText = subtaskInput.value.trim();
              if (newSubtaskText === '') {
                  alert('Por favor, ingresa el nombre de la sub-tarea.');
                  return;
              }
-             const todos = loadTodos();
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const mainTask = todos[mainTaskIndex];
+             const mainTask = findTaskById(mainTaskId);
+             if (mainTask) {
                  if (!Array.isArray(mainTask.subtasks)) mainTask.subtasks = [];
-                 mainTask.subtasks.push({ text: newSubtaskText, completed: false });
+                 mainTask.subtasks.push({ 
+                    id: generateLocalId(),
+                    text: newSubtaskText, 
+                    completed: false 
+                });
                  if (mainTask.completed) mainTask.completed = false;
-                 mainTask.showSubtaskUI = false;
-                 saveTodos(todos);
+                 mainTask.showSubtaskUI = false; 
+                 
+                 saveTaskToFirestore(mainTask);
+                 syncAndRender();
                  subtaskInput.value = '';
              } else {
-                 console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
+                 console.error("Tarea principal no encontrada para agregar sub-tarea:", mainTaskId);
              }
         }
 
-        function deleteTodo(indexToDelete) {
-            const todos = loadTodos();
-            if (indexToDelete >= 0 && indexToDelete < todos.length) {
-                todos.splice(indexToDelete, 1);
-                saveTodos(todos);
+        function deleteTodo(taskId) {
+            const taskIndex = findTaskIndexById(taskId);
+            if (taskIndex > -1) {
+                const taskToDelete = todos[taskIndex];
+                todos.splice(taskIndex, 1); 
+                syncAndRender();
+                
+                if (taskToDelete.firebaseId) {
+                    deleteTaskFromFirestore(taskToDelete.firebaseId); 
+                }
             } else {
-                console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
+                console.error("Tarea a eliminar no encontrada:", taskId);
             }
         }
 
-        function deleteSubtask(mainTaskIndex, subtaskIndexToDelete) {
-             const todos = loadTodos();
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const mainTask = todos[mainTaskIndex];
-                 if (Array.isArray(mainTask.subtasks) && subtaskIndexToDelete >= 0 && subtaskIndexToDelete < mainTask.subtasks.length) {
-                     mainTask.subtasks.splice(subtaskIndexToDelete, 1);
+        function deleteSubtask(mainTaskId, subtaskId) {
+             const mainTask = findTaskById(mainTaskId);
+             if (mainTask && Array.isArray(mainTask.subtasks)) {
+                 const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
+                 if (subtaskIndex > -1) {
+                     mainTask.subtasks.splice(subtaskIndex, 1);
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-                     if (mainTask.subtasks.length === 0) {
-                         mainTask.completed = false;
-                     } else {
-                         mainTask.completed = allSubtasksCompleted;
-                     }
-                     saveTodos(todos);
+                     mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompleted : false;
+
+                     saveTaskToFirestore(mainTask); 
+                     syncAndRender();
                  } else {
-                     console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
+                     console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
                  }
              } else {
-                  console.error("Índice de tarea principal inválido para eliminar sub-tarea:", mainTaskIndex);
+                  console.error("Tarea principal no encontrada para eliminar sub-tarea:", mainTaskId);
              }
         }
 
-        function toggleSubtaskCompletion(mainTaskIndex, subtaskIndexToToggle) {
-             const todos = loadTodos();
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const mainTask = todos[mainTaskIndex];
-                  if (Array.isArray(mainTask.subtasks) && subtaskIndexToToggle >= 0 && subtaskIndexToToggle < mainTask.subtasks.length) {
-                     mainTask.subtasks[subtaskIndexToToggle].completed = !mainTask.subtasks[subtaskIndexToToggle].completed;
-                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
+        function toggleSubtaskCompletion(mainTaskId, subtaskId) {
+             const mainTask = findTaskById(mainTaskId);
+             if (mainTask && Array.isArray(mainTask.subtasks)) {
+                const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
+                if (subtask) {
+                     subtask.completed = !subtask.completed;
+                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(s => s.completed);
                      if (mainTask.subtasks.length > 0) {
                           mainTask.completed = allSubtasksCompleted;
                      }
-                     saveTodos(todos);
+                     saveTaskToFirestore(mainTask);
+                     syncAndRender();
                  } else {
-                     console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
+                     console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
              } else {
-                 console.error("Índice de tarea principal inválido para cambiar estado de sub-tarea:", mainTaskIndex);
+                 console.error("Tarea principal inválida para cambiar estado de sub-tarea:", mainTaskId);
              }
         }
 
-        function toggleMainCompletion(mainTaskIndex, isChecked) {
-             const todos = loadTodos();
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const mainTask = todos[mainTaskIndex];
-                 mainTask.completed = isChecked;
-                 if (Array.isArray(mainTask.subtasks) && mainTask.subtasks.length > 0) {
-                     mainTask.subtasks.forEach(subtask => {
-                         subtask.completed = isChecked;
+        function toggleMainCompletion(taskId, isChecked) {
+             const task = findTaskById(taskId);
+             if (task) {
+                 task.completed = isChecked;
+                 if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+                     task.subtasks.forEach(subtask => {
+                         subtask.completed = isChecked; 
                      });
                  }
-                 saveTodos(todos);
+                 saveTaskToFirestore(task);
+                 syncAndRender();
              } else {
-                  console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
+                  console.error("Tarea principal inválida para cambiar estado:", taskId);
              }
         }
 
-        function moveSubtaskUp(mainTaskIndex, subtaskIndex) {
-            const todos = loadTodos();
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                const mainTask = todos[mainTaskIndex];
-                if (Array.isArray(mainTask.subtasks) && subtaskIndex > 0 && subtaskIndex < mainTask.subtasks.length) {
-                    [mainTask.subtasks[subtaskIndex - 1], mainTask.subtasks[subtaskIndex]] =
-                    [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex - 1]];
-                    saveTodos(todos);
+        function moveSubtask(mainTaskId, subtaskId, direction) { 
+            const mainTask = findTaskById(mainTaskId);
+            if (mainTask && Array.isArray(mainTask.subtasks)) {
+                const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
+                if (subtaskIndex === -1) return;
+
+                const newIndex = subtaskIndex + direction;
+                if (newIndex >= 0 && newIndex < mainTask.subtasks.length) {
+                    [mainTask.subtasks[subtaskIndex], mainTask.subtasks[newIndex]] =
+                    [mainTask.subtasks[newIndex], mainTask.subtasks[subtaskIndex]];
+                    
+                    saveTaskToFirestore(mainTask);
+                    syncAndRender();
                 }
             }
         }
+        function moveSubtaskUp(mainTaskId, subtaskId) { moveSubtask(mainTaskId, subtaskId, -1); }
+        function moveSubtaskDown(mainTaskId, subtaskId) { moveSubtask(mainTaskId, subtaskId, 1); }
 
-        function moveSubtaskDown(mainTaskIndex, subtaskIndex) {
-            const todos = loadTodos();
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                const mainTask = todos[mainTaskIndex];
-                if (Array.isArray(mainTask.subtasks) && subtaskIndex >= 0 && subtaskIndex < mainTask.subtasks.length - 1) {
-                    [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex + 1]] =
-                    [mainTask.subtasks[subtaskIndex + 1], mainTask.subtasks[subtaskIndex]];
-                    saveTodos(todos);
-                }
-            }
-        }
 
-        function performManualSort() {
-             const todos = loadTodos();
+        async function performManualSort() {
+             console.log("Ejecutando reordenamiento manual...");
              todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
                  if (rankA !== rankB) return rankA - rankB;
+
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) return dateA - dateB;
-                 const orderA = a.order || 0;
-                 const orderB = b.order || 0;
-                 return orderA - orderB;
+                 
+                 return 0; 
              });
-             todos.forEach((task, index) => {
-                 task.order = Date.now() + index;
-             });
-             saveTodos(todos);
-        }
 
+             const updatePromises = todos.map((task, index) => {
+                 task.order = index; 
+                 if (task.firebaseId) {
+                     const taskDocRef = doc(db, "tareas", task.firebaseId);
+                     return updateDoc(taskDocRef, { order: task.order });
+                 }
+                 return Promise.resolve();
+             });
+
+             try {
+                 await Promise.all(updatePromises);
+                 console.log("Órdenes actualizados en Firestore tras reordenamiento manual.");
+             } catch (e) {
+                 console.error("Error al actualizar órdenes en Firestore durante reordenamiento:", e);
+             }
+             syncAndRender(); 
+        }
+        
+        // --- THEME ---
         function enableDarkMode() {
             if (body) body.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark');
+            localStorage.setItem('theme', 'dark'); 
             if (darkModeToggle) {
                 const icon = darkModeToggle.querySelector('i');
                 if (icon) {
@@ -1188,6 +1240,7 @@
             }
         }
 
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("DOM cargado. Inicializando...");
             todoInput = document.getElementById('new-todo-input');
@@ -1200,38 +1253,9 @@
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') enableDarkMode(); else disableDarkMode();
 
-            let initialTodos = [];
-            let loadedFromFirebase = false; 
-
-            try {
-                 console.log("Intentando cargar desde Firestore...");
-                 initialTodos = await loadTodosOnline(); 
-                 loadedFromFirebase = true;
-                 console.log("Datos cargados exitosamente desde Firestore.");
-            } catch (e) {
-                 console.error("Error al cargar datos iniciales desde Firestore. Cayendo a Local Storage:", e);
-                 let errorMessage = "Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.";
-                 if (e.message) { 
-                     errorMessage += ` (Detalle: ${e.message})`;
-                 }
-                 alert(errorMessage);
-                 initialTodos = loadTodos(); 
-            }
-
-             initialTodos.sort((a, b) => {
-                 const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
-                 const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
-                 if (rankA !== rankB) return rankA - rankB;
-                 const dateA = a.date ? new Date(a.date).getTime() : Infinity;
-                 const dateB = b.date ? new Date(b.date).getTime() : Infinity;
-                 if (dateA !== dateB) return dateA - dateB;
-                 const orderA = a.order || 0;
-                 const orderB = b.order || 0;
-                 return orderA - orderB;
-             });
+            await loadTodosFromFirestore(); 
             
-            renderTodos(initialTodos); 
-            console.log(`Renderizado inicial completo. Datos cargados desde: ${loadedFromFirebase ? 'Firebase' : 'LocalStorage'}`);
+            console.log(`Renderizado inicial completo.`);
 
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
             if (todoInput) {
@@ -1244,6 +1268,7 @@
             }
             if (reorderButton) reorderButton.addEventListener('click', performManualSort);
             if (darkModeToggle) darkModeToggle.addEventListener('click', toggleDarkMode);
+            
             console.log("Inicialización completa.");
         });
     </script>
