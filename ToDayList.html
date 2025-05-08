@@ -43,14 +43,6 @@
             --footer-text-color: #aaa; /* Color para el texto del footer */
             --medal-color: #ffd700; /* Color para el icono de medalla */
             --medal-text-color: var(--text-color);
-
-            /* --- Variables para colores de prioridad --- */
-            --priority-red-color: #e74c3c;
-            --priority-orange-color: #f39c12;
-            --priority-yellow-color: #f1c40f;
-            --priority-green-color: #2ecc71;
-            --priority-none-color: var(--border-color); /* O el color que quieras para 'none' */
-            /* --- Fin Variables para colores de prioridad --- */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -83,14 +75,6 @@
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
             --footer-text-color: #666; /* Color para el texto del footer en dark mode */
             --medal-text-color: var(--text-color);
-
-            /* --- Variables para colores de prioridad (Modo Oscuro) --- */
-            --priority-red-color: #e74c3c; /* Mantener rojo */
-            --priority-orange-color: #f39c12; /* Mantener naranja */
-            --priority-yellow-color: #f1c40f; /* Mantener amarillo */
-            --priority-green-color: #2ecc71; /* Mantener verde */
-            --priority-none-color: var(--border-color);
-            /* --- Fin Variables para colores de prioridad --- */
         }
 
         /* --- Estilos Generales --- */
@@ -191,12 +175,12 @@
              margin-bottom: 0;
          }
 
-        .todo-item[data-priority-color="red"] { border-left-color: var(--priority-red-color); }
-        .todo-item[data-priority-color="orange"] { border-left-color: var(--priority-orange-color); }
-        .todo-item[data-priority-color="yellow"] { border-left-color: var(--priority-yellow-color); }
-        .todo-item[data-priority-color="green"] { border-left-color: var(--priority-green-color); }
+        .todo-item[data-priority-color="red"] { border-left-color: #e74c3c; }
+        .todo-item[data-priority-color="orange"] { border-left-color: #f39c12; }
+        .todo-item[data-priority-color="yellow"] { border-left-color: #f1c40f; }
+        .todo-item[data-priority-color="green"] { border-left-color: #2ecc71; }
         /* Estilo para cuando no hay color */
-        .todo-item[data-priority-color="none"] { border-left-color: var(--priority-none-color); }
+        .todo-item[data-priority-color="none"] { border-left-color: var(--border-color); }
 
 
          .app-button {
@@ -352,17 +336,16 @@
              border-radius: 4px;
              cursor: pointer;
              flex-shrink: 0;
-             transition: border-color 0.2s ease, transform 0.1s ease, background-color 0.2s ease; /* Añadir transición para background-color */
+             transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
         }
          .todo-item .priority-color-label:hover {
              transform: scale(1.1);
          }
-        /* Usar variables CSS para los colores de fondo y borde */
-        .priority-color-label[data-color="red"] { background-color: var(--priority-red-color); border-color: var(--priority-red-color); }
-        .priority-color-label[data-color="orange"] { background-color: var(--priority-orange-color); border-color: var(--priority-orange-color); }
-        .priority-color-label[data-color="yellow"] { background-color: var(--priority-yellow-color); border-color: var(--priority-yellow-color); }
-        .priority-color-label[data-color="green"] { background-color: var(--priority-green-color); border-color: var(--priority-green-color); }
+        .priority-color-label[data-color="red"] { background-color: #e74c3c; border-color: #e74c3c; }
+        .priority-color-label[data-color="orange"] { background-color: #f39c12; border-color: #f39c12; }
+        .priority-color-label[data-color="yellow"] { background-color: #f1c40f; border-color: #f1c40f; }
+        .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
         .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
 
@@ -404,83 +387,30 @@
             opacity: 1;
         }
 
-        /* --- Estilos para input[type="date"] --- */
-        /* Estilo base para input de fecha */
         .todo-item .main-task-header .task-body input[type="date"] {
             background: none;
-            border: none; /* El borde se manejará por :not(:valid) y :valid */
-            padding: 0;   /* El padding se manejará por :not(:valid) y :valid */
+            border: none;
+            padding: 0;
             font-family: 'Lexend', sans-serif;
             font-size: 0.85rem;
-            /* Color por defecto para el texto del placeholder y el icono del calendario.
-               Este es el color que queremos ver cuando el input está vacío. */
-            color: var(--button-color);
+            color: var(--placeholder-color);
             cursor: pointer;
             flex-shrink: 0;
             outline: none;
             transition: color 0.2s ease;
-            opacity: 1; /* Asegurar opacidad completa por defecto */
-            min-height: 1.5em; /* Asegurar una altura mínima para que sea pulsable */
-            box-sizing: border-box; /* Asegurar que padding/border se incluyan en el tamaño total */
         }
-
-        /* Estilo para input de fecha cuando NO es válido (generalmente vacío) */
-        .todo-item .main-task-header .task-body input[type="date"]:not(:valid) {
-            border: 1px dashed var(--placeholder-color); /* Borde sutil para indicar el área */
-            padding: 0 4px; /* Añadir padding para que el borde y el texto tengan espacio */
-            /* El color del texto del placeholder se hereda de la regla base del input[type="date"] */
-        }
-
-        /* Estilos adicionales para navegadores WebKit (Chrome, Safari en móviles)
-           para el texto del placeholder y sus partes cuando el input está vacío. */
-        .todo-item .main-task-header .task-body input[type="date"]:not(:valid)::-webkit-datetime-edit-text,
-        .todo-item .main-task-header .task-body input[type="date"]:not(:valid)::-webkit-datetime-edit-year-field,
-        .todo-item .main-task-header .task-body input[type="date"]:not(:valid)::-webkit-datetime-edit-month-field,
-        .todo-item .main-task-header .task-body input[type="date"]:not(:valid)::-webkit-datetime-edit-day-field {
-            color: var(--button-color); /* Forzar el color en las partes internas en WebKit */
-            opacity: 1; /* Asegurar opacidad completa */
-        }
-
-        /* Estilo para input de fecha cuando es válido (tiene fecha) y la tarea NO está completada */
-         .todo-item:not(.completed) .main-task-header .task-body input[type="date"]:valid {
-            color: var(--text-color); /* Color normal cuando tiene fecha y no es hoy */
-            border: none; /* Quitar el borde discontinuo si estaba presente */
-            padding: 0; /* Quitar el padding si estaba presente */
-        }
-
-        /* Estilo para hover/focus general (se aplica si no está completado) */
-        .todo-item:not(.completed) .main-task-header .task-body input[type="date"]:hover,
-        .todo-item:not(.completed) .main-task-header .task-body input[type="date"]:focus {
-            color: var(--button-hover-color); /* Color de hover general */
-            text-decoration: underline;
-        }
-
-        /* Estilo para input de fecha cuando la tarea está completada */
-        .todo-item.completed .main-task-header .task-body input[type="date"] {
-            color: var(--completed-text-color); /* Color de completado */
-            opacity: 0.7; /* Opacidad de completado */
-            border: none; /* Asegurar que no tenga borde de :not(:valid) */
-            padding: 0; /* Asegurar que no tenga padding de :not(:valid) */
-            text-decoration: none; /* Quitar subrayado si lo tenía por hover/focus */
-            cursor: default;
-        }
-        /* Hover/Focus en tareas completadas (no debería cambiar mucho) */
-        .todo-item.completed .main-task-header .task-body input[type="date"]:hover,
-        .todo-item.completed .main-task-header .task-body input[type="date"]:focus {
-            color: var(--completed-text-color); /* Mantener color de completado */
-            text-decoration: none; /* Sin subrayado */
-        }
-
-        /* Estilo para el icono del calendario en WebKit (opcional, pero puede ayudar) */
-        .todo-item .main-task-header .task-body input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 1;
-            color: var(--button-color);
-        }
-        .todo-item.completed .main-task-header .task-body input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 0.7;
-        }
-        /* --- Fin Estilos para input[type="date"] --- */
-
+        .todo-item .main-task-header .task-body input[type="date"]:hover,
+        .todo-item .main-task-header .task-body input[type="date"]:focus {
+             color: var(--button-hover-color);
+             text-decoration: underline;
+         }
+         .todo-item .main-task-header .task-body input[type="date"]:valid {
+             color: var(--text-color);
+         }
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
+              color: var(--button-hover-color);
+         }
 
         .todo-item .main-task-header .task-body .task-actions-group .delete-button {
              padding: 6px;
@@ -621,9 +551,9 @@
             background-color: var(--progress-bar-completed-color);
         }
 
-        /* Ajuste: La regla para input[type="date"] en .completed ya está en el bloque dedicado a input[type="date"] */
         .todo-item.completed .priority-color-label,
-        .todo-item.completed .subtasks-list li .app-button {
+        .todo-item.completed .subtasks-list li .app-button,
+        .todo-item.completed .main-task-header .task-body input[type="date"] {
             opacity: 0.7;
             cursor: default;
         }
@@ -653,14 +583,14 @@
             opacity: 0.4;
         }
 
-        /* Ajuste: La regla para input[type="date"]:hover en .completed ya está en el bloque dedicado a input[type="date"] */
         .todo-item.completed .priority-color-label:hover,
-        .todo-item.completed .subtasks-list li .app-button:hover {
-            color: inherit; /* Revertir al color de completado */
+        .todo-item.completed .subtasks-list li .app-button:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:focus {
+            color: inherit;
             text-decoration: none;
             transform: none;
         }
-
 
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
@@ -720,7 +650,7 @@
                 justify-content: flex-end;
             }
             .todo-item .main-task-header .task-body input[type="date"] {
-                min-width: 110px; /* Ajustado para asegurar que el texto no se corte demasiado */
+                min-width: 110px;
                 flex-grow: 0;
                 order: 1;
             }
@@ -958,33 +888,6 @@
         }
 
         // --- UI RENDERING & EVENT HANDLERS ---
-
-        // --- FUNCIÓN PARA RESALTAR FECHA DE HOY (MODIFICADA) ---
-        function updateDateHighlight(listItemElement, task) {
-            const dateInput = listItemElement.querySelector('.task-date-input');
-            if (dateInput) {
-                const todayString = getTodayDateString();
-                const isToday = task.date === todayString;
-
-                // Resetear estilos inline primero para que las reglas CSS por defecto (:valid, :not(:valid), .completed) se apliquen
-                dateInput.style.color = '';
-                dateInput.style.fontWeight = '';
-
-                // Aplicar estilos inline SOLO si es hoy Y no está completada
-                if (isToday && !task.completed) {
-                    const computedStyle = getComputedStyle(listItemElement);
-                    const priorityColor = computedStyle.borderLeftColor;
-                    dateInput.style.color = priorityColor;
-                    dateInput.style.fontWeight = 'bold';
-                }
-                // El CSS ahora maneja el color por defecto para inputs vacíos o con fecha no-hoy.
-                // El CSS también maneja el color y opacidad para tareas completadas.
-                // El estilo inline de arriba sobrescribe el color del CSS solo para el caso "hoy y no completada".
-            }
-        }
-        // --- FIN FUNCIÓN MODIFICADA ---
-
-
         function calculateSubtaskProgress(subtasks) {
             if (!subtasks || subtasks.length === 0) return 0;
             const completed = subtasks.filter(sub => sub.completed).length;
@@ -1072,14 +975,8 @@
                 if (!task) return;
                  if (!task.completed) {
                      updateTaskDate(task.id, event.target.value);
-                     // --- LLAMAR A LA FUNCIÓN DE RESALTADO DESPUÉS DE ACTUALIZAR ---
-                     const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
-                     if (listItemElement) {
-                         updateDateHighlight(listItemElement, task);
-                     }
-                     // --- FIN LLAMADA ---
                  } else {
-                     event.target.value = task.date || ''; // Revertir si está completada
+                     event.target.value = task.date || '';
                  }
             });
 
@@ -1108,7 +1005,6 @@
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
             mainTaskHeader.appendChild(taskBody);
-
 
             return mainTaskHeader;
         }
@@ -1271,8 +1167,7 @@
                 if (mainTask.completed) listItem.classList.add('completed');
                 if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
 
-                const mainTaskHeader = createMainTaskHeader(mainTask);
-                listItem.appendChild(mainTaskHeader);
+                listItem.appendChild(createMainTaskHeader(mainTask));
                 listItem.appendChild(createProgressBar(mainTask));
 
                 if (!mainTask.completed) {
@@ -1289,10 +1184,6 @@
                 }
 
                 todoListContainer.appendChild(listItem);
-
-                // --- LLAMAR A LA FUNCIÓN DE RESALTADO AL RENDERIZAR ---
-                updateDateHighlight(listItem, mainTask);
-                // --- FIN LLAMADA ---
             });
             if (todoInput) todoInput.value = '';
         }
@@ -1306,23 +1197,8 @@
                  const currentColor = typeof task.priorityColor === 'string' ? task.priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
                  task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
-
-                 // Find the list item and priority label
-                 const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
-                 if (listItemElement) {
-                     const priorityLabelElement = listItemElement.querySelector('.priority-color-label');
-                     if (priorityLabelElement) {
-                         // --- ACTUALIZAR DATA ATTRIBUTE EN AMBOS ELEMENTOS ---
-                         listItemElement.dataset.priorityColor = task.priorityColor; // Para el borde izquierdo
-                         priorityLabelElement.dataset.color = task.priorityColor; // Para el color del label
-                         // --- FIN ACTUALIZACIÓN ---
-
-                         // Re-evaluar el highlight de fecha ya que el color de prioridad afecta el color de la fecha
-                         updateDateHighlight(listItemElement, task);
-                     }
-                 }
-
-                 saveTaskToFirestore(task); // Guardar después de actualizar el objeto task
+                 saveTaskToFirestore(task);
+                 syncAndRender();
              } else {
                   console.error("Tarea no encontrada para ciclar color:", taskId);
              }
@@ -1334,7 +1210,7 @@
                  if (task.completed) return;
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task);
-                // La llamada a updateDateHighlight ya está en el listener del input
+                syncAndRender();
             } else {
                  console.error("Tarea no encontrada para actualizar fecha:", taskId);
              }
@@ -1364,7 +1240,7 @@
             todos.push(newTodo);
 
             await saveTaskToFirestore(newTodo);
-            syncAndRender(); // syncAndRender redibujará la lista, incluyendo el highlight si la fecha es hoy
+            syncAndRender();
 
             if (todoInput) todoInput.value = '';
         }
@@ -1389,7 +1265,7 @@
                  mainTask.completedDate = null;
 
                  saveTaskToFirestore(mainTask);
-                 syncAndRender(); // syncAndRender redibujará la tarea principal con la nueva sub-tarea
+                 syncAndRender();
                  subtaskInput.value = '';
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
                  if (listItemElement) {
@@ -1413,7 +1289,7 @@
                 }
 
                 todos.splice(taskIndex, 1);
-                syncAndRender(); // syncAndRender redibujará la lista sin la tarea eliminada
+                syncAndRender();
 
                 if (taskToDelete.firebaseId) {
                     deleteTaskFromFirestore(taskToDelete.firebaseId);
@@ -1436,7 +1312,7 @@
                          mainTask.showSubtaskUI = false;
                      }
                      saveTaskToFirestore(mainTask);
-                     syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas actualizadas
+                     syncAndRender();
                  } else {
                      console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
                  }
@@ -1453,7 +1329,7 @@
                 if (subtask) {
                      subtask.completed = !subtask.completed;
                      saveTaskToFirestore(mainTask);
-                     syncAndRender(); // syncAndRender redibujará la tarea principal con el estado de sub-tarea actualizado
+                     syncAndRender();
                  } else {
                      console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
@@ -1472,8 +1348,10 @@
 
                 if (isChecked) {
                     task.completedDate = today;
+                    // --- INICIO CAMBIO SOLICITADO ---
                     // Cuando se marca como completada, quitar la etiqueta de color
                     task.priorityColor = 'none';
+                    // --- FIN CAMBIO SOLICITADO ---
 
                     if (!wasCompletedTodayBefore) {
                        updateMedalCount(1);
@@ -1499,7 +1377,7 @@
                 }
 
                 saveTaskToFirestore(task);
-                syncAndRender(); // syncAndRender redibujará la tarea principal con el estado actualizado (incluyendo highlight de fecha si aplica)
+                syncAndRender();
             } else {
                 console.error("Tarea principal inválida para cambiar estado:", taskId);
             }
@@ -1516,7 +1394,7 @@
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[newIndex]] =
                     [mainTask.subtasks[newIndex], mainTask.subtasks[subtaskIndex]];
                     saveTaskToFirestore(mainTask);
-                    syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas reordenadas
+                    syncAndRender();
                 }
             }
         }
@@ -1555,7 +1433,7 @@
              } catch (e) {
                  console.error("Error general al actualizar órdenes en Firestore:", e);
              }
-             syncAndRender(); // syncAndRender redibujará la lista con el nuevo orden
+             syncAndRender();
         }
 
         // --- THEME ---
@@ -1571,12 +1449,6 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
-             // Re-evaluar el highlight de fecha para que tome el color correcto del tema
-             document.querySelectorAll('.todo-item').forEach(item => {
-                 const taskId = item.dataset.taskId;
-                 const task = findTaskById(taskId);
-                 if (task) updateDateHighlight(item, task);
-             });
         }
 
         function disableDarkMode() {
@@ -1591,12 +1463,6 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
-            // Re-evaluar el highlight de fecha para que tome el color correcto del tema
-            document.querySelectorAll('.todo-item').forEach(item => {
-                const taskId = item.dataset.taskId;
-                const task = findTaskById(taskId);
-                if (task) updateDateHighlight(item, task);
-            });
         }
 
         function toggleDarkMode() {
@@ -1630,7 +1496,7 @@
             const initialMedalData = loadAndRefreshMedalData();
             displayMedalCount(initialMedalData.count);
 
-            renderTodosUI(); // Esto ahora llamará a updateDateHighlight para cada tarea
+            renderTodosUI();
 
             console.log(`Renderizado inicial completo.`);
 
