@@ -11,8 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Eliminado: Librería canvas-confetti -->
-
 
     <style>
         /* --- Variables CSS para Colores (Modo Claro por defecto) --- */
@@ -21,7 +19,6 @@
             --text-color: #333;
             --heading-color: #222;
             --item-bg: #ffffff;
-            --item-bg-celebrate: #e0ffe0; /* <-- Nuevo: Color de fondo para celebrar */
             --border-color: #e0e0e0;
             --input-bg: #f8f8f8;
             --input-text-color: #333;
@@ -41,8 +38,6 @@
             --legend-text-color: #666;
             --sort-button-color: #555;
             --sort-button-hover-color: #3498db; /* Color de hover para el botón de ordenar */
-            /* Eliminado: Variables para el icono de completado */
-            --footer-text-color: #aaa; /* Color para el texto del footer */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -51,7 +46,6 @@
             --text-color: #ecf0f1;
             --heading-color: #ecf0f1;
             --item-bg: #34495e;
-            --item-bg-celebrate: #4a627a; /* <-- Nuevo: Color de fondo para celebrar en dark mode */
             --border-color: #4a627a;
             --input-bg: #445b71;
             --input-text-color: #ecf0f1;
@@ -63,7 +57,6 @@
             --completed-text-color: #7f8c8d;
             --progress-bg: #4a627a;
             --progress-bar-color: #8bc34a; /* Color de barra de progreso en dark mode */
-            --progress-bar-completed-color: #8bc34a; /* Color de barra de progreso completada en dark mode */
             --empty-list-color: #bdc3c7;
             --fixed-button-bg: #34495e;
             --fixed-button-border: #4a627a;
@@ -72,8 +65,6 @@
             --sort-button-color: #bdc3c7;
             --sort-button-hover-color: #3498db; /* Mantenido el color de hover de ordenar */
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
-            /* Eliminado: Variables para el icono de completado en dark mode */
-            --footer-text-color: #777; /* Color para el texto del footer en dark mode */
         }
 
         /* --- Estilos Generales --- */
@@ -87,8 +78,7 @@
             padding-bottom: 80px; /* Asegura espacio para el botón de dark mode */
             transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
-            flex-direction: column; /* Para que los elementos se apilen verticalmente */
-            align-items: center; /* Para centrar el contenido (container y footer) */
+            justify-content: center;
         }
 
         .container {
@@ -96,7 +86,6 @@
             max-width: 600px;
             padding: 0 10px; /* Añade un poco de padding lateral al contenedor principal */
             box-sizing: border-box;
-            flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio disponible */
         }
 
         h1 {
@@ -150,14 +139,11 @@
             padding: 15px; /* Default padding */
             margin-bottom: 15px;
             box-sizing: border-box;
-            /* --- Modificado: Añadida transición para background-color y transform --- */
-            transition: background-color 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             /* --- Añadido: Borde izquierdo más grueso por defecto --- */
             border-left: 5px solid var(--border-color);
             padding-left: 10px; /* Ajusta el padding izquierdo para compensar el borde */
-            /* Eliminado: position: relative; */
-            /* Eliminado: overflow: hidden; */
         }
          .todo-item:last-child {
              margin-bottom: 0; /* El último ítem no necesita margen inferior si la lista lo tiene */
@@ -169,13 +155,6 @@
         .todo-item[data-priority-color="yellow"] { border-left-color: #f1c40f; }
         .todo-item[data-priority-color="green"] { border-left-color: #2ecc71; }
         /* El color "none" usa el borde izquierdo por defecto definido en .todo-item */
-
-        /* --- Añadido: Estilo para la celebración --- */
-        .todo-item.celebrate {
-            background-color: var(--item-bg-celebrate); /* Cambia el fondo */
-            transform: scale(1.02); /* Ligeramente más grande */
-            /* Puedes añadir box-shadow u otros efectos aquí si quieres */
-        }
 
 
          /* --- Botones --- */
@@ -314,7 +293,7 @@
         /* --- Cabecera de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
-            align-items: baseline; /* ALINEA POR LA LÍNEA BASE */
+            align-items: baseline; /* <-- ALINEA POR LA LÍNEA BASE */
             margin-bottom: 15px; /* Espacio antes de la barra de progreso o sub-tareas */
             padding: 0; /* Sin padding extra aquí */
             gap: 10px; /* Espacio entre checkbox, etiqueta de prioridad y el nuevo task-body */
@@ -324,7 +303,7 @@
              /* hereda de .custom-checkbox, aquí puedes anular si es necesario */
              border-color: var(--text-color);
              background-color: var(--item-bg);
-             /* margin-top: 3px; */ /* Ya no es necesario con baseline */
+             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
         }
          .todo-item .main-task-header input[type="checkbox"]:checked {
               background-color: var(--text-color);
@@ -342,7 +321,7 @@
              flex-shrink: 0; /* No se encoge */
              transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
-             /* margin-top: 3px; */ /* Ya no es necesario con baseline */
+             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
         }
          .todo-item .priority-color-label:hover {
              transform: scale(1.1); /* Efecto sutil al pasar el mouse */
@@ -658,19 +637,6 @@
                margin-left: auto; /* Empuja el botón de reordenar a la derecha */
           }
 
-
-        /* --- Estilos para el pie de página de créditos --- */
-        #credits {
-            text-align: center; /* Centrar el texto */
-            font-size: 0.8rem; /* Tamaño de fuente pequeño */
-            color: var(--footer-text-color); /* Color discreto usando la variable */
-            margin-top: 40px; /* Espacio arriba para separarlo del último elemento */
-            padding-bottom: 10px; /* Espacio abajo */
-            width: 100%; /* Asegura que ocupe el ancho disponible */
-            box-sizing: border-box;
-        }
-
-
         /* ------------------------------------------------------------- */
         /* --- AJUSTES PARA PANTALLAS PEQUEÑAS (MÓVILES) --- */
         /* ------------------------------------------------------------- */
@@ -767,11 +733,6 @@
         </div>
     </div>
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
-
-    <!-- Pie de página de créditos -->
-    <footer id="credits">
-        AppWeb realizada por Enrique G. para Arteextremeño
-    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
@@ -976,20 +937,24 @@
                     if (task.linkUrl) window.open(task.linkUrl, '_blank');
                     return;
                 }
-                const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", task.linkUrl || "");
-                if (newUrl === null) return; // User cancelled
-
-                if (newUrl.trim() !== "") {
-                    let finalUrl = newUrl.trim();
-                    if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
-                        finalUrl = 'https://' + finalUrl;
-                    }
-                    task.linkUrl = finalUrl;
+                if (task.linkUrl) {
+                    window.open(task.linkUrl, '_blank');
                 } else {
-                    task.linkUrl = null; // Permite borrar el enlace si se deja vacío
+                    const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", task.linkUrl || "");
+                    if (newUrl === null) return;
+
+                    if (newUrl.trim() !== "") {
+                        let finalUrl = newUrl.trim();
+                        if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
+                            finalUrl = 'https://' + finalUrl;
+                        }
+                        task.linkUrl = finalUrl;
+                    } else {
+                        task.linkUrl = null; // Permite borrar el enlace si se deja vacío
+                    }
+                    saveTaskToFirestore(task);
+                    syncAndRender();
                 }
-                saveTaskToFirestore(task);
-                syncAndRender();
             });
 
             const dateInput = document.createElement('input');
@@ -1269,10 +1234,10 @@
                     text: newSubtaskText,
                     completed: false
                 });
-                 const wasCompleted = mainTask.completed; // Guardar estado anterior
-                 // Al añadir una sub-tarea, la tarea principal no puede estar completada automáticamente por sub-tareas si ya no están todas hechas
-                 const allSubtasksCompletedAfterAdd = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-                 mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompletedAfterAdd : mainTask.completed;
+                 // Al añadir una sub-tarea, la tarea principal no puede estar completada automáticamente
+                 if (mainTask.completed) mainTask.completed = false;
+                 // Mantenemos la UI visible después de añadir una
+                 // mainTask.showSubtaskUI = false; // <- Originalmente se ocultaba, ahora la dejo visible
 
                  saveTaskToFirestore(mainTask);
                  syncAndRender();
@@ -1284,15 +1249,6 @@
                        if (inputElement) inputElement.focus();
                  }
 
-                 // --- Añadido: Disparar confeti si la tarea principal acaba de ser completada ---
-                 // Esto puede ocurrir si al añadir la última sub-tarea, la principal ya estaba marcada
-                 // o si la principal no tenía sub-tareas y se añadió la primera y se marcó.
-                 // La lógica más robusta es verificar *después* de actualizar el estado de completado principal.
-                 if (!wasCompleted && mainTask.completed) {
-                      setTimeout(() => {
-                          triggerConfetti(mainTask.id);
-                      }, 0);
-                 }
              } else {
                  console.error("Tarea principal no encontrada para agregar sub-tarea:", mainTaskId);
              }
@@ -1321,23 +1277,15 @@
                      mainTask.subtasks.splice(subtaskIndex, 1);
                      // Recalcular estado de completado de la tarea principal
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-                     const wasCompleted = mainTask.completed; // Guardar estado anterior
                      mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompleted : false; // Si no quedan sub-tareas, no está completada por sub-tareas
 
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
-
-                     // --- Añadido: Disparar confeti si la tarea principal acaba de ser completada ---
-                     if (!wasCompleted && mainTask.completed) {
-                         setTimeout(() => {
-                             triggerConfetti(mainTask.id);
-                         }, 0); // Un pequeño retraso para asegurar que el DOM se renderice
-                     }
                  } else {
                      console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
                  }
              } else {
-                  console.error("Tarea principal inválida para eliminar sub-tarea:", mainTaskId);
+                  console.error("Tarea principal no encontrada para eliminar sub-tarea:", mainTaskId);
              }
         }
 
@@ -1349,19 +1297,14 @@
                      subtask.completed = !subtask.completed;
                      // Recalcular estado de completado de la tarea principal
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(s => s.completed);
-                     const wasCompleted = mainTask.completed; // Guardar estado anterior
-                     // El estado de completado de la tarea principal se basa en sub-tareas si existen
-                     mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompleted : mainTask.completed; // Si no hay sub-tareas, no cambiar el estado principal basado en sub-tareas
+                     if (mainTask.subtasks.length > 0) {
+                          mainTask.completed = allSubtasksCompleted;
+                     } else { // Si no hay sub-tareas, el checkbox principal no depende de ellas
+                          // El estado de completado de la tarea principal se manejará solo con su checkbox
+                     }
 
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
-
-                     // --- Añadido: Disparar confeti si la tarea principal acaba de ser completada ---
-                     if (!wasCompleted && mainTask.completed) {
-                         setTimeout(() => {
-                             triggerConfetti(mainTask.id);
-                         }, 0); // Un pequeño retraso para asegurar que el DOM se renderice
-                     }
                  } else {
                      console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
@@ -1373,7 +1316,6 @@
         function toggleMainCompletion(taskId, isChecked) {
              const task = findTaskById(taskId);
              if (task) {
-                 const wasCompleted = task.completed; // Guardar estado anterior
                  task.completed = isChecked;
                  // Si la tarea principal se marca como completada/incompleta, afectar sub-tareas
                  if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
@@ -1383,13 +1325,6 @@
                  }
                  saveTaskToFirestore(task);
                  syncAndRender();
-
-                 // --- Añadido: Disparar confeti si la tarea principal acaba de ser completada ---
-                 if (!wasCompleted && task.completed) {
-                     setTimeout(() => {
-                         triggerConfetti(task.id);
-                     }, 0); // Un pequeño retraso para asegurar que el DOM se renderice
-                 }
              } else {
                   console.error("Tarea principal inválida para cambiar estado:", taskId);
              }
@@ -1465,44 +1400,6 @@
 
              syncAndRender(); // Renderizar la UI con el orden actualizado localmente
         }
-
-        // --- Función para disparar el efecto de confeti ---
-        // La llamaremos directamente cuando la tarea principal pase a completada.
-        function triggerConfetti(taskId) {
-            console.log(`Intentando disparar confeti para la tarea ${taskId}`);
-            const listItem = todoListContainer.querySelector(`li[data-task-id="${taskId}"]`);
-            if (!listItem) {
-                 console.warn(`triggerConfetti: No se encontró el elemento de la tarea con ID ${taskId}.`);
-                 return; // Salir si el elemento no se encuentra
-            }
-
-            const rect = listItem.getBoundingClientRect();
-
-            // Añadir comprobación de dimensiones para depuración
-            if (rect.width === 0 || rect.height === 0) {
-                 console.warn(`triggerConfetti: El elemento de la tarea ${taskId} tiene dimensiones cero. Posible problema de timing de renderizado.`);
-                 // Opcional: Reintentar después de un pequeño retraso si las dimensiones son cero
-                 // setTimeout(() => triggerConfetti(taskId), 50);
-                 return;
-            }
-
-
-            // Calcular el centro de la tarjeta en coordenadas del viewport (0 a 1)
-            const x = (rect.left + rect.width / 2) / window.innerWidth;
-            const y = (rect.top + rect.height / 2) / window.innerHeight;
-
-            console.log(`Disparando confeti para la tarea ${taskId} desde x: ${x}, y: ${y}`);
-
-            // Disparar el confeti desde el centro de la tarjeta
-            confetti({
-                particleCount: 100, // Cantidad de partículas
-                spread: 90, // Ángulo de dispersión (90 grados es hacia arriba)
-                origin: { x: x, y: y }, // Origen en el centro de la tarjeta
-                colors: ['#f1c40f', '#ffffff', '#3498db', '#2ecc71'], // Colores del confeti (amarillo, blanco, azul, verde)
-                disableForReducedMotion: true // Deshabilita si el usuario prefiere movimiento reducido
-            });
-        }
-
 
         // --- THEME ---
         function enableDarkMode() {
