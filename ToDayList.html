@@ -538,7 +538,7 @@
             opacity: 0.7;
             cursor: default; /* Cursor por defecto */
         }
-        
+
         .todo-item.completed .main-task-header .task-actions-group .delete-button {
             opacity: 0.7; /* Mantiene opacidad consistente */
             /* cursor: default; <- Heredado */
@@ -575,7 +575,7 @@
             text-decoration: none; /* Sin subrayado */
             transform: none; /* Sin transformación (ej. scale) */
         }
-        
+
         /* Checkbox principal en tareas completadas */
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
@@ -633,14 +633,27 @@
                 width: 100%;         /* El grupo de acciones ocupa todo el ancho disponible */
                 margin-left: 0;      /* Resetea el margin-left: auto que lo empujaba a la derecha */
                 justify-content: flex-end; /* Alinea los iconos a la derecha dentro de su nueva línea */
-                /* gap: 5px; /* Ya está definido arriba */
+                display: flex; /* Asegura que sea un contenedor flex para usar 'order' */
+                align-items: center; /* Alinea verticalmente los items dentro del grupo */
+                gap: 5px; /* Espacio entre los elementos del grupo */
             }
 
             /* Ajustar el input de fecha para que no sea demasiado ancho y se vea mejor */
             .todo-item .main-task-header input[type="date"] {
                 min-width: 110px; /* Un ancho mínimo para que se vea bien la fecha */
                 flex-grow: 0;     /* No queremos que crezca y empuje otros iconos */
+                order: 1; /* <-- Nuevo: Coloca el input de fecha primero en el grupo de acciones */
             }
+
+            /* Aplicar orden a los botones para que link y delete queden juntos al final */
+            .todo-item .main-task-header .task-actions-group .link-button {
+                order: 2; /* <-- Nuevo: Coloca el botón de enlace después de la fecha */
+            }
+
+            .todo-item .main-task-header .task-actions-group .delete-button {
+                order: 3; /* <-- Nuevo: Coloca el botón de eliminar al final */
+            }
+
 
             /* Ajustes opcionales para el contenedor de input principal en móviles */
             #todo-input-container {
@@ -1173,7 +1186,7 @@
                  if (mainTask.completed) mainTask.completed = false;
                  // Mantenemos la UI visible después de añadir una
                  // mainTask.showSubtaskUI = false; // <- Originalmente se ocultaba, ahora la dejo visible
-                 
+
                  saveTaskToFirestore(mainTask);
                  syncAndRender();
                  subtaskInput.value = ''; // Limpiar el input de sub-tarea
@@ -1255,7 +1268,7 @@
                  // Si la tarea principal se marca como completada/incompleta, afectar sub-tareas
                  if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
                      task.subtasks.forEach(subtask => {
-                         subtask.completed = isChecked; // Marcar/desmarcar todas las sub-tareas
+                         subtask.completed = isChecked; // Mark/unmark all subtasks
                      });
                  }
                  saveTaskToFirestore(task);
