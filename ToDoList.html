@@ -7,10 +7,11 @@
     <title>ToDoList</title>
 
     <!-- Línea para añadir el Favicon -->
-    <!-- Asegúrate de que el nombre del archivo (href) y el tipo (type) coincidan con tu imagen -->
-    <link rel="icon" href="favicon.png" type="image/png">
-    <!-- Si tu archivo es .ico, usa: <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
-    <!-- Si tu archivo es .svg, usa: <link rel="icon" href="favicon.svg" type="image/svg+xml"> -->
+    <!-- Usamos el nombre de archivo que proporcionaste: iconToDoList.png -->
+    <link rel="icon" href="iconToDoList.png" type="image/png">
+    <!-- Si tuvieras otros tamaños, podrías añadirlos así: -->
+    <!-- <link rel="icon" href="iconToDoList-32x32.png" sizes="32x32" type="image/png"> -->
+    <!-- <link rel="apple-touch-icon" href="iconToDoList-180x180.png"> -->
 
 
     <!-- Enlace a Google Font: Quicksand (para el título) -->
@@ -203,7 +204,7 @@
 
          /* Specific styles for '-' (delete) buttons */
          .delete-button {
-             color: var(--delete-button-color); /* Color rojo para eliminar */
+             color: var(--delete-button-color); /* Rojo para eliminar */
          }
          .delete-button:hover {
              color: var(--delete-button-hover-color);
@@ -392,7 +393,7 @@
          .todo-item .main-task-header input[type="date"]:valid {
              color: var(--text-color); /* Color normal si tiene fecha */
          }
-         .todo-item .main-task-header input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header input[type="date"]:valid:hover,
          .todo-item.completed .main-task-header input[type="date"]:valid:focus {
               color: var(--button-hover-color); /* Rojo de hover si tiene fecha */
          }
