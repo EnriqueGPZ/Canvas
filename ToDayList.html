@@ -622,36 +622,37 @@
             }
 
             /* El span del título ya tiene flex-grow: 1, lo cual es bueno.
-               Al hacer que .task-actions-group ocupe el 100% de la siguiente línea,
-               el título tendrá el espacio que necesita en la primera línea. */
+               Al quitar width: 100% del grupo de acciones, el título podrá
+               ocupar el espacio restante en la primera línea. */
             .todo-item .main-task-header span {
-                /* flex-grow: 1; /* Ya está definido arriba, pero lo reafirmo si quieres */
+                /* flex-grow: 1; /* Ya está definido arriba */
                 /* min-width: 0; /* Ya está definido arriba */
             }
 
             .todo-item .main-task-header .task-actions-group {
-                width: 100%;         /* El grupo de acciones ocupa todo el ancho disponible */
-                margin-left: 0;      /* Resetea el margin-left: auto que lo empujaba a la derecha */
-                justify-content: flex-end; /* Alinea los iconos a la derecha dentro de su nueva línea */
+                /* width: 100%; */ /* <-- Eliminado: Ya no forzamos el grupo a una nueva línea */
+                margin-left: auto; /* <-- Restaurado: Permite que se empuje a la derecha si cabe */
+                justify-content: flex-end; /* Alinea los iconos a la derecha dentro de su contenedor (ya sea en la 1ª o 2ª línea) */
                 display: flex; /* Asegura que sea un contenedor flex para usar 'order' */
                 align-items: center; /* Alinea verticalmente los items dentro del grupo */
                 gap: 5px; /* Espacio entre los elementos del grupo */
+                flex-shrink: 0; /* Evita que se encoja */
             }
 
             /* Ajustar el input de fecha para que no sea demasiado ancho y se vea mejor */
             .todo-item .main-task-header input[type="date"] {
                 min-width: 110px; /* Un ancho mínimo para que se vea bien la fecha */
                 flex-grow: 0;     /* No queremos que crezca y empuje otros iconos */
-                order: 1; /* <-- Nuevo: Coloca el input de fecha primero en el grupo de acciones */
+                order: 1; /* Coloca el input de fecha primero en el grupo de acciones */
             }
 
             /* Aplicar orden a los botones para que link y delete queden juntos al final */
             .todo-item .main-task-header .task-actions-group .link-button {
-                order: 2; /* <-- Nuevo: Coloca el botón de enlace después de la fecha */
+                order: 2; /* Coloca el botón de enlace después de la fecha */
             }
 
             .todo-item .main-task-header .task-actions-group .delete-button {
-                order: 3; /* <-- Nuevo: Coloca el botón de eliminar al final */
+                order: 3; /* Coloca el botón de eliminar al final */
             }
 
 
