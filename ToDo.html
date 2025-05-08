@@ -133,7 +133,6 @@
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            /* word-break: break-word; */ /* Movido al span del título */
             box-sizing: border-box;
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -271,10 +270,9 @@
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
-        /* --- Estilos de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
-            align-items: center; /* o flex-start si prefieres alinear arriba con texto multilínea */
+            align-items: center;
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
@@ -308,23 +306,19 @@
         .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
         .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
-        /* Texto de la tarea principal */
         .todo-item .main-task-header span {
             font-weight: 700;
             font-size: 1.1rem;
             flex-grow: 1;
             color: var(--text-color);
             transition: color 0.3s ease, text-decoration 0.3s ease;
-            /* overflow: hidden; */ /* Quitado para permitir salto de línea */
-            /* text-overflow: ellipsis; */ /* Quitado */
-            /* white-space: nowrap; */ /* Quitado */
-            min-width: 0; /* Puede ayudar a flexbox, prueba quitar si no es necesario */
-            word-break: break-word; /* AÑADIDO para romper palabras largas */
+            min-width: 0; 
+            word-break: break-word; 
         }
 
         .todo-item .main-task-header .task-actions-group {
             display: flex;
-            align-items: center; /* o flex-start si prefieres alinear arriba con texto multilínea */
+            align-items: center; 
             gap: 5px;
             margin-left: auto;
             flex-shrink: 0;
@@ -435,7 +429,7 @@
              color: var(--text-color);
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
-             word-break: break-word; /* Para sub-tareas también */
+             word-break: break-word;
         }
          .todo-item .subtasks-list li .subtask-move-button {
              color: var(--button-color);
@@ -493,7 +487,6 @@
              display: none;
         }
 
-        /* --- Estilos para Tarea COMPLETADA --- */
         .todo-item.completed .main-task-header span,
         .todo-item.completed .subtasks-list li span {
             color: var(--completed-text-color);
@@ -676,54 +669,42 @@
                     return addDoc(tareasRef, dataToSave);
                 });
                 await Promise.all(addPromises);
-                console.log("Datos guardados en Firestore correctamente.");
+                console.log("Datos guardados en Firestore correctamente (operación completa).");
             } catch (e) {
-                console.error("Error al guardar en Firestore:", e);
+                console.error("Error al guardar en Firestore (operación completa):", e);
+                // Lanzar el error para que el .catch en saveTodos lo maneje si es necesario
+                throw e;
             }
         }
 
-        async function loadTodosOnline() {
-            try {
-                console.log("Cargando de Firestore...");
-                const querySnapshot = await getDocs(tareasRef);
-                const todos = [];
-                querySnapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                     todos.push({
-                        firebaseId: docSnap.id,
-                        text: data.text || 'Tarea sin nombre',
-                        completed: typeof data.completed === 'boolean' ? data.completed : false,
-                        subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [],
-                        showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
-                        priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
-                        date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
-                        linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
-                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity)
+        // --- MODIFICADO: saveTodos ahora renderiza UI primero y sincroniza online en segundo plano ---
+        function saveTodos(todosArray, options = { render: true, syncOnline: true }) {
+            console.log("Guardando datos (local)...");
+            saveTodosToLocalStorage(todosArray); // Guardar en Local Storage (rápido)
+
+            if (options.render) {
+                // Actualizar la UI inmediatamente después del guardado local
+                console.log("Renderizando UI...");
+                renderTodos(todosArray);
+            }
+
+            if (options.syncOnline) {
+                console.log("Iniciando guardado en Firestore en segundo plano...");
+                // Guardar en Firestore en segundo plano, sin bloquear la UI
+                // Usamos .then().catch() para manejar el resultado de la promesa sin await
+                saveTodosOnline(todosArray)
+                    .then(() => {
+                        console.log("Guardado en Firestore en segundo plano completado.");
+                    })
+                    .catch(e => {
+                        console.error("Error en guardado en Firestore en segundo plano:", e);
+                        // Opcionalmente, notificar al usuario si el guardado en segundo plano falla
+                        // alert("Hubo un problema al sincronizar los datos con la nube en segundo plano.");
                     });
-                });
-                console.log("Datos cargados de Firestore:", todos);
-                saveTodosToLocalStorage(todos);
-                return todos;
-            } catch (e) {
-                 console.error("Error al cargar de Firestore:", e);
-                 throw e;
             }
         }
+        // --- FIN MODIFICADO ---
 
-        async function saveTodos(todosArray) {
-            console.log("Guardando datos (local y online)...");
-            try {
-                saveTodosToLocalStorage(todosArray);
-                await saveTodosOnline(todosArray);
-                console.log("Guardado completo (local y online).");
-            } catch (e) {
-                console.error("Error general al guardar datos:", e);
-                alert("Error al guardar la lista de tareas.");
-            }
-        }
 
         function calculateProgress(subtasks) {
             if (!subtasks || subtasks.length === 0) return 0;
@@ -772,7 +753,7 @@
                 linkButton.title = 'Añadir enlace';
             }
             linkButton.addEventListener('click', () => {
-                const todos = loadTodos();
+                const todos = loadTodos(); // Cargar para modificar, ya que el prompt es bloqueante
                 const currentTask = todos[mainIndex];
                 if (currentTask.completed) {
                     if (currentTask.linkUrl) window.open(currentTask.linkUrl, '_blank');
@@ -782,18 +763,19 @@
                     window.open(currentTask.linkUrl, '_blank');
                 } else {
                     const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", "");
-                    if (newUrl === null) return;
+                    if (newUrl === null) return; // Usuario canceló
+                    
+                    // Modificar el array 'todos' y luego llamar a saveTodos
                     if (newUrl.trim() !== "") {
                         let finalUrl = newUrl.trim();
                         if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
                             finalUrl = 'https://' + finalUrl;
                         }
-                        currentTask.linkUrl = finalUrl;
+                        todos[mainIndex].linkUrl = finalUrl;
                     } else {
-                        currentTask.linkUrl = null;
+                        todos[mainIndex].linkUrl = null;
                     }
-                    saveTodos(todos).then(() => renderTodos(todos))
-                    .catch(e => console.error("Error guardando URL de enlace:", e));
+                    saveTodos(todos); // saveTodos se encargará de renderizar y sincronizar
                 }
             });
 
@@ -865,18 +847,21 @@
                      if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
                          mainTask.subtasks = [];
                      }
-                     saveTodos(todos).then(() => {
-                         renderTodos(todos);
-                         if (newState) {
-                              const listItemElement = todoListContainer.children[mainIndex];
-                              if (listItemElement) {
-                                  const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                                  if (inputElement) {
-                                      setTimeout(() => { inputElement.focus(); }, 50);
-                                  }
-                              }
-                         }
-                     }).catch(e => console.error("Error guardando toggleSubtaskSection:", e));
+                     saveTodos(todos); // saveTodos se encarga de renderizar y sincronizar
+                     // El enfoque del input se hará después del renderizado en renderTodos si es necesario
+                     // (o se puede añadir una lógica específica si se quiere enfocar después de este saveTodos)
+                     if (newState) {
+                          // Pequeño hack para enfocar después de que el DOM se actualice
+                          setTimeout(() => {
+                            const listItemElement = todoListContainer.children[mainIndex];
+                            if (listItemElement) {
+                                const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                                if (inputElement) {
+                                    inputElement.focus();
+                                }
+                            }
+                          }, 0);
+                     }
                  } else {
                       console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
                  }
@@ -974,6 +959,9 @@
              if (todoInput) todoInput.value = '';
         }
 
+        // --- MODIFICADO: Las siguientes funciones ahora solo llaman a saveTodos ---
+        // saveTodos se encargará de llamar a renderTodos.
+
         function cyclePriorityColor(mainTaskIndex) {
              const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
@@ -982,8 +970,7 @@
                  const currentIndex = currentColors.indexOf(currentColor);
                  const nextIndex = (currentIndex + 1) % currentColors.length;
                  todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
-                 saveTodos(todos).then(() => renderTodos(todos))
-                 .catch(e => console.error("Error guardando cyclePriorityColor:", e));
+                 saveTodos(todos);
              } else {
                   console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
              }
@@ -993,8 +980,7 @@
             const todos = loadTodos();
             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                 todos[mainTaskIndex].date = newDateValue || null;
-                saveTodos(todos).then(() => renderTodos(todos))
-                 .catch(e => console.error("Error guardando updateTaskDate:", e));
+                saveTodos(todos);
             } else {
                  console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
             }
@@ -1017,8 +1003,7 @@
                 linkUrl: null,
                 order: Date.now()
             });
-            saveTodos(todos).then(() => renderTodos(todos))
-            .catch(e => console.error("Error guardando addTodo:", e));
+            saveTodos(todos);
             if (todoInput) todoInput.value = '';
         }
 
@@ -1035,8 +1020,7 @@
                  mainTask.subtasks.push({ text: newSubtaskText, completed: false });
                  if (mainTask.completed) mainTask.completed = false;
                  mainTask.showSubtaskUI = false;
-                 saveTodos(todos).then(() => renderTodos(todos))
-                 .catch(e => console.error("Error guardando addSubtask:", e));
+                 saveTodos(todos);
                  subtaskInput.value = '';
              } else {
                  console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
@@ -1047,8 +1031,7 @@
             const todos = loadTodos();
             if (indexToDelete >= 0 && indexToDelete < todos.length) {
                 todos.splice(indexToDelete, 1);
-                saveTodos(todos).then(() => renderTodos(todos))
-                .catch(e => console.error("Error guardando deleteTodo:", e));
+                saveTodos(todos);
             } else {
                 console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
             }
@@ -1066,8 +1049,7 @@
                      } else {
                          mainTask.completed = allSubtasksCompleted;
                      }
-                     saveTodos(todos).then(() => renderTodos(todos))
-                     .catch(e => console.error("Error guardando deleteSubtask:", e));
+                     saveTodos(todos);
                  } else {
                      console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
                  }
@@ -1086,8 +1068,7 @@
                      if (mainTask.subtasks.length > 0) {
                           mainTask.completed = allSubtasksCompleted;
                      }
-                     saveTodos(todos).then(() => renderTodos(todos))
-                     .catch(e => console.error("Error guardando toggleSubtaskCompletion:", e));
+                     saveTodos(todos);
                  } else {
                      console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
                  }
@@ -1106,8 +1087,7 @@
                          subtask.completed = isChecked;
                      });
                  }
-                 saveTodos(todos).then(() => renderTodos(todos))
-                 .catch(e => console.error("Error guardando toggleMainCompletion:", e));
+                 saveTodos(todos);
              } else {
                   console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
              }
@@ -1120,8 +1100,7 @@
                 if (Array.isArray(mainTask.subtasks) && subtaskIndex > 0 && subtaskIndex < mainTask.subtasks.length) {
                     [mainTask.subtasks[subtaskIndex - 1], mainTask.subtasks[subtaskIndex]] =
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex - 1]];
-                    saveTodos(todos).then(() => renderTodos(todos))
-                    .catch(e => console.error("Error guardando moveSubtaskUp:", e));
+                    saveTodos(todos);
                 }
             }
         }
@@ -1133,8 +1112,7 @@
                 if (Array.isArray(mainTask.subtasks) && subtaskIndex >= 0 && subtaskIndex < mainTask.subtasks.length - 1) {
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex + 1]] =
                     [mainTask.subtasks[subtaskIndex + 1], mainTask.subtasks[subtaskIndex]];
-                    saveTodos(todos).then(() => renderTodos(todos))
-                    .catch(e => console.error("Error guardando moveSubtaskDown:", e));
+                    saveTodos(todos);
                 }
             }
         }
@@ -1155,9 +1133,10 @@
              todos.forEach((task, index) => {
                  task.order = Date.now() + index;
              });
-             saveTodos(todos).then(() => renderTodos(todos))
-             .catch(e => console.error("Error guardando performManualSort:", e));
+             saveTodos(todos);
         }
+        // --- FIN MODIFICADO ---
+
 
         function enableDarkMode() {
             if (body) body.classList.add('dark-mode');
@@ -1225,7 +1204,7 @@
                  const orderB = b.order || 0;
                  return orderA - orderB;
              });
-            renderTodos(initialTodos);
+            renderTodos(initialTodos); // Renderizar la lista inicial
 
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
             if (todoInput) {
