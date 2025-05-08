@@ -672,45 +672,70 @@
                 console.log("Datos guardados en Firestore correctamente (operación completa).");
             } catch (e) {
                 console.error("Error al guardar en Firestore (operación completa):", e);
-                // Lanzar el error para que el .catch en saveTodos lo maneje si es necesario
                 throw e;
             }
         }
 
-        // --- MODIFICADO: saveTodos ahora renderiza UI primero y sincroniza online en segundo plano ---
         function saveTodos(todosArray, options = { render: true, syncOnline: true }) {
             console.log("Guardando datos (local)...");
-            saveTodosToLocalStorage(todosArray); // Guardar en Local Storage (rápido)
+            saveTodosToLocalStorage(todosArray); 
 
             if (options.render) {
-                // Actualizar la UI inmediatamente después del guardado local
                 console.log("Renderizando UI...");
                 renderTodos(todosArray);
             }
 
             if (options.syncOnline) {
                 console.log("Iniciando guardado en Firestore en segundo plano...");
-                // Guardar en Firestore en segundo plano, sin bloquear la UI
-                // Usamos .then().catch() para manejar el resultado de la promesa sin await
                 saveTodosOnline(todosArray)
                     .then(() => {
                         console.log("Guardado en Firestore en segundo plano completado.");
                     })
                     .catch(e => {
                         console.error("Error en guardado en Firestore en segundo plano:", e);
-                        // Opcionalmente, notificar al usuario si el guardado en segundo plano falla
-                        // alert("Hubo un problema al sincronizar los datos con la nube en segundo plano.");
                     });
             }
         }
-        // --- FIN MODIFICADO ---
-
 
         function calculateProgress(subtasks) {
             if (!subtasks || subtasks.length === 0) return 0;
             const completed = subtasks.filter(sub => sub.completed).length;
             return (completed / subtasks.length) * 100;
         }
+        
+        // --- CORREGIDO loadTodosOnline ---
+        async function loadTodosOnline() {
+            try {
+                console.log("Cargando de Firestore...");
+                const querySnapshot = await getDocs(tareasRef);
+                const todos = [];
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                     todos.push({
+                        firebaseId: docSnap.id,
+                        text: data.text || 'Tarea sin nombre',
+                        completed: typeof data.completed === 'boolean' ? data.completed : false,
+                        subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
+                            text: sub.text || 'Sub-tarea sin nombre',
+                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
+                        })) : [],
+                        showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
+                        priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
+                        date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
+                        linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
+                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // CORREGIDO: data.date en lugar de todo.date
+                    });
+                });
+                console.log("Datos cargados de Firestore:", todos);
+                saveTodosToLocalStorage(todos); // Guardar en LS después de cargar de Firebase
+                return todos;
+            } catch (e) {
+                 console.error("Error al cargar de Firestore (dentro de loadTodosOnline):", e); 
+                 throw e; 
+            }
+        }
+        // --- FIN CORRECCIÓN ---
+
 
         function createMainTaskHeader(mainTask, mainIndex) {
             const mainTaskHeader = document.createElement('div');
@@ -753,7 +778,7 @@
                 linkButton.title = 'Añadir enlace';
             }
             linkButton.addEventListener('click', () => {
-                const todos = loadTodos(); // Cargar para modificar, ya que el prompt es bloqueante
+                const todos = loadTodos(); 
                 const currentTask = todos[mainIndex];
                 if (currentTask.completed) {
                     if (currentTask.linkUrl) window.open(currentTask.linkUrl, '_blank');
@@ -763,9 +788,8 @@
                     window.open(currentTask.linkUrl, '_blank');
                 } else {
                     const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", "");
-                    if (newUrl === null) return; // Usuario canceló
+                    if (newUrl === null) return; 
                     
-                    // Modificar el array 'todos' y luego llamar a saveTodos
                     if (newUrl.trim() !== "") {
                         let finalUrl = newUrl.trim();
                         if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
@@ -775,7 +799,7 @@
                     } else {
                         todos[mainIndex].linkUrl = null;
                     }
-                    saveTodos(todos); // saveTodos se encargará de renderizar y sincronizar
+                    saveTodos(todos); 
                 }
             });
 
@@ -847,11 +871,8 @@
                      if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
                          mainTask.subtasks = [];
                      }
-                     saveTodos(todos); // saveTodos se encarga de renderizar y sincronizar
-                     // El enfoque del input se hará después del renderizado en renderTodos si es necesario
-                     // (o se puede añadir una lógica específica si se quiere enfocar después de este saveTodos)
+                     saveTodos(todos); 
                      if (newState) {
-                          // Pequeño hack para enfocar después de que el DOM se actualice
                           setTimeout(() => {
                             const listItemElement = todoListContainer.children[mainIndex];
                             if (listItemElement) {
@@ -958,9 +979,6 @@
             });
              if (todoInput) todoInput.value = '';
         }
-
-        // --- MODIFICADO: Las siguientes funciones ahora solo llaman a saveTodos ---
-        // saveTodos se encargará de llamar a renderTodos.
 
         function cyclePriorityColor(mainTaskIndex) {
              const todos = loadTodos();
@@ -1135,8 +1153,6 @@
              });
              saveTodos(todos);
         }
-        // --- FIN MODIFICADO ---
-
 
         function enableDarkMode() {
             if (body) body.classList.add('dark-mode');
@@ -1185,12 +1201,21 @@
             if (savedTheme === 'dark') enableDarkMode(); else disableDarkMode();
 
             let initialTodos = [];
+            let loadedFromFirebase = false; 
+
             try {
-                 initialTodos = await loadTodosOnline();
+                 console.log("Intentando cargar desde Firestore...");
+                 initialTodos = await loadTodosOnline(); 
+                 loadedFromFirebase = true;
+                 console.log("Datos cargados exitosamente desde Firestore.");
             } catch (e) {
                  console.error("Error al cargar datos iniciales desde Firestore. Cayendo a Local Storage:", e);
-                 initialTodos = loadTodos();
-                 alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
+                 let errorMessage = "Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.";
+                 if (e.message) { 
+                     errorMessage += ` (Detalle: ${e.message})`;
+                 }
+                 alert(errorMessage);
+                 initialTodos = loadTodos(); 
             }
 
              initialTodos.sort((a, b) => {
@@ -1204,7 +1229,9 @@
                  const orderB = b.order || 0;
                  return orderA - orderB;
              });
-            renderTodos(initialTodos); // Renderizar la lista inicial
+            
+            renderTodos(initialTodos); 
+            console.log(`Renderizado inicial completo. Datos cargados desde: ${loadedFromFirebase ? 'Firebase' : 'LocalStorage'}`);
 
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
             if (todoInput) {
