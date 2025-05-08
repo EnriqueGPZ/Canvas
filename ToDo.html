@@ -80,8 +80,6 @@
             --legend-text-color: #a0a0a0; /* Color para el texto de la leyenda oscuro */
             --sort-button-color: #bdc3c7; /* Color para el botón de ordenar oscuro */
             --sort-button-hover-color: #3498db; /* Azul para el hover del botón de ordenar (mismo) */
-            --link-icon-color: #3498db; /* Color para el icono de link (azul) */
-            --link-icon-hover-color: #2980b9; /* Azul oscuro para hover */
 
             /* Custom checkmark color for dark mode */
             --checkbox-checkmark-color: var(--bg-color); /* Usar el color de fondo principal */
@@ -661,7 +659,14 @@
 
          /* Ocultar el icono de link si se muestra el input de link */
          .todo-item.show-link-ui .link-icon {
-              display: none; /* Ocultar el icono de link */
+              display: none !important; /* Usar !important para asegurar que se oculte */
+         }
+          /* Mostrar el icono de link SOLO si hay link Y el input de link NO está visible */
+         .todo-item .link-icon {
+             display: none; /* Oculto por defecto */
+         }
+         .todo-item:not(.show-link-ui) .link-icon[title]:not([title='No link']) {
+             display: inline-block; /* Mostrar si NO se muestra el input Y tiene un link válido */
          }
 
 
@@ -1001,9 +1006,11 @@
             // --- Icono de Link (visible solo si hay link y el input no está visible) ---
             const linkIcon = document.createElement('i');
             linkIcon.classList.add('fas', 'fa-link', 'link-icon');
-            linkIcon.title = mainTask.link || 'No link'; // Tooltip muestra el link o "No link"
-            // Ocultar por defecto, se mostrará en renderTodos si hay link y showLinkUI es false
-            linkIcon.style.display = 'none';
+            // El título se actualizará en renderTodos para mostrar el link
+            linkIcon.title = mainTask.link || 'No link';
+            // La visibilidad inicial se controla por CSS y la clase show-link-ui en renderTodos
+            // linkIcon.style.display = 'none'; // Esto se maneja mejor con CSS ahora
+
             if (mainTask.link) {
                  linkIcon.addEventListener('click', () => {
                      // Solo abrir link si la tarea no está completada
@@ -1099,10 +1106,13 @@
 
              linkToggle.addEventListener('click', () => {
                  // Solo permitir editar/agregar link si la tarea no está completada
-                 if (!mainTask.completed) {
+                 const todos = loadTodos(); // Cargar estado actual para verificar
+                 if (mainIndex >= 0 && mainIndex < todos.length && !todos[mainIndex].completed) {
                     toggleLinkInput(mainIndex, true); // Mostrar el input de link
-                 } else {
+                 } else if (mainIndex >= 0 && mainIndex < todos.length && todos[mainIndex].completed) {
                      alert("No puedes editar el link de una tarea completada.");
+                 } else {
+                     console.error("Índice de tarea principal inválido para toggleLinkInput:", mainIndex);
                  }
              });
 
@@ -1121,10 +1131,13 @@
              // Listener para alternar visibilidad del INPUT
              addSubtasksToggle.addEventListener('click', () => {
                  // Solo permitir agregar sub-tareas si la tarea no está completada
-                 if (!loadTodos()[mainIndex].completed) { // Cargar estado actual para verificar
+                 const todos = loadTodos(); // Cargar estado actual para verificar
+                 if (mainIndex >= 0 && mainIndex < todos.length && !todos[mainIndex].completed) {
                      toggleSubtaskSection(mainIndex, true); // Mostrar el input de sub-tarea
-                 } else {
+                 } else if (mainIndex >= 0 && mainIndex < todos.length && todos[mainIndex].completed) {
                      alert("No puedes agregar sub-tareas a una tarea completada.");
+                 } else {
+                     console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainIndex);
                  }
              });
 
@@ -1244,16 +1257,9 @@
                 // Agregar el elemento de lista principal a la lista principal en el HTML
                 todoListContainer.appendChild(listItem);
 
-                 // NEW: Ajustar visibilidad del icono de link después de añadirlo al DOM
-                 const linkIconElement = listItem.querySelector('.link-icon');
-                 if (linkIconElement) {
-                     // Mostrar el icono de link SOLO si hay link Y el input de link NO está visible
-                     if (mainTask.link && !mainTask.showLinkUI) {
-                         linkIconElement.style.display = 'inline-block'; // O flex, block, etc. dependiendo del layout deseado
-                     } else {
-                         linkIconElement.style.display = 'none';
-                     }
-                 }
+                 // NEW: La visibilidad del icono de link ahora se controla completamente por CSS
+                 // usando la clase .show-link-ui y el selector de atributo [title]
+                 // No necesitamos JS aquí para ocultarlo/mostrarlo inicialmente.
             });
              // Limpiar el input de agregar tarea principal después de renderizar la lista
              if (todoInput) todoInput.value = '';
@@ -1282,6 +1288,19 @@
 
                 saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
                      renderTodos(todos); // Renderiza el estado actual
+                     // Si se acaba de mostrar el input, intentar enfocarlo
+                     if (show) {
+                          const listItemElement = todoListContainer.children[mainIndex];
+                          if (listItemElement) {
+                              const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                              if (inputElement) {
+                                  setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
+                                  // Mover el cursor al final del texto si ya había algo
+                                  const len = inputElement.value.length;
+                                  inputElement.setSelectionRange(len, len);
+                              }
+                          }
+                     }
                  })
                  .catch(e => console.error("Error guardando toggleSubtaskSection:", e)); // Capturar error de guardado
             } else {
@@ -1310,6 +1329,9 @@
                               const inputElement = listItemElement.querySelector('.link-input-container input[type="url"]');
                               if (inputElement) {
                                   setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
+                                   // Mover el cursor al final del texto si ya había algo
+                                  const len = inputElement.value.length;
+                                  inputElement.setSelectionRange(len, len);
                               }
                           }
                      }
@@ -1729,7 +1751,12 @@
             } catch (e) {
                  console.error("Error al cargar datos iniciales desde Firestore. Cayendo a Local Storage:", e);
                  initialTodos = loadTodos(); // Fallback a Local Storage
-                 alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
+                 // Solo mostrar alerta si la carga de Firestore falló Y Local Storage estaba vacío o falló también
+                 if (initialTodos.length === 0) {
+                     alert("Error al cargar la lista de tareas. No se encontraron datos guardados.");
+                 } else {
+                     alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
+                 }
             }
 
             // Ordenar la lista inicial después de cargarla (ya sea de Firestore o LS)
