@@ -417,10 +417,25 @@
             outline: none;
             transition: color 0.2s ease; /* Solo transición de color */
         }
+
+        /* Estilo para input de fecha cuando NO es válido (generalmente vacío) */
+        .todo-item .main-task-header .task-body input[type="date"]:not(:valid) {
+             /* Hacer el área visible cuando está vacío */
+             border: 1px dashed var(--placeholder-color); /* Borde sutil para indicar el área */
+             padding: 0 4px; /* Añadir padding para que el borde se vea */
+             background-color: transparent; /* Fondo transparente */
+             color: var(--button-color); /* Asegurar que el texto (ej: yyyy-mm-dd) tenga un color visible */
+             box-sizing: border-box; /* Incluir padding y borde en el tamaño */
+         }
+
         /* Estilo para fecha válida (no vacía) cuando NO es hoy y NO completado */
          .todo-item:not(.completed) .main-task-header .task-body input[type="date"]:valid {
              color: var(--text-color); /* Color normal cuando tiene fecha y no es hoy */
+             border: none; /* Quitar borde */
+             padding: 0; /* Quitar padding */
+             background: none; /* Quitar fondo */
          }
+
         /* Estilo para hover/focus */
         .todo-item .main-task-header .task-body input[type="date"]:hover,
         .todo-item .main-task-header .task-body input[type="date"]:focus {
@@ -433,8 +448,14 @@
               color: var(--button-hover-color); /* Mantener color de hover general */
          }
 
-        /* --- ELIMINADO: Estilos específicos para .date-today --- */
-        /* Estos estilos ahora se aplicarán directamente en JS */
+        /* Estilo para input de fecha cuando está completado */
+        .todo-item.completed .main-task-header .task-body input[type="date"] {
+            color: var(--completed-text-color); /* Color de completado */
+            opacity: 0.7; /* Opacidad de completado */
+            border: none; /* Asegurar que no tenga borde de :not(:valid) */
+            padding: 0; /* Asegurar que no tenga padding de :not(:valid) */
+            background: none; /* Asegurar que no tenga fondo de :not(:valid) */
+        }
 
 
         .todo-item .main-task-header .task-body .task-actions-group .delete-button {
@@ -926,15 +947,16 @@
                 dateInput.style.color = '';
                 dateInput.style.fontWeight = '';
 
+                // Aplicar estilos inline SOLO si es hoy Y no está completada
                 if (isToday && !task.completed) {
-                    // Si es hoy y no está completada, aplicar color de prioridad y negrita
                     const computedStyle = getComputedStyle(listItemElement);
                     const priorityColor = computedStyle.borderLeftColor;
                     dateInput.style.color = priorityColor;
                     dateInput.style.fontWeight = 'bold';
                 }
-                // Si no es hoy O está completada, los estilos ya se resetearon arriba,
-                // permitiendo que el CSS maneje el color (var(--button-color) si vacío, var(--text-color) si válido, o var(--completed-text-color) si completada).
+                // El CSS ahora maneja el color por defecto para inputs vacíos o con fecha no-hoy.
+                // El CSS también maneja el color y opacidad para tareas completadas.
+                // El estilo inline de arriba sobrescribe el color del CSS solo para el caso "hoy y no completada".
             }
         }
         // --- FIN FUNCIÓN MODIFICADA ---
