@@ -5,6 +5,14 @@
     <!-- Mantener user-scalable=no y maximum-scale=1.0 para intentar prevenir zoom en input focus en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>ToDoList</title>
+
+    <!-- Línea para añadir el Favicon -->
+    <!-- Asegúrate de que el nombre del archivo (href) y el tipo (type) coincidan con tu imagen -->
+    <link rel="icon" href="favicon.png" type="image/png">
+    <!-- Si tu archivo es .ico, usa: <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
+    <!-- Si tu archivo es .svg, usa: <link rel="icon" href="favicon.svg" type="image/svg+xml"> -->
+
+
     <!-- Enlace a Google Font: Quicksand (para el título) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -385,7 +393,7 @@
              color: var(--text-color); /* Color normal si tiene fecha */
          }
          .todo-item .main-task-header input[type="date"]:valid:hover,
-         .todo-item .main-task-header input[type="date"]:valid:focus {
+         .todo-item.completed .main-task-header input[type="date"]:valid:focus {
               color: var(--button-hover-color); /* Rojo de hover si tiene fecha */
          }
 
@@ -474,7 +482,7 @@
               border-color: var(--text-color);
          }
          /* Checkmark color in Dark Mode for subtasks */
-         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
+         body.dark-mode .todo-item.subtasks-list li input[type="checkbox"]:checked::after {
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
