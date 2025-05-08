@@ -14,57 +14,52 @@
     <style>
         /* --- Variables CSS para Colores (Modo Claro por defecto) --- */
         :root {
-            --bg-color: #f4f7f6; /* Fondo principal suave */
-            --text-color: #333; /* Texto oscuro */
-            --heading-color: #222; /* Color del título */
-            --item-bg: #ffffff; /* Fondo de cada tarea */
-            --border-color: #e0e0e0; /* Borde/separador suave */
-            --input-bg: #f8f8f8; /* Fondo de inputs */
-            --input-text-color: #333; /* Texto de inputs */
-            --placeholder-color: #888; /* Color de placeholder */
-            --button-color: #555; /* Color general de botones (iconos +) */
-            --button-hover-color: #e74c3c; /* Rojo de hover/eliminar */
-            --delete-button-color: #e74c3c; /* Rojo para eliminar */
-            --delete-button-hover-color: #c0392b; /* Rojo oscuro para eliminar hover */
-            --completed-text-color: #999; /* Texto para elementos completados */
-            --progress-bg: #e0ffe0; /* Fondo de barra de progreso (claro) */
-            --progress-bar-color: #66c266; /* Color de barra de progreso */
-            --progress-bar-completed-color: #28a745; /* Verde 100% completado */
-            --empty-list-color: #888; /* Color del mensaje de lista vacía */
-            --fixed-button-bg: #ffffff; /* Fondo del botón fijo (dark mode toggle) */
-            --fixed-button-border: #ccc; /* Borde del botón fijo */
-            --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra del botón fijo */
-            --legend-text-color: #666; /* Color para el texto de la leyenda */
-            --sort-button-color: #555; /* Color para el botón de ordenar */
-            --sort-button-hover-color: #3498db; /* Azul para el hover del botón de ordenar */
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --heading-color: #222;
+            --item-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --input-bg: #f8f8f8;
+            --input-text-color: #333;
+            --placeholder-color: #888;
+            --button-color: #555;
+            --button-hover-color: #e74c3c;
+            --delete-button-color: #e74c3c;
+            --delete-button-hover-color: #c0392b;
+            --completed-text-color: #999;
+            --progress-bg: #e0ffe0;
+            --progress-bar-color: #66c266;
+            --progress-bar-completed-color: #28a745;
+            --empty-list-color: #888;
+            --fixed-button-bg: #ffffff;
+            --fixed-button-border: #ccc;
+            --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            --legend-text-color: #666;
+            --sort-button-color: #555;
+            --sort-button-hover-color: #3498db;
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
         body.dark-mode {
-            --bg-color: #2c3e50; /* Fondo principal oscuro */
-            --text-color: #ecf0f1; /* Texto claro */
-            --heading-color: #ecf0f1; /* Color del título oscuro */
-            --item-bg: #34495e; /* Fondo de cada tarea oscuro */
-            --border-color: #4a627a; /* Borde/separador oscuro */
-            --input-bg: #445b71; /* Fondo de inputs oscuro */
-            --input-text-color: #ecf0f1; /* Texto de inputs oscuro */
-            --placeholder-color: #bdc3c7; /* Color de placeholder oscuro */
-            --button-color: #bdc3c7; /* Color general de botones (iconos +) oscuro */
-            --button-hover-color: #e74c3c; /* Rojo de hover/eliminar (mismo) */
-            --delete-button-color: #e74c3c; /* Rojo para eliminar (mismo) */
-            --delete-button-hover-color: #c0392b; /* Rojo oscuro para eliminar hover (mismo) */
-            --completed-text-color: #7f8c8d; /* Texto para elementos completados oscuro */
-            --progress-bg: #4a627a; /* Fondo de barra de progreso (oscuro) */
-            --progress-bar-color: #8bc34a; /* Verde un poco más brillante para contraste */
-            --progress-bar-completed-color: #28a745; /* Verde 100% completado (mismo) */
-            --empty-list-color: #bdc3c7; /* Color del mensaje de lista vacía oscuro */
-            --fixed-button-bg: #34495e; /* Fondo del botón fijo oscuro */
-            --fixed-button-border: #4a627a; /* Borde del botón fijo oscuro */
-            --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.4); /* Sombra del botón fijo oscuro */
-            --legend-text-color: #a0a0a0; /* Color para el texto de la leyenda oscuro */
-            --sort-button-color: #bdc3c7; /* Color para el botón de ordenar oscuro */
-            --sort-button-hover-color: #3498db; /* Azul para el hover del botón de ordenar (mismo) */
-            --checkbox-checkmark-color: var(--bg-color); /* Usar el color de fondo principal */
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --heading-color: #ecf0f1;
+            --item-bg: #34495e;
+            --border-color: #4a627a;
+            --input-bg: #445b71;
+            --input-text-color: #ecf0f1;
+            --placeholder-color: #bdc3c7;
+            --button-color: #bdc3c7;
+            --completed-text-color: #7f8c8d;
+            --progress-bg: #4a627a;
+            --progress-bar-color: #8bc34a;
+            --empty-list-color: #bdc3c7;
+            --fixed-button-bg: #34495e;
+            --fixed-button-border: #4a627a;
+            --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            --legend-text-color: #a0a0a0;
+            --sort-button-color: #bdc3c7;
+            --checkbox-checkmark-color: var(--bg-color);
         }
 
         /* --- Estilos Generales --- */
@@ -276,12 +271,12 @@
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
+        /* --- Estilos de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
             padding: 0;
-            flex-wrap: wrap;
             gap: 10px;
         }
         .todo-item .main-task-header input[type="checkbox"] {
@@ -297,7 +292,6 @@
              display: inline-block;
              width: 16px;
              height: 16px;
-             margin-right: 8px;
              border: 1px solid var(--border-color);
              border-radius: 4px;
              cursor: pointer;
@@ -318,9 +312,30 @@
             font-weight: 700;
             font-size: 1.1rem;
             flex-grow: 1;
-            margin-right: 10px;
             color: var(--text-color);
             transition: color 0.3s ease, text-decoration 0.3s ease;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .todo-item .main-task-header .task-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .todo-item .main-task-header .link-button {
+            color: var(--button-color);
+            padding: 6px;
+            font-size: 1.1rem;
+            opacity: 0.5; /* Apagado por defecto */
+        }
+        .todo-item .main-task-header .link-button.link-on {
+            opacity: 1; /* Encendido */
         }
 
         .todo-item .main-task-header input[type="date"] {
@@ -331,8 +346,6 @@
             font-size: 0.85rem;
             color: var(--placeholder-color);
             cursor: pointer;
-            margin-left: auto;
-            margin-right: 5px;
             flex-shrink: 0;
             outline: none;
             transition: color 0.2s ease;
@@ -350,49 +363,9 @@
               color: var(--button-hover-color);
          }
 
-        .todo-item .main-task-header button {
+        .todo-item .main-task-header .task-actions-group .delete-button {
              padding: 6px;
              font-size: 1.2rem;
-        }
-
-        /* --- Estilos para el Botón de Enlace en Tareas --- */
-        .todo-item .main-task-header .link-button {
-            color: var(--button-color);
-            padding: 6px; /* Consistente con otros botones de icono */
-            font-size: 1.1rem; /* Tamaño del icono */
-            margin-right: 8px; /* Espacio antes del siguiente elemento (fecha) */
-            /* No establecer margin-left: auto aquí, para que se posicione después del texto */
-            opacity: 0.5; /* Estado "apagado" por defecto */
-        }
-
-        .todo-item .main-task-header .link-button.link-on {
-            opacity: 1; /* Estado "encendido" */
-        }
-
-        .todo-item .main-task-header .link-button:hover {
-            /* Hereda el color de hover de .app-button si se usa esa clase */
-            /* Si no, definir explícitamente: color: var(--button-hover-color); */
-        }
-
-        /* Comportamiento en tareas completadas para el botón de enlace */
-        .todo-item.completed .main-task-header .link-button.link-off {
-            cursor: default; /* No se puede añadir enlace a tarea completada */
-        }
-        .todo-item.completed .main-task-header .link-button.link-off:hover {
-            color: var(--button-color); /* No cambiar color en hover */
-            opacity: 0.5; /* Mantener opacidad de apagado */
-        }
-        /* Para .link-on.completed, el hover de .app-button es suficiente, ya que la acción (abrir) es válida */
-        /* Si se quiere un comportamiento específico para .link-on en completadas: */
-        .todo-item.completed .main-task-header .link-button.link-on {
-            /* La opacidad general de .completed .app-button ya lo atenúa un poco */
-            /* Si se quiere que no cambie en hover en absoluto: */
-            /* opacity: 0.7; */ /* Heredado de .completed .app-button */
-        }
-        .todo-item.completed .main-task-header .link-button.link-on:hover {
-            /* Si se quiere que no cambie en hover en absoluto: */
-            /* color: var(--button-color); */ /* O el color que tenga en estado completado */
-            /* opacity: 0.7; */
         }
 
 
@@ -517,6 +490,7 @@
              display: none;
         }
 
+        /* --- Estilos para Tarea COMPLETADA --- */
         .todo-item.completed .main-task-header span,
         .todo-item.completed .subtasks-list li span {
             color: var(--completed-text-color);
@@ -525,42 +499,53 @@
         .todo-item.completed .progress-bar {
             background-color: var(--progress-bar-completed-color);
         }
-        .todo-item.completed .main-task-header button, /* Esto incluye el link-button */
+
+        /* Estilos para elementos en tareas completadas */
+        .todo-item.completed .priority-color-label,
         .todo-item.completed .subtasks-list li .app-button,
-        .todo-item.completed .main-task-header input[type="date"],
-        .todo-item.completed .priority-color-label {
+        .todo-item.completed .main-task-header .task-actions-group input[type="date"] { /* Input de fecha */
             opacity: 0.7;
-            /* cursor: default;  Quitado para que el link-button siga siendo clickable si tiene URL */
-        }
-         .todo-item.completed .main-task-header button:hover,
-         .todo-item.completed .subtasks-list li .app-button:hover,
-         .todo-item.completed .main-task-header input[type="date"]:hover,
-         .todo-item.completed .main-task-header input[type="date"]:focus,
-         .todo-item.completed .priority-color-label:hover {
-             /* opacity: 0.7; */ /* Se maneja por el estado específico del link-button */
-             /* color: inherit; */
-             text-decoration: none;
-             transform: none;
-         }
-         /* Ajuste para que el link-button en estado completado y con link siga siendo usable */
-         .todo-item.completed .main-task-header .link-button.link-on {
-            opacity: 0.7; /* Atenuado pero usable */
-            cursor: pointer;
-         }
-         .todo-item.completed .main-task-header .link-button.link-on:hover {
-            color: var(--button-hover-color); /* Permitir hover si tiene link */
-            opacity: 1; /* Puede resaltar un poco más en hover */
-         }
-         .todo-item.completed .main-task-header .link-button.link-off {
-            opacity: 0.4; /* Más atenuado si no tiene link y está completada */
             cursor: default;
-         }
-         .todo-item.completed .main-task-header .link-button.link-off:hover {
-            color: var(--button-color);
-            opacity: 0.4;
-         }
+        }
+        
+        /* Botones dentro del grupo de acciones en tareas completadas (excluyendo el link-button que se trata aparte) */
+        .todo-item.completed .main-task-header .task-actions-group .delete-button { /* Específicamente el de borrar */
+            opacity: 0.7;
+            cursor: default;
+        }
+        .todo-item.completed .main-task-header .task-actions-group .delete-button:hover {
+            opacity: 0.7; 
+            color: var(--delete-button-color); 
+        }
 
+        /* Comportamiento específico para el LINK-BUTTON en tareas completadas */
+        .todo-item.completed .main-task-header .link-button.link-on {
+            opacity: 0.8; /* "Encendido" pero ligeramente atenuado por estar completada */
+            cursor: pointer; 
+        }
+        .todo-item.completed .main-task-header .link-button.link-on:hover {
+            color: var(--button-hover-color); 
+            opacity: 1; 
+        }
+        .todo-item.completed .main-task-header .link-button.link-off {
+            opacity: 0.4; /* "Apagado" y más atenuado por estar completada */
+            cursor: default; 
+        }
+        .todo-item.completed .main-task-header .link-button.link-off:hover {
+            color: var(--button-color); 
+            opacity: 0.4; 
+        }
 
+        /* Quitar hover effects para la mayoría de elementos en tareas completadas */
+        .todo-item.completed .priority-color-label:hover,
+        .todo-item.completed .subtasks-list li .app-button:hover,
+        .todo-item.completed .main-task-header .task-actions-group input[type="date"]:hover,
+        .todo-item.completed .main-task-header .task-actions-group input[type="date"]:focus {
+            color: inherit;
+            text-decoration: none;
+            transform: none;
+        }
+        
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
              background-color: var(--completed-text-color);
@@ -622,7 +607,7 @@
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4",
+            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", // Reemplaza con tu API Key si es necesario
             authDomain: "todolist-5cc91.firebaseapp.com",
             projectId: "todolist-5cc91",
             storageBucket: "todolist-5cc91.firebaseapp.com",
@@ -660,7 +645,7 @@
                         showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
                         priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
                         date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
-                        linkUrl: typeof todo.linkUrl === 'string' ? todo.linkUrl : null, // MODIFICADO
+                        linkUrl: typeof todo.linkUrl === 'string' ? todo.linkUrl : null,
                         order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
                     }));
                 } else {
@@ -716,7 +701,7 @@
                         showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
-                        linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null, // MODIFICADO
+                        linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
                         order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity)
                     });
                 });
@@ -771,13 +756,15 @@
 
             const mainTaskSpan = document.createElement('span');
             mainTaskSpan.textContent = mainTask.text;
+            mainTaskSpan.title = mainTask.text;
 
-            // --- BOTÓN DE ENLACE (NUEVO) ---
+            const taskActionsGroup = document.createElement('div');
+            taskActionsGroup.classList.add('task-actions-group');
+
             const linkButton = document.createElement('button');
             linkButton.classList.add('app-button', 'link-button');
             linkButton.innerHTML = '<i class="fas fa-link"></i>';
             linkButton.setAttribute('aria-label', 'Gestionar enlace');
-
             if (mainTask.linkUrl) {
                 linkButton.classList.add('link-on');
                 linkButton.title = `Abrir enlace: ${mainTask.linkUrl}`;
@@ -785,24 +772,18 @@
                 linkButton.classList.add('link-off');
                 linkButton.title = 'Añadir enlace';
             }
-
             linkButton.addEventListener('click', () => {
                 const todos = loadTodos();
                 const currentTask = todos[mainIndex];
-
                 if (currentTask.completed) {
-                    if (currentTask.linkUrl) {
-                        window.open(currentTask.linkUrl, '_blank');
-                    }
+                    if (currentTask.linkUrl) window.open(currentTask.linkUrl, '_blank');
                     return;
                 }
-
                 if (currentTask.linkUrl) {
                     window.open(currentTask.linkUrl, '_blank');
                 } else {
                     const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", "");
                     if (newUrl === null) return;
-
                     if (newUrl.trim() !== "") {
                         let finalUrl = newUrl.trim();
                         if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
@@ -812,13 +793,10 @@
                     } else {
                         currentTask.linkUrl = null;
                     }
-                    
-                    saveTodos(todos).then(() => {
-                        renderTodos(todos);
-                    }).catch(e => console.error("Error guardando URL de enlace:", e));
+                    saveTodos(todos).then(() => renderTodos(todos))
+                    .catch(e => console.error("Error guardando URL de enlace:", e));
                 }
             });
-            // --- FIN BOTÓN DE ENLACE ---
 
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
@@ -849,9 +827,10 @@
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
             mainTaskHeader.appendChild(mainTaskSpan);
-            mainTaskHeader.appendChild(linkButton); // AÑADIDO EL BOTÓN DE ENLACE
-            mainTaskHeader.appendChild(dateInput);
-            mainTaskHeader.appendChild(deleteMainButton);
+            taskActionsGroup.appendChild(linkButton);
+            taskActionsGroup.appendChild(dateInput);
+            taskActionsGroup.appendChild(deleteMainButton);
+            mainTaskHeader.appendChild(taskActionsGroup);
 
             return mainTaskHeader;
         }
@@ -1036,7 +1015,7 @@
                 showSubtaskUI: false,
                 priorityColor: 'none',
                 date: null,
-                linkUrl: null, // MODIFICADO
+                linkUrl: null,
                 order: Date.now()
             });
             saveTodos(todos).then(() => renderTodos(todos))
