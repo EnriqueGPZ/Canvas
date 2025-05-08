@@ -22,10 +22,13 @@
             --input-bg: #f8f8f8;
             --input-text-color: #333;
             --placeholder-color: #888;
-            --button-color: #555;
+            --button-color: #555; /* Color base para iconos/botones */
             --button-hover-color: #e74c3c; /* Color de hover para botones generales */
-            --delete-button-color: #e74c3c;
-            --delete-button-hover-color: #c0392b;
+            
+            /* AJUSTADO: Colores para el botón de eliminar */
+            --delete-button-color: var(--button-color); /* Usa el color base de otros iconos */
+            --delete-button-hover-color: var(--button-hover-color); /* Usa el hover general (o define uno específico si prefieres) */
+            
             --completed-text-color: #999;
             --progress-bg: #e0ffe0;
             --progress-bar-color: #66c266;
@@ -52,10 +55,13 @@
             --input-bg: #445b71;
             --input-text-color: #ecf0f1;
             --placeholder-color: #bdc3c7;
-            --button-color: #bdc3c7;
+            --button-color: #bdc3c7; /* Color base para iconos/botones en dark mode */
             --button-hover-color: #f39c12; /* Cambiado color hover en dark mode */
-            --delete-button-color: #e74c3c; /* Mantenido el color de borrar */
-            --delete-button-hover-color: #c0392b; /* Mantenido el color de borrar */
+
+            /* AJUSTADO: Colores para el botón de eliminar en dark mode */
+            --delete-button-color: var(--button-color); /* Usa el color base de otros iconos */
+            --delete-button-hover-color: var(--button-hover-color); /* Usa el hover general (o define uno específico) */
+            
             --completed-text-color: #7f8c8d;
             --progress-bg: #4a627a;
             --progress-bar-color: #8bc34a; /* Color de barra de progreso en dark mode */
@@ -79,19 +85,19 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
-            padding-bottom: 80px; /* Asegura espacio para el botón de dark mode Y el footer */
+            padding-bottom: 80px; 
             transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
-            flex-direction: column; /* Cambiado a columna para que el footer vaya abajo */
-            align-items: center; /* Centra el contenido */
+            flex-direction: column; 
+            align-items: center; 
         }
 
         .container {
             width: 100%;
             max-width: 600px;
-            padding: 0 10px; /* Añade un poco de padding lateral al contenedor principal */
+            padding: 0 10px; 
             box-sizing: border-box;
-            flex-grow: 1; /* Permite que el contenedor principal ocupe espacio */
+            flex-grow: 1; 
         }
 
         h1 {
@@ -99,18 +105,17 @@
             color: var(--heading-color);
             text-align: center;
             margin-top: 0;
-            margin-bottom: 10px; /* Reducido para acercar el contador de medallas */
+            margin-bottom: 10px; 
             font-weight: 700;
             font-size: 2.5rem;
             letter-spacing: -0.5px;
         }
         
-        /* --- NUEVO: Estilos para el contador de medallas --- */
         #medal-counter-container {
             text-align: center;
             font-size: 1.2rem;
             color: var(--medal-text-color);
-            margin-bottom: 20px; /* Espacio antes de la lista de tareas */
+            margin-bottom: 20px; 
         }
         #medal-counter-container .fa-medal {
             color: var(--medal-color);
@@ -119,7 +124,6 @@
         #medal-count {
             font-weight: bold;
         }
-        /* --- FIN NUEVO --- */
 
 
         #priority-legend {
@@ -127,48 +131,48 @@
             font-size: 0.75rem;
             color: var(--legend-text-color);
             margin-top: 30px;
-            margin-bottom: 20px; /* Ajustado para que haya espacio antes del footer */
+            margin-bottom: 20px; 
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-wrap: wrap; /* Permite que la leyenda se ajuste en pantallas pequeñas */
-            gap: 5px 10px; /* Espacio entre elementos de la leyenda */
+            flex-wrap: wrap; 
+            gap: 5px 10px; 
         }
         #priority-legend .priority-legend-item {
-             display: inline-flex; /* Mantiene el inline-flex */
+             display: inline-flex; 
              align-items: center;
-             gap: 4px; /* Espacio entre el color y el texto */
+             gap: 4px; 
         }
          #priority-legend .priority-color-label {
              width: 10px;
              height: 10px;
-             margin-right: 0; /* Eliminado el margin-right ya que gap lo maneja */
-             flex-shrink: 0; /* Evita que se encoja */
+             margin-right: 0; 
+             flex-shrink: 0; 
          }
          #priority-legend .priority-color-label:hover {
-             transform: none; /* Sin efecto hover en la leyenda */
+             transform: none; 
          }
 
         #todo-list {
             list-style: none;
             padding: 0;
-            margin: 0 0 30px 0; /* Margen inferior antes del input de nueva tarea */
+            margin: 0 0 30px 0; 
         }
 
         .todo-item {
             background-color: var(--item-bg);
-            border: 1px solid var(--border-color); /* Default border */
+            border: 1px solid var(--border-color); 
             border-radius: 8px;
-            padding: 15px; /* Default padding */
+            padding: 15px; 
             margin-bottom: 15px;
             box-sizing: border-box;
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             border-left: 5px solid var(--border-color);
-            padding-left: 10px; /* Ajusta el padding izquierdo para compensar el borde */
+            padding-left: 10px; 
         }
          .todo-item:last-child {
-             margin-bottom: 0; /* El último ítem no necesita margen inferior si la lista lo tiene */
+             margin-bottom: 0; 
          }
 
         .todo-item[data-priority-color="red"] { border-left-color: #e74c3c; }
@@ -207,10 +211,10 @@
              color: var(--button-hover-color); 
          }
          .delete-button {
-             color: var(--delete-button-color);
+             color: var(--delete-button-color); /* Usará la variable ajustada */
          }
          .delete-button:hover {
-             color: var(--delete-button-hover-color);
+             color: var(--delete-button-hover-color); /* Usará la variable ajustada */
          }
          .sort-button {
              color: var(--sort-button-color);
@@ -555,7 +559,7 @@
         }
         .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button:hover { 
             opacity: 0.7; 
-            color: var(--delete-button-color); 
+            color: var(--delete-button-color); /* Mantiene el color base al hacer hover en completadas */
         }
 
         .todo-item.completed .main-task-header .task-body .link-button.link-on { 
@@ -662,7 +666,6 @@
 
     <div class="container">
         <h1>ToDayList</h1>
-        <!-- NUEVO: Contenedor para medallas -->
         <div id="medal-counter-container">
             <i class="fas fa-medal"></i> <span id="medal-count">0</span>
         </div>
@@ -737,13 +740,13 @@
         let reorderButton;
         let darkModeToggle;
         let body;
-        let medalCountDisplay; // NUEVO: para el span del contador de medallas
+        let medalCountDisplay; 
 
         let todos = [];
 
         const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
         const PRIORITY_ORDER = { 'red': 1, 'orange': 2, 'yellow': 3, 'green': 4, 'none': 5 };
-        const MEDALS_STORAGE_KEY = 'dailyMedalData'; // NUEVO: Clave para localStorage
+        const MEDALS_STORAGE_KEY = 'dailyMedalData'; 
 
         // --- UTILITIES ---
         function generateLocalId() {
@@ -758,9 +761,9 @@
             return todos.findIndex(todo => todo.id === taskId);
         }
 
-        // --- NUEVO: Funciones para Medallas ---
+        // --- Funciones para Medallas ---
         function getTodayDateString() {
-            return new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+            return new Date().toISOString().split('T')[0]; 
         }
 
         function displayMedalCount(count) {
@@ -774,10 +777,9 @@
             const today = getTodayDateString();
 
             if (!medalData || medalData.date !== today) {
-                // Si no hay datos o la fecha es de un día anterior, recalcular para hoy
                 console.log("Recalculando medallas para hoy o inicializando.");
                 let countForToday = 0;
-                todos.forEach(task => { // Asegurarse que 'todos' esté cargado
+                todos.forEach(task => { 
                     if (task.completed && task.completedDate === today) {
                         countForToday++;
                     }
@@ -788,19 +790,18 @@
             return medalData;
         }
 
-        function updateMedalCount(change) { // change puede ser 1 o -1
-            let medalData = loadAndRefreshMedalData(); // Asegura que estamos trabajando con los datos de hoy
+        function updateMedalCount(change) { 
+            let medalData = loadAndRefreshMedalData(); 
             
             medalData.count += change;
             if (medalData.count < 0) {
-                medalData.count = 0; // No permitir contador negativo
+                medalData.count = 0; 
             }
 
             localStorage.setItem(MEDALS_STORAGE_KEY, JSON.stringify(medalData));
             displayMedalCount(medalData.count);
             console.log(`Medallas actualizadas: ${medalData.count} (cambio: ${change})`);
         }
-        // --- FIN NUEVO: Funciones para Medallas ---
 
 
         // --- DATA HANDLING (FIRESTORE & LOCAL) ---
@@ -817,7 +818,7 @@
                         firebaseId: docSnap.id,
                         text: data.text || 'Tarea sin nombre',
                         completed: typeof data.completed === 'boolean' ? data.completed : false,
-                        completedDate: data.completedDate || null, // NUEVO: Cargar fecha de compleción
+                        completedDate: data.completedDate || null, 
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
                             id: sub.id || generateLocalId(),
                             text: sub.text || 'Sub-tarea sin nombre',
@@ -832,7 +833,6 @@
                 });
                 todos = firestoreTodos;
                 console.log("Tareas cargadas desde Firestore:", todos.length);
-                // No llamar a renderTodosUI aquí directamente, se hará después de inicializar medallas
             } catch (e) {
                  console.error("Error al cargar tareas desde Firestore:", e);
                  alert("Error al cargar tareas desde la nube. Verifica tu conexión.");
@@ -840,7 +840,7 @@
         }
 
         async function saveTaskToFirestore(taskData) {
-            const { firebaseId, ...dataToSave } = { ...taskData }; // completedDate se guardará si existe
+            const { firebaseId, ...dataToSave } = { ...taskData }; 
 
             if (firebaseId) {
                 try {
@@ -1225,7 +1225,7 @@
                 firebaseId: null,
                 text: newTodoText,
                 completed: false,
-                completedDate: null, // NUEVO: Inicializar
+                completedDate: null, 
                 subtasks: [],
                 showSubtaskUI: false,
                 priorityColor: 'none', 
@@ -1258,7 +1258,7 @@
                     completed: false
                 });
                  mainTask.completed = false;
-                 mainTask.completedDate = null; // Si se añade subtarea, la principal no puede estar completada hoy para medalla
+                 mainTask.completedDate = null; 
 
                  saveTaskToFirestore(mainTask);
                  syncAndRender();
@@ -1279,7 +1279,6 @@
             if (taskIndex > -1) {
                 const taskToDelete = todos[taskIndex];
                 
-                // NUEVO: Si la tarea eliminada contribuyó a una medalla hoy, restarla
                 const today = getTodayDateString();
                 if (taskToDelete.completed && taskToDelete.completedDate === today) {
                     updateMedalCount(-1);
@@ -1304,7 +1303,7 @@
                  if (subtaskIndex > -1) {
                      mainTask.subtasks.splice(subtaskIndex, 1);
                      mainTask.completed = false;
-                     mainTask.completedDate = null; // Si se modifica subtarea, la principal no puede estar completada hoy para medalla
+                     mainTask.completedDate = null; 
                      if (mainTask.subtasks.length === 0) {
                          mainTask.showSubtaskUI = false;
                      }
@@ -1325,12 +1324,6 @@
                 const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
                 if (subtask) {
                      subtask.completed = !subtask.completed;
-                     // Si al cambiar una subtarea, la tarea principal estaba marcada como completada (y por ende con medalla)
-                     // y ahora ya no todas las subtareas están completas, la tarea principal ya no está 100% completa.
-                     // Sin embargo, la medalla se gestiona solo por el check principal.
-                     // Aquí solo nos aseguramos de que el estado 'completed' de la tarea principal se actualice si es necesario
-                     // si queremos que el check principal refleje el estado de las subtareas automáticamente.
-                     // Por ahora, el check principal es independiente.
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
                  } else {
@@ -1344,16 +1337,13 @@
         function toggleMainCompletion(taskId, isChecked) {
             const task = findTaskById(taskId);
             if (task) {
-                const wasCompletedBefore = task.completed; // Estado ANTES del cambio
                 const wasCompletedTodayBefore = task.completed && task.completedDate === getTodayDateString();
 
                 task.completed = isChecked;
                 const today = getTodayDateString();
 
-                if (isChecked) { // Tarea marcada como completada
-                    task.completedDate = today; // Marcar fecha de compleción
-                    // Solo sumar medalla si NO estaba completada antes Y se completa hoy
-                    // O si estaba completada pero no hoy (ej. completada ayer, hoy se vuelve a "confirmar")
+                if (isChecked) { 
+                    task.completedDate = today; 
                     if (!wasCompletedTodayBefore) {
                        updateMedalCount(1);
                     }
@@ -1361,12 +1351,11 @@
                     if (typeof confetti === 'function') {
                         confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 } });
                     }
-                } else { // Tarea desmarcada
-                    // Solo restar medalla si ESTABA completada HOY
+                } else { 
                     if (wasCompletedTodayBefore) {
                        updateMedalCount(-1);
                     }
-                    task.completedDate = null; // Limpiar fecha de compleción
+                    task.completedDate = null; 
                     task.showSubtaskUI = false;
                 }
 
@@ -1482,7 +1471,7 @@
             reorderButton = document.getElementById('reorder-button');
             darkModeToggle = document.getElementById('dark-mode-toggle');
             body = document.body;
-            medalCountDisplay = document.getElementById('medal-count'); // NUEVO
+            medalCountDisplay = document.getElementById('medal-count'); 
 
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
@@ -1491,13 +1480,12 @@
                 disableDarkMode(); 
             }
 
-            await loadTodosFromFirestore(); // Cargar tareas PRIMERO
+            await loadTodosFromFirestore(); 
 
-            // NUEVO: Inicializar y mostrar contador de medallas DESPUÉS de cargar tareas
             const initialMedalData = loadAndRefreshMedalData();
             displayMedalCount(initialMedalData.count);
 
-            renderTodosUI(); // Renderizar UI después de cargar tareas y medallas
+            renderTodosUI(); 
 
             console.log(`Renderizado inicial completo.`);
 
