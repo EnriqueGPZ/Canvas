@@ -133,7 +133,7 @@
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            word-break: break-word;
+            /* word-break: break-word; */ /* Movido al span del título */
             box-sizing: border-box;
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -274,7 +274,7 @@
         /* --- Estilos de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
-            align-items: center;
+            align-items: center; /* o flex-start si prefieres alinear arriba con texto multilínea */
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
@@ -308,21 +308,23 @@
         .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
         .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
+        /* Texto de la tarea principal */
         .todo-item .main-task-header span {
             font-weight: 700;
             font-size: 1.1rem;
             flex-grow: 1;
             color: var(--text-color);
             transition: color 0.3s ease, text-decoration 0.3s ease;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            min-width: 0;
+            /* overflow: hidden; */ /* Quitado para permitir salto de línea */
+            /* text-overflow: ellipsis; */ /* Quitado */
+            /* white-space: nowrap; */ /* Quitado */
+            min-width: 0; /* Puede ayudar a flexbox, prueba quitar si no es necesario */
+            word-break: break-word; /* AÑADIDO para romper palabras largas */
         }
 
         .todo-item .main-task-header .task-actions-group {
             display: flex;
-            align-items: center;
+            align-items: center; /* o flex-start si prefieres alinear arriba con texto multilínea */
             gap: 5px;
             margin-left: auto;
             flex-shrink: 0;
@@ -332,10 +334,10 @@
             color: var(--button-color);
             padding: 6px;
             font-size: 1.1rem;
-            opacity: 0.5; /* Apagado por defecto */
+            opacity: 0.5; 
         }
         .todo-item .main-task-header .link-button.link-on {
-            opacity: 1; /* Encendido */
+            opacity: 1; 
         }
 
         .todo-item .main-task-header input[type="date"] {
@@ -433,6 +435,7 @@
              color: var(--text-color);
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
+             word-break: break-word; /* Para sub-tareas también */
         }
          .todo-item .subtasks-list li .subtask-move-button {
              color: var(--button-color);
@@ -500,16 +503,14 @@
             background-color: var(--progress-bar-completed-color);
         }
 
-        /* Estilos para elementos en tareas completadas */
         .todo-item.completed .priority-color-label,
         .todo-item.completed .subtasks-list li .app-button,
-        .todo-item.completed .main-task-header .task-actions-group input[type="date"] { /* Input de fecha */
+        .todo-item.completed .main-task-header .task-actions-group input[type="date"] {
             opacity: 0.7;
             cursor: default;
         }
         
-        /* Botones dentro del grupo de acciones en tareas completadas (excluyendo el link-button que se trata aparte) */
-        .todo-item.completed .main-task-header .task-actions-group .delete-button { /* Específicamente el de borrar */
+        .todo-item.completed .main-task-header .task-actions-group .delete-button {
             opacity: 0.7;
             cursor: default;
         }
@@ -518,9 +519,8 @@
             color: var(--delete-button-color); 
         }
 
-        /* Comportamiento específico para el LINK-BUTTON en tareas completadas */
         .todo-item.completed .main-task-header .link-button.link-on {
-            opacity: 0.8; /* "Encendido" pero ligeramente atenuado por estar completada */
+            opacity: 0.8; 
             cursor: pointer; 
         }
         .todo-item.completed .main-task-header .link-button.link-on:hover {
@@ -528,7 +528,7 @@
             opacity: 1; 
         }
         .todo-item.completed .main-task-header .link-button.link-off {
-            opacity: 0.4; /* "Apagado" y más atenuado por estar completada */
+            opacity: 0.4; 
             cursor: default; 
         }
         .todo-item.completed .main-task-header .link-button.link-off:hover {
@@ -536,7 +536,6 @@
             opacity: 0.4; 
         }
 
-        /* Quitar hover effects para la mayoría de elementos en tareas completadas */
         .todo-item.completed .priority-color-label:hover,
         .todo-item.completed .subtasks-list li .app-button:hover,
         .todo-item.completed .main-task-header .task-actions-group input[type="date"]:hover,
