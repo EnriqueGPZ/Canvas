@@ -557,6 +557,8 @@
             text-decoration: line-through;
         }
         .todo-item.completed .progress-bar {
+            /* La barra en tareas completadas siempre muestra 100%,
+               el color de 'completed-color' se usa aquí */
             background-color: var(--progress-bar-completed-color);
         }
 
@@ -660,7 +662,7 @@
         @media (max-width: 500px) { /* Aplica estilos cuando el ancho de la ventana es <= 500px */
             .todo-item .main-task-header {
                 /* flex-wrap: wrap; */ /* Ya está definido arriba */
-                row-gap: 8px;    /* Espacio vertical entre la línea del checkbox/color y la línea del task-body si envuelve */
+                row-gap: 8px;    /* Espacio vertical entre la línea del checkbox/color y la línea del task-body if it wraps */
                 /* align-items: flex-start; */ /* <-- ELIMINADO: Usamos baseline ahora */
             }
 
@@ -711,18 +713,18 @@
 
             /* Ajustes opcionales para el contenedor de input principal en móviles */
             #todo-input-container {
-                /* flex-direction: column; /* Opcional: si quieres el input arriba y botones abajo */
-                /* align-items: stretch; */ /* Si usas flex-direction: column */
+                /* flex-direction: column; /* Optional: if you want input on top and buttons below */
+                /* align-items: stretch; */ /* If using flex-direction: column */
             }
-            /* Si los botones no caben en la misma línea que el input */
+            /* If buttons don't fit on the same line as the input */
             #todo-input-container #add-todo-button,
             #todo-input-container #reorder-button {
-                 /* flex-grow: 1; /* Hace que los botones ocupen el espacio disponible si están en su propia línea */
-                 /* margin-top: 5px; /* Si bajan a otra línea */
+                 /* flex-grow: 1; /* Makes buttons take available space if on their own line */
+                 /* margin-top: 5px; /* If they drop to a new line */
             }
-             /* Si quieres que el botón de reordenar esté al lado del de añadir en móvil */
+             /* If you want the reorder button next to the add button on mobile */
              #todo-input-container #reorder-button {
-                  margin-left: 0; /* Elimina el 'auto' para que no se separe */
+                  margin-left: 0; /* Remove 'auto' so it doesn't separate */
              }
 
         }
@@ -754,6 +756,9 @@
     <p class="footer-text">WebApp creada por Enrique Gil para Arteextremeño</p>
 
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
+
+    <!-- CDN de canvas-confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
@@ -900,7 +905,8 @@
         }
 
         // --- UI RENDERING & EVENT HANDLERS ---
-        function calculateProgress(subtasks) {
+        // Calcula el progreso de las subtareas (0 a 100)
+        function calculateSubtaskProgress(subtasks) {
             if (!subtasks || subtasks.length === 0) return 0;
             const completed = subtasks.filter(sub => sub.completed).length;
             return (completed / subtasks.length) * 100;
@@ -986,7 +992,7 @@
             dateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
-                 if (!task.completed) {
+                 if (!task.completed) { // Solo permitir cambiar la fecha si la tarea no está completada
                     updateTaskDate(task.id, event.target.value);
                  } else {
                      event.target.value = task.date || ''; // Resetea si está completada
@@ -1000,6 +1006,7 @@
             deleteMainButton.addEventListener('click', () => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
+                 // Confirmar eliminación si tiene subtareas o si ya está completada
                  if ((task.subtasks && task.subtasks.length > 0) || task.completed) {
                      if (!confirm(`¿Estás seguro de eliminar la tarea "${task.text}"?`)) {
                          return;
@@ -1027,21 +1034,32 @@
             return mainTaskHeader;
         }
 
+        // Modificada para ajustar el 100% cuando hay subtareas
         function createProgressBar(mainTask) {
              const progressContainer = document.createElement('div');
              progressContainer.classList.add('progress-container');
              const progressBar = document.createElement('div');
              progressBar.classList.add('progress-bar');
-             let progressPercentage = 0;
-             if (mainTask.subtasks && mainTask.subtasks.length > 0) {
-                 progressPercentage = calculateProgress(mainTask.subtasks);
-             } else if (mainTask.completed && (!mainTask.subtasks || mainTask.subtasks.length === 0)) {
-                 progressPercentage = 100; // Una tarea sin sub-tareas completada es 100%
+
+             let displayedProgress = 0;
+
+             if (mainTask.completed) {
+                 // Si la tarea principal está marcada como completada, la barra siempre es 100%
+                 displayedProgress = 100;
+             } else if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                 // Si no está completada pero tiene subtareas, calcula el progreso de subtareas
+                 const subtaskProgress = calculateSubtaskProgress(mainTask.subtasks);
+                 // Si el progreso de subtareas llega al 100%, móstralo como 90% (o tu límite)
+                 displayedProgress = subtaskProgress === 100 ? 90 : subtaskProgress;
              }
-             progressBar.style.width = `${progressPercentage}%`;
+             // Si no está completada y no tiene subtareas, el progreso es 0 (ya cubierto por displayedProgress = 0 inicial)
+
+
+             progressBar.style.width = `${displayedProgress}%`;
              progressContainer.appendChild(progressBar);
              return progressContainer;
         }
+
 
         function createAddSubtasksToggle(mainTaskId) {
              const addSubtasksToggle = document.createElement('button');
@@ -1051,6 +1069,9 @@
              addSubtasksToggle.addEventListener('click', () => {
                  const task = findTaskById(mainTaskId);
                  if (task) {
+                     // Si la tarea está completada, no permitir añadir subtareas
+                     if (task.completed) return;
+
                      task.showSubtaskUI = !task.showSubtaskUI;
                      if (task.showSubtaskUI && (!Array.isArray(task.subtasks) || task.subtasks.length === 0)) {
                          task.subtasks = []; // Asegurarse de que subtasks es un array si se muestra la UI
@@ -1086,8 +1107,14 @@
                     checkbox.type = 'checkbox';
                     checkbox.classList.add('custom-checkbox');
                     checkbox.checked = subtask.completed;
+                     // Deshabilitar checkbox de subtarea si la tarea principal está completada
+                    if (mainTask.completed) {
+                        checkbox.disabled = true;
+                    }
                     checkbox.addEventListener('change', () => {
-                        toggleSubtaskCompletion(mainTask.id, subtask.id);
+                         if (!mainTask.completed) { // Solo permitir cambiar si la tarea principal no está completada
+                             toggleSubtaskCompletion(mainTask.id, subtask.id);
+                         }
                     });
                     const subtaskSpan = document.createElement('span');
                     subtaskSpan.textContent = subtask.text;
@@ -1098,23 +1125,36 @@
                     moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
                     moveUpButton.setAttribute('aria-label', 'Mover sub-tarea arriba');
                     moveUpButton.title = 'Mover sub-tarea arriba';
-                    if (subIndex === 0) moveUpButton.disabled = true;
-                    moveUpButton.addEventListener('click', () => moveSubtaskUp(mainTask.id, subtask.id));
+                    // Deshabilitar botones de mover si la tarea principal está completada o si no se puede mover
+                    if (mainTask.completed || subIndex === 0) moveUpButton.disabled = true;
+                    moveUpButton.addEventListener('click', () => {
+                         if (!mainTask.completed) moveSubtaskUp(mainTask.id, subtask.id);
+                    });
 
                     const moveDownButton = document.createElement('button');
                     moveDownButton.classList.add('app-button', 'subtask-move-button');
                     moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
                     moveDownButton.setAttribute('aria-label', 'Mover sub-tarea abajo');
                     moveDownButton.title = 'Mover sub-tarea abajo';
-                    if (subIndex === mainTask.subtasks.length - 1) moveDownButton.disabled = true;
-                    moveDownButton.addEventListener('click', () => moveSubtaskDown(mainTask.id, subtask.id));
+                    // Deshabilitar botones de mover si la tarea principal está completada o si no se puede mover
+                    if (mainTask.completed || subIndex === mainTask.subtasks.length - 1) moveDownButton.disabled = true;
+                    moveDownButton.addEventListener('click', () => {
+                         if (!mainTask.completed) moveSubtaskDown(mainTask.id, subtask.id);
+                    });
 
                     const deleteSubtaskButton = document.createElement('button');
                     deleteSubtaskButton.classList.add('app-button', 'delete-button');
                     deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
                     deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea');
                     deleteSubtaskButton.title = 'Eliminar sub-tarea';
-                    deleteSubtaskButton.addEventListener('click', () => deleteSubtask(mainTask.id, subtask.id));
+                    // Deshabilitar botón de eliminar si la tarea principal está completada
+                     if (mainTask.completed) {
+                         deleteSubtaskButton.disabled = true;
+                     }
+                    deleteSubtaskButton.addEventListener('click', () => {
+                         if (!mainTask.completed) deleteSubtask(mainTask.id, subtask.id);
+                    });
+
 
                     subtaskItem.appendChild(checkbox);
                     subtaskItem.appendChild(subtaskSpan);
@@ -1175,9 +1215,23 @@
                 listItem.appendChild(createProgressBar(mainTask));
                 // La UI de añadir sub-tarea se muestra u oculta con una clase en el contenedor
                 // pero el botón toggle y el input container siempre se crean
-                listItem.appendChild(createAddSubtasksToggle(mainTask.id));
-                listItem.appendChild(createSubtasksList(mainTask));
-                listItem.appendChild(createSubtaskInputContainer(mainTask.id));
+                 // No mostrar el toggle de subtareas si la tarea principal está completada
+                if (!mainTask.completed) {
+                    listItem.appendChild(createAddSubtasksToggle(mainTask.id));
+                } else {
+                    // Si está completada, asegurar que la UI de sub-tarea esté oculta
+                     mainTask.showSubtaskUI = false; // Esto asegura el estado correcto en la memoria
+                     // No creamos el toggle ni el input container, solo la lista si tiene subtareas
+                }
+
+                 // Siempre crear la lista de subtareas si existen, incluso si la tarea principal está completada
+                if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                    listItem.appendChild(createSubtasksList(mainTask));
+                }
+                // Crear el input container solo si la UI está mostrada (y la tarea principal no está completada)
+                if (mainTask.showSubtaskUI && !mainTask.completed) {
+                     listItem.appendChild(createSubtaskInputContainer(mainTask.id));
+                }
 
 
                 todoListContainer.appendChild(listItem);
@@ -1189,6 +1243,9 @@
         function cyclePriorityColor(taskId) {
              const task = findTaskById(taskId);
              if (task) {
+                  // No permitir cambiar prioridad si está completada
+                 if (task.completed) return;
+
                  const currentColors = PRIORITY_COLORS;
                  const currentColor = typeof task.priorityColor === 'string' ? task.priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
@@ -1203,6 +1260,9 @@
         function updateTaskDate(taskId, newDateValue) {
             const task = findTaskById(taskId);
             if (task) {
+                 // No permitir cambiar fecha si está completada (esto ya se maneja en createMainTaskHeader, pero doble chequeo)
+                 if (task.completed) return;
+
                 task.date = newDateValue || null; // Guarda null si el valor es vacío
                 saveTaskToFirestore(task);
                 syncAndRender();
@@ -1249,16 +1309,17 @@
              }
              const mainTask = findTaskById(mainTaskId);
              if (mainTask) {
+                 // No permitir añadir subtarea si la principal está completada
+                 if (mainTask.completed) return;
+
                  if (!Array.isArray(mainTask.subtasks)) mainTask.subtasks = [];
                  mainTask.subtasks.push({
                     id: generateLocalId(),
                     text: newSubtaskText,
                     completed: false
                 });
-                 // Al añadir una sub-tarea, la tarea principal no puede estar completada automáticamente
-                 if (mainTask.completed) mainTask.completed = false;
-                 // Mantenemos la UI visible después de añadir una
-                 // mainTask.showSubtaskUI = false; // <- Originalmente se ocultaba, ahora la dejo visible
+                 // Al añadir una sub-tarea, la tarea principal DEBE estar incompleta
+                 mainTask.completed = false;
 
                  saveTaskToFirestore(mainTask);
                  syncAndRender();
@@ -1293,12 +1354,18 @@
         function deleteSubtask(mainTaskId, subtaskId) {
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && Array.isArray(mainTask.subtasks)) {
+                 // No permitir eliminar si la principal está completada
+                 if (mainTask.completed) return;
+
                  const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
                  if (subtaskIndex > -1) {
                      mainTask.subtasks.splice(subtaskIndex, 1);
-                     // Recalcular estado de completado de la tarea principal
-                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-                     mainTask.completed = mainTask.subtasks.length > 0 ? allSubtasksCompleted : false; // Si no quedan sub-tareas, no está completada por sub-tareas
+                     // Si se elimina una subtarea, la tarea principal DEBE estar incompleta
+                     mainTask.completed = false;
+                      // Si no quedan subtareas, ocultar la UI
+                     if (mainTask.subtasks.length === 0) {
+                         mainTask.showSubtaskUI = false;
+                     }
 
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
@@ -1310,19 +1377,19 @@
              }
         }
 
+        // Modificada para NO marcar la tarea principal como completada automáticamente
         function toggleSubtaskCompletion(mainTaskId, subtaskId) {
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && Array.isArray(mainTask.subtasks)) {
+                 // No permitir cambiar estado si la principal está completada (ya manejado en createSubtasksList, pero doble chequeo)
+                 if (mainTask.completed) return;
+
                 const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
                 if (subtask) {
                      subtask.completed = !subtask.completed;
-                     // Recalcular estado de completado de la tarea principal
-                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(s => s.completed);
-                     if (mainTask.subtasks.length > 0) {
-                          mainTask.completed = allSubtasksCompleted;
-                     } else { // Si no hay sub-tareas, el checkbox principal no depende de ellas
-                          // El estado de completado de la tarea principal se manejará solo con su checkbox
-                     }
+
+                     // NOTA: Ya NO recalculamos el estado `mainTask.completed` aquí.
+                     // Eso solo ocurrirá cuando se haga check en el checkbox principal.
 
                      saveTaskToFirestore(mainTask);
                      syncAndRender();
@@ -1334,26 +1401,49 @@
              }
         }
 
+        // Modificada para lanzar confeti y afectar sub-tareas
         function toggleMainCompletion(taskId, isChecked) {
-             const task = findTaskById(taskId);
-             if (task) {
-                 task.completed = isChecked;
-                 // Si la tarea principal se marca como completada/incompleta, afectar sub-tareas
-                 if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
-                     task.subtasks.forEach(subtask => {
-                         subtask.completed = isChecked; // Mark/unmark all subtasks
-                     });
-                 }
-                 saveTaskToFirestore(task);
-                 syncAndRender();
-             } else {
-                  console.error("Tarea principal inválida para cambiar estado:", taskId);
-             }
+            const task = findTaskById(taskId);
+            if (task) {
+                task.completed = isChecked;
+
+                // Si la tarea principal se marca/desmarca, afectar sub-tareas
+                if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+                    task.subtasks.forEach(subtask => {
+                         subtask.completed = isChecked; // Marcar/desmarcar todas las sub-tareas
+                    });
+                }
+
+                 // Si se acaba de completar (pasó de false a true) Y si canvas-confetti está disponible, lanzar confeti
+                if (isChecked && typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 150, // Un poco más de partículas
+                        spread: 90, // Un poco más disperso
+                        origin: { y: 0.55 } // Ligeramente más arriba
+                    });
+                } else if (!isChecked) {
+                     // Si se desmarca la tarea principal, asegurarse de que la UI de sub-tarea no esté mostrada si estaba visible
+                     // para evitar inconsistencias visuales al desmarcar una tarea con el input de subtarea abierto.
+                     // Podríamos no hacerlo, pero simplifica la UI.
+                     task.showSubtaskUI = false;
+                }
+
+
+                saveTaskToFirestore(task);
+                syncAndRender();
+            } else {
+                console.error("Tarea principal inválida para cambiar estado:", taskId);
+            }
         }
+        // --- Fin de la función modificada ---
+
 
         function moveSubtask(mainTaskId, subtaskId, direction) {
             const mainTask = findTaskById(mainTaskId);
             if (mainTask && Array.isArray(mainTask.subtasks)) {
+                 // No permitir mover si la principal está completada
+                 if (mainTask.completed) return;
+
                 const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
                 if (subtaskIndex === -1) return;
 
@@ -1386,6 +1476,7 @@
                  if (dateA !== dateB) return dateA - dateB;
 
                  // 3. (Opcional) Completado (incompletas primero)
+                 // Desactivado para el nuevo flujo: la tarea principal solo se marca como completada por el check principal
                  // const completedA = a.completed ? 1 : 0;
                  // const completedB = b.completed ? 1 : 0;
                  // if (completedA !== completedB) return completedA - completedB;
