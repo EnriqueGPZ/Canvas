@@ -615,18 +615,7 @@
     <script type="module">
         // 1. Importar los módulos necesarios de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
-        import {
-            getFirestore,
-            collection,
-            addDoc,
-            deleteDoc,
-            doc,
-            updateDoc, // Importar updateDoc
-            onSnapshot, // Importar onSnapshot
-            writeBatch, // Importar writeBatch para reordenar
-            query, // Importar query
-            orderBy // Importar orderBy
-        } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
 
         // 2. Configurar tu conexión a Firebase
         // !! IMPORTANTE: Asegúrate de que las reglas de seguridad de Firestore
@@ -655,9 +644,6 @@
         let darkModeToggle;
         let body;
 
-        // Variable para almacenar la lista de tareas localmente (sincronizada con Firestore)
-        let currentTodos = []; // Ahora esta lista se actualiza *desde* el listener de Firestore
-
 
         // Colores de prioridad disponibles y su orden para ciclar
         const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
@@ -672,9 +658,9 @@
         };
 
 
-        // --- Funciones para Local Storage (Para carga rápida inicial) ---
+        // --- Funciones para Local Storage (Se mantienen para carga rápida y fallback) ---
 
-        function loadTodosFromLocalStorage() {
+        function loadTodos() {
             try {
                 const storedTodos = localStorage.getItem('todos');
                 if (storedTodos) {
@@ -682,17 +668,19 @@
                     // Asegurarse de que las tareas antiguas tengan las propiedades necesarias
                     // y limpiar datos potencialmente corruptos o faltantes
                     return todos.map(todo => ({
-                        firebaseId: todo.firebaseId || null, // Asegurar que tiene firebaseId (será null si es data vieja)
-                        text: todo.text || 'Tarea sin nombre',
-                        completed: typeof todo.completed === 'boolean' ? todo.completed : false,
+                        // No necesitamos firebaseId para la lógica JS en este modelo, pero lo mantenemos si existe en los datos
+                        firebaseId: todo.firebaseId || null,
+                        text: todo.text || 'Tarea sin nombre', // Default text if missing
+                        completed: typeof todo.completed === 'boolean' ? todo.completed : false, // Ensure boolean
                         subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
                             text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [], // Ensure subtasks is an array and clean its items
-                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
-                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
-                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
-                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity) // Añadir campo order, usar fecha o Infinity como fallback
+                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false, // Ensure boolean with default false
+                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none', // Ensure valid color with default 'none'
+                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null, // Add date property, validate format
+                         // Mantener el campo order si existe, aunque no se use activamente en este modelo de guardado
+                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
                     }));
                 } else {
                     return [];
@@ -703,16 +691,90 @@
             }
         }
 
-        function saveTodosToLocalStorage(todosArray) {
-             try {
-                 localStorage.setItem('todos', JSON.stringify(todosArray));
-             } catch (e) {
-                 console.error("Error al guardar en localStorage:", e);
-             }
+        // --- Funciones para Firebase Firestore (Modelo anterior: Delete All + Add All) ---
+
+        // Función para guardar TODAS las tareas en Firestore (sobrescribe lo anterior)
+        async function saveTodosOnline(todosArray) {
+            try {
+                // 1. Eliminar documentos existentes
+                const querySnapshot = await getDocs(tareasRef);
+                const deletePromises = querySnapshot.docs.map(docSnap =>
+                    deleteDoc(doc(db, "tareas", docSnap.id))
+                );
+                await Promise.all(deletePromises); // Esperar a que se borren todos
+
+                // 2. Añadir los nuevos documentos
+                // Asegurarse de NO guardar el firebaseId en el nuevo documento
+                const addPromises = todosArray.map(todo => {
+                    const { firebaseId, ...dataToSave } = todo; // Excluir firebaseId
+                    return addDoc(tareasRef, dataToSave);
+                });
+                await Promise.all(addPromises); // Esperar a que se añadan todos
+
+                console.log("Datos guardados en Firestore correctamente.");
+            } catch (e) {
+                console.error("Error al guardar en Firestore:", e);
+                alert("Error al guardar la lista de tareas en la nube.");
+            }
+        }
+
+        // Función para cargar las tareas desde Firestore (Modelo anterior)
+        async function loadTodosOnline() {
+            try {
+                console.log("Cargando de Firestore...");
+                const querySnapshot = await getDocs(tareasRef);
+                const todos = [];
+                querySnapshot.forEach(docSnap => {
+                    // Asegurarse de que los datos cargados tengan la estructura esperada
+                    const data = docSnap.data();
+                     todos.push({
+                        firebaseId: docSnap.id, // Guardar el ID de Firebase si existe
+                        text: data.text || 'Tarea sin nombre',
+                        completed: typeof data.completed === 'boolean' ? data.completed : false,
+                        subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
+                            text: sub.text || 'Sub-tarea sin nombre',
+                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
+                        })) : [],
+                        showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
+                        priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
+                        date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
+                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // Cargar el campo order si existe
+                    });
+                });
+                console.log("Datos cargados de Firestore:", todos);
+
+                // Guardar los datos cargados de Firestore en Local Storage para la próxima carga rápida
+                saveTodosToLocalStorage(todos);
+
+                return todos;
+
+            } catch (e) {
+                 console.error("Error al cargar de Firestore:", e);
+                 // Si falla la carga de Firestore, intentar cargar de Local Storage como fallback
+                 alert("Error al cargar la lista de tareas desde la nube. Intentando cargar datos locales.");
+                 return loadTodos(); // Fallback a Local Storage
+            }
+        }
+
+        // --- Sobrescribir la función original de guardado para que use Firestore ---
+        // Ahora esta función es la única que se llama para guardar cambios.
+        async function saveTodos(todosArray) {
+            console.log("Guardando datos (local y online)...");
+            try {
+                // Guardar primero en Local Storage (más rápido para el usuario)
+                saveTodosToLocalStorage(todosArray);
+                // Luego, guardar en Firestore (en segundo plano)
+                await saveTodosOnline(todosArray);
+                console.log("Guardado completo (local y online).");
+            } catch (e) {
+                console.error("Error general al guardar datos:", e);
+                // La función saveTodosOnline ya maneja sus propios errores,
+                // pero este catch general puede ser útil si hay un problema antes de llamarla.
+            }
         }
 
 
-        // --- Funciones de Lógica de la App (Ahora interactúan con Firestore) ---
+        // --- Funciones de Lógica de la App (Modifican array local y llaman a saveTodos) ---
 
         // Calcula el progreso de una tarea principal basado en sus sub-tareas
         function calculateProgress(subtasks) {
@@ -734,20 +796,21 @@
             mainCheckbox.type = 'checkbox';
             mainCheckbox.classList.add('custom-checkbox'); // Aplicar clase de estilo custom
             mainCheckbox.checked = mainTask.completed;
+            // El listener ahora solo llama a toggleMainCompletion, que modifica el array local y guarda
             mainCheckbox.addEventListener('change', (event) => {
-                // Llamar a la función que actualiza en Firestore
-                toggleMainCompletion(mainTask.firebaseId, event.target.checked);
+                toggleMainCompletion(mainIndex, event.target.checked);
             });
 
             const priorityLabel = document.createElement('div');
             priorityLabel.classList.add('priority-color-label');
             priorityLabel.dataset.color = mainTask.priorityColor;
             priorityLabel.title = `Prioridad: ${mainTask.priorityColor.charAt(0).toUpperCase() + mainTask.priorityColor.slice(1)}`;
+            // El listener ahora solo llama a cyclePriorityColor, que modifica el array local y guarda
             priorityLabel.addEventListener('click', () => {
-                // Solo permitir cambiar prioridad si la tarea no está completada
-                if (!mainTask.completed) {
-                    cyclePriorityColor(mainTask.firebaseId, mainTask.priorityColor);
-                }
+                 // Solo permitir cambiar prioridad si la tarea no está completada
+                 if (!mainTask.completed) {
+                    cyclePriorityColor(mainIndex);
+                 }
             });
 
             const mainTaskSpan = document.createElement('span');
@@ -763,7 +826,7 @@
             dateInput.addEventListener('change', (event) => {
                  // Solo permitir cambiar fecha si la tarea no está completada
                  if (!mainTask.completed) {
-                    updateTaskDate(mainTask.firebaseId, event.target.value);
+                    updateTaskDate(mainIndex, event.target.value);
                  } else {
                      // Si estaba completada, revertir el cambio y notificar
                      event.target.value = mainTask.date || ''; // Revertir al valor guardado
@@ -777,14 +840,14 @@
             deleteMainButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Icono de papelera
             deleteMainButton.setAttribute('aria-label', 'Eliminar tarea');
 
+            // El listener ahora solo llama a deleteTodo, que modifica el array local y guarda
             deleteMainButton.addEventListener('click', () => {
                  if ((mainTask.subtasks && mainTask.subtasks.length > 0) || mainTask.completed) {
                      if (!confirm(`¿Estás seguro de eliminar la tarea "${mainTask.text}"?`)) {
                          return;
                      }
                  }
-                // Llamar a la función que elimina en Firestore
-                deleteTodo(mainTask.firebaseId);
+                deleteTodo(mainIndex);
             });
 
             mainTaskHeader.appendChild(mainCheckbox);
@@ -816,7 +879,7 @@
              return progressContainer;
         }
 
-        function createAddSubtasksToggle(mainTask) { // Recibe la tarea completa
+        function createAddSubtasksToggle(mainIndex) { // Recibe el índice
              const addSubtasksToggle = document.createElement('button');
              addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle'); // Aplicar clases de estilo
              addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i> Agregar Sub-tareas'; // Texto e icono
@@ -824,14 +887,43 @@
 
              // Listener para alternar visibilidad del INPUT
              addSubtasksToggle.addEventListener('click', () => {
-                 // Llamar a la función que actualiza en Firestore
-                 toggleSubtaskSection(mainTask.firebaseId, !mainTask.showSubtaskUI); // Invertir el estado actual
+                 // Cargar el estado actual, modificar showSubtaskUI, guardar y renderizar
+                 const todos = loadTodos();
+                 if (mainIndex >= 0 && mainIndex < todos.length) {
+                     const mainTask = todos[mainIndex];
+                     const currentState = mainTask.showSubtaskUI;
+                     const newState = !currentState; // Invertir el estado actual
+
+                     mainTask.showSubtaskUI = newState; // Aplicar el nuevo estado
+
+                     // Si se muestra la sección y no hay sub-tareas, inicializar el array
+                     if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                         mainTask.subtasks = [];
+                     }
+
+                     saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
+                         renderTodos(todos); // Renderiza el estado actual
+                         // Si se acaba de mostrar el input, intentar enfocarlo
+                         if (newState) {
+                              // Usamos el índice original ya que renderTodos no reordena automáticamente
+                              const listItemElement = todoListContainer.children[mainIndex];
+                              if (listItemElement) {
+                                  const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                                  if (inputElement) {
+                                      setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
+                                  }
+                              }
+                         }
+                     });
+                 } else {
+                      console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
+                 }
              });
 
              return addSubtasksToggle;
         }
 
-        function createSubtasksList(mainTask) { // Recibe la tarea completa
+        function createSubtasksList(mainTask, mainIndex) { // Recibe la tarea y el índice
             const subtasksList = document.createElement('ul');
             subtasksList.classList.add('subtasks-list');
 
@@ -843,9 +935,9 @@
                     checkbox.type = 'checkbox';
                     checkbox.classList.add('custom-checkbox'); // Aplicar clase de estilo custom
                     checkbox.checked = subtask.completed;
+                    // El listener ahora solo llama a toggleSubtaskCompletion, que modifica el array local y guarda
                     checkbox.addEventListener('change', () => {
-                        // Llamar a la función que actualiza en Firestore
-                        toggleSubtaskCompletion(mainTask.firebaseId, subIndex);
+                        toggleSubtaskCompletion(mainIndex, subIndex);
                     });
 
                     const subtaskSpan = document.createElement('span');
@@ -856,9 +948,9 @@
                     deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Icono de papelera
                     deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea');
 
+                    // El listener ahora solo llama a deleteSubtask, que modifica el array local y guarda
                     deleteSubtaskButton.addEventListener('click', () => {
-                        // Llamar a la función que elimina en Firestore
-                        deleteSubtask(mainTask.firebaseId, subIndex); // Usar subIndex correcto
+                        deleteSubtask(mainIndex, subIndex);
                     });
 
                     subtaskItem.appendChild(checkbox);
@@ -870,7 +962,7 @@
             return subtasksList;
         }
 
-        function createSubtaskInputContainer(mainTask) { // Recibe la tarea completa
+        function createSubtaskInputContainer(mainIndex) { // Recibe el índice
              const subtaskInputContainer = document.createElement('div');
              subtaskInputContainer.classList.add('subtask-input-container');
 
@@ -883,9 +975,9 @@
              addSubtaskButton.innerHTML = '<i class="fas fa-plus"></i>'; // Icono de más
              addSubtaskButton.setAttribute('aria-label', 'Agregar sub-tarea');
 
+             // El listener ahora solo llama a addSubtask, que modifica el array local y guarda
              addSubtaskButton.addEventListener('click', () => {
-                 // Llamar a la función que añade en Firestore
-                 addSubtask(mainTask.firebaseId, subtaskInput);
+                 addSubtask(mainIndex, subtaskInput);
              });
               subtaskInput.addEventListener('keypress', (event) => {
                   if (event.key === 'Enter') {
@@ -902,7 +994,7 @@
 
 
         // Función para renderizar (mostrar) la lista completa de tareas en el HTML
-        // Esta función recibe el array de tareas (ya ordenado por el listener)
+        // Esta función recibe el array que debe renderizar
         function renderTodos(todosArray) {
             if (!todoListContainer) {
                  console.error("Error: todoListContainer no encontrado.");
@@ -915,12 +1007,10 @@
                 return;
             }
 
+            // Usamos el array tal cual está (ya sea el cargado, el modificado, o el ordenado por el botón)
             todosArray.forEach((mainTask, mainIndex) => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('todo-item');
-                // Añadir el firebaseId como data attribute para referencia rápida si es necesario (opcional)
-                listItem.dataset.firebaseId = mainTask.firebaseId;
-
 
                 // Añadir clases CSS según el estado
                 if (mainTask.completed) {
@@ -932,11 +1022,12 @@
                  }
 
                 // Agregar los elementos a la tarea principal (li) en el orden deseado
-                listItem.appendChild(createMainTaskHeader(mainTask, mainIndex)); // mainIndex es solo para referencia visual si se necesita
+                // Pasamos el índice local a las funciones de creación de elementos interactivos
+                listItem.appendChild(createMainTaskHeader(mainTask, mainIndex));
                 listItem.appendChild(createProgressBar(mainTask));
-                listItem.appendChild(createAddSubtasksToggle(mainTask));
-                listItem.appendChild(createSubtasksList(mainTask));
-                listItem.appendChild(createSubtaskInputContainer(mainTask));
+                listItem.appendChild(createAddSubtasksToggle(mainIndex)); // Pasar índice
+                listItem.appendChild(createSubtasksList(mainTask, mainIndex)); // Pasar tarea y índice
+                listItem.appendChild(createSubtaskInputContainer(mainIndex)); // Pasar índice
 
                 // Agregar el elemento de lista principal a la lista principal en el HTML
                 todoListContainer.appendChild(listItem);
@@ -946,62 +1037,68 @@
         }
 
 
-         // --- Funciones de Manipulación de Datos (Ahora asíncronas y actualizan Firestore) ---
+         // --- Funciones de Manipulación de Datos (Modifican array local y llaman a saveTodos) ---
 
         // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
-        async function toggleSubtaskSection(firebaseId, show) {
-            if (!firebaseId) return; // No hacer nada si no hay ID de Firebase
-            const taskDocRef = doc(db, "tareas", firebaseId);
-            try {
-                await updateDoc(taskDocRef, {
-                    showSubtaskUI: show
+        // Esta función ahora modifica el array local y llama a saveTodos
+        function toggleSubtaskSection(mainTaskIndex, show) {
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                const mainTask = todos[mainTaskIndex];
+                mainTask.showSubtaskUI = show;
+                // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
+                if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
+                }
+
+                saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
                 });
-                // La UI se actualizará automáticamente via onSnapshot
-            } catch (e) {
-                console.error("Error al alternar sección de sub-tareas:", e);
-                alert("Error al actualizar la tarea en la nube.");
+            } else {
+                 console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
             }
         }
 
 
         // Función para ciclar el color de prioridad de una tarea principal
-        async function cyclePriorityColor(firebaseId, currentColor) {
-             if (!firebaseId) return;
-             const taskDocRef = doc(db, "tareas", firebaseId);
-             const currentColors = PRIORITY_COLORS;
-             const currentIndex = currentColors.indexOf(currentColor);
-             const nextIndex = (currentIndex + 1) % currentColors.length;
-             const nextColor = currentColors[nextIndex];
+        function cyclePriorityColor(mainTaskIndex) {
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const currentColors = PRIORITY_COLORS;
+                 // Asegurar que priorityColor es un string válido antes de buscar el índice
+                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string'
+                                      ? todos[mainTaskIndex].priorityColor
+                                      : 'none'; // Usar 'none' si es null, undefined o no string
+                 const currentIndex = currentColors.indexOf(currentColor);
+                 const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
+                 todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
 
-             try {
-                 await updateDoc(taskDocRef, {
-                     priorityColor: nextColor
+                 saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
                  });
-                 // La UI se actualizará automáticamente via onSnapshot
-             } catch (e) {
-                 console.error("Error al ciclar color de prioridad:", e);
-                 alert("Error al actualizar la tarea en la nube.");
+             } else {
+                  console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
              }
         }
 
         // Función para actualizar la fecha de una tarea principal
-        async function updateTaskDate(firebaseId, newDateValue) {
-            if (!firebaseId) return;
-            const taskDocRef = doc(db, "tareas", firebaseId);
-            try {
-                await updateDoc(taskDocRef, {
-                    date: newDateValue || null // Guardar null si el valor está vacío
+        function updateTaskDate(mainTaskIndex, newDateValue) {
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                // Guardar null si el valor está vacío (el usuario borró la fecha)
+                todos[mainTaskIndex].date = newDateValue || null;
+
+                saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
                 });
-                // La UI se actualizará automáticamente via onSnapshot
-            } catch (e) {
-                console.error("Error al actualizar fecha:", e);
-                alert("Error al actualizar la tarea en la nube.");
+            } else {
+                 console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
             }
         }
 
 
         // Función para agregar una nueva tarea principal
-        async function addTodo() {
+        function addTodo() {
             const newTodoText = todoInput.value.trim();
 
             if (newTodoText === '') {
@@ -1009,31 +1106,28 @@
                 return;
             }
 
-            // Crear el objeto de la nueva tarea
-            const newTaskData = {
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+
+            todos.push({
+                // No necesitamos firebaseId para la lógica JS en este modelo, pero lo añadimos si quieres mantenerlo en los datos
+                // firebaseId: null, // Firebase asignará uno al guardar online
                 text: newTodoText,
                 completed: false,
-                subtasks: [],
-                showSubtaskUI: false,
-                priorityColor: 'none',
-                date: null,
-                order: Date.now() // Usar timestamp para el orden inicial
-            };
+                subtasks: [], // Siempre array vacío inicialmente
+                showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
+                priorityColor: 'none', // Color de prioridad por defecto
+                date: null, // Fecha inicialmente nula
+                order: Date.now() // Usar timestamp para el orden inicial (aunque solo se usa en reordenar)
+            });
 
-            try {
-                // Añadir el documento a Firestore
-                await addDoc(tareasRef, newTaskData);
-                // La UI se actualizará automáticamente via onSnapshot
-                if (todoInput) todoInput.value = ''; // Limpiar input inmediatamente
-            } catch (e) {
-                console.error("Error al agregar tarea principal:", e);
-                alert("Error al agregar la tarea en la nube.");
-            }
+            saveTodos(todos).then(() => { // Esperar a que guarde online
+                 renderTodos(todos); // Renderiza el estado actual
+            });
+            if (todoInput) todoInput.value = ''; // Limpiar input inmediatamente
         }
 
         // Función para agregar una sub-tarea a una tarea principal específica
-        async function addSubtask(firebaseId, subtaskInput) {
-             if (!firebaseId) return;
+        function addSubtask(mainTaskIndex, subtaskInput) {
              const newSubtaskText = subtaskInput.value.trim();
 
              if (newSubtaskText === '') {
@@ -1041,188 +1135,150 @@
                  return;
              }
 
-             const taskDocRef = doc(db, "tareas", firebaseId);
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
 
-             // Encontrar la tarea principal en el array local (currentTodos) para obtener el estado actual de subtasks
-             const mainTask = currentTodos.find(task => task.firebaseId === firebaseId);
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
 
-             if (!mainTask) {
-                 console.error("Tarea principal no encontrada localmente para agregar sub-tarea:", firebaseId);
-                 alert("Error: Tarea no encontrada.");
-                 return;
-             }
+                 // Asegurarse de que subtasks es un array antes de pushear
+                 if (!Array.isArray(mainTask.subtasks)) {
+                     mainTask.subtasks = [];
+                 }
 
-             // Crear una copia del array de sub-tareas y añadir la nueva
-             const updatedSubtasks = Array.isArray(mainTask.subtasks) ? [...mainTask.subtasks] : [];
-             updatedSubtasks.push({
-                 text: newSubtaskText,
-                 completed: false
-             });
-
-             // Determinar si la tarea principal debe desmarcarse
-             const shouldUnmarkMain = mainTask.completed; // Si estaba marcada, desmarcarla
-
-             try {
-                 // Actualizar el documento en Firestore
-                 await updateDoc(taskDocRef, {
-                     subtasks: updatedSubtasks,
-                     completed: shouldUnmarkMain ? false : mainTask.completed, // Desmarcar si estaba marcada
-                     showSubtaskUI: false // Ocultar el input después de añadir
+                 mainTask.subtasks.push({
+                     text: newSubtaskText,
+                     completed: false
                  });
-                 // La UI se actualizará automáticamente via onSnapshot
+
+                 // Al añadir una sub-tarea, la tarea principal ya no puede considerarse "completada"
+                 // si ahora tiene sub-tareas pendientes. Desmarcamos si estaba marcada.
+                 if (mainTask.completed) {
+                     mainTask.completed = false;
+                 }
+
+                 // Ocultar el input de sub-tarea después de añadir
+                 mainTask.showSubtaskUI = false;
+
+
+                 saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
+                 });
                  subtaskInput.value = ''; // Limpiar input inmediatamente
-             } catch (e) {
-                 console.error("Error al agregar sub-tarea:", e);
-                 alert("Error al agregar la sub-tarea en la nube.");
+
+             } else {
+                 console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
              }
         }
 
         // Función para eliminar una tarea principal
-        async function deleteTodo(firebaseId) {
-            if (!firebaseId) return;
-            const taskDocRef = doc(db, "tareas", firebaseId);
-            try {
-                await deleteDoc(taskDocRef);
-                // La UI se actualizará automáticamente via onSnapshot
-            } catch (e) {
-                console.error("Error al eliminar tarea principal:", e);
-                alert("Error al eliminar la tarea en la nube.");
+        function deleteTodo(indexToDelete) {
+            const todos = loadTodos(); // Cargar estado actual (desde LS)
+
+            if (indexToDelete >= 0 && indexToDelete < todos.length) {
+                todos.splice(indexToDelete, 1);
+
+                saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
+                });
+            } else {
+                console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
             }
         }
 
         // Función para eliminar una sub-tarea
-        async function deleteSubtask(mainTaskFirebaseId, subtaskIndexToDelete) {
-             if (!mainTaskFirebaseId) return;
+        function deleteSubtask(mainTaskIndex, subtaskIndexToDelete) {
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
 
-             const taskDocRef = doc(db, "tareas", mainTaskFirebaseId);
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                 if (Array.isArray(mainTask.subtasks) && subtaskIndexToDelete >= 0 && subtaskIndexToDelete < mainTask.subtasks.length) {
+                     mainTask.subtasks.splice(subtaskIndexToDelete, 1);
 
-             // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTask = currentTodos.find(task => task.firebaseId === mainTaskFirebaseId);
+                     // Después de eliminar, recalcular el estado de completado de la tarea principal
+                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
 
-             if (!mainTask) {
-                 console.error("Tarea principal no encontrada localmente para eliminar sub-tarea:", mainTaskFirebaseId);
-                 alert("Error: Tarea no encontrada.");
-                 return;
-             }
+                     if (mainTask.subtasks.length === 0) {
+                         // Si no quedan sub-tareas, desmarcar la principal
+                         mainTask.completed = false;
+                         // mainTask.showSubtaskUI = false; // Ya no ocultamos el input si se borra la última sub-tarea
+                     } else {
+                         // Si aún quedan sub-tareas, actualizar el estado principal si es necesario
+                         mainTask.completed = allSubtasksCompleted;
+                     }
 
-             if (!Array.isArray(mainTask.subtasks) || subtaskIndexToDelete < 0 || subtaskIndexToDelete >= mainTask.subtasks.length) {
-                 console.error("Índice de sub-tarea a eliminar fuera de rango o subtasks no es array:", subtaskIndexToDelete);
-                 return;
-             }
-
-             // Crear una copia del array de sub-tareas y eliminar la sub-tarea
-             const updatedSubtasks = [...mainTask.subtasks];
-             updatedSubtasks.splice(subtaskIndexToDelete, 1);
-
-             // Recalcular si la tarea principal debe desmarcarse o marcarse
-             let newMainCompletedState = mainTask.completed;
-             if (updatedSubtasks.length === 0) {
-                 newMainCompletedState = false; // Si no quedan sub-tareas, desmarcar principal
+                     saveTodos(todos).then(() => { // Esperar a que guarde online
+                         renderTodos(todos); // Renderiza el estado actual
+                     });
+                 } else {
+                     console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
+                 }
              } else {
-                 // Si aún quedan sub-tareas, verificar si todas están completadas
-                 const allSubtasksCompleted = updatedSubtasks.every(sub => sub.completed);
-                 newMainCompletedState = allSubtasksCompleted; // Marcar principal si todas las restantes están completadas
-             }
-
-
-             try {
-                 // Actualizar el documento en Firestore
-                 await updateDoc(taskDocRef, {
-                     subtasks: updatedSubtasks,
-                     completed: newMainCompletedState
-                 });
-                 // La UI se actualizará automáticamente via onSnapshot
-             } catch (e) {
-                 console.error("Error al eliminar sub-tarea:", e);
-                 alert("Error al eliminar la sub-tarea en la nube.");
+                  console.error("Índice de tarea principal inválido para eliminar sub-tarea:", mainTaskIndex);
              }
         }
 
         // Función para cambiar el estado de completado de una sub-tarea
-        async function toggleSubtaskCompletion(mainTaskFirebaseId, subtaskIndexToToggle) {
-             if (!mainTaskFirebaseId) return;
+        function toggleSubtaskCompletion(mainTaskIndex, subtaskIndexToToggle) {
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
 
-             const taskDocRef = doc(db, "tareas", mainTaskFirebaseId);
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                  if (Array.isArray(mainTask.subtasks) && subtaskIndexToToggle >= 0 && subtaskIndexToToggle < mainTask.subtasks.length) {
+                     mainTask.subtasks[subtaskIndexToToggle].completed = !mainTask.subtasks[subtaskIndexToToggle].completed;
 
-             // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTask = currentTodos.find(task => task.firebaseId === mainTaskFirebaseId);
+                     // Recalcular si todas las sub-tareas están completadas
+                     const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
 
-             if (!mainTask) {
-                 console.error("Tarea principal no encontrada localmente para cambiar estado sub-tarea:", mainTaskFirebaseId);
-                 alert("Error: Tarea no encontrada.");
-                 return;
-             }
-
-             if (!Array.isArray(mainTask.subtasks) || subtaskIndexToToggle < 0 || subtaskIndexToToggle >= mainTask.subtasks.length) {
-                 console.error("Índice de sub-tarea a cambiar estado fuera de rango o subtasks no es array:", subtaskIndexToToggle);
-                 return;
-             }
-
-             // Crear una copia del array de sub-tareas y actualizar el estado de la sub-tarea
-             const updatedSubtasks = [...mainTask.subtasks];
-             updatedSubtasks[subtaskIndexToToggle].completed = !updatedSubtasks[subtaskIndexToToggle].completed;
-
-             // Recalcular si la tarea principal debe marcarse/desmarcarse
-             const allSubtasksCompleted = updatedSubtasks.length > 0 && updatedSubtasks.every(sub => sub.completed);
-             // Si tiene sub-tareas, el estado principal depende de ellas
-             const newMainCompletedState = updatedSubtasks.length > 0 ? allSubtasksCompleted : mainTask.completed;
+                     // Auto-marca/desmarca la tarea principal si HAY sub-tareas
+                     if (mainTask.subtasks.length > 0) {
+                          mainTask.completed = allSubtasksCompleted;
+                     }
+                     // Si no tiene sub-tareas, el checkbox principal se controla solo manualmente.
 
 
-             try {
-                 // Actualizar el documento en Firestore
-                 await updateDoc(taskDocRef, {
-                     subtasks: updatedSubtasks,
-                     completed: newMainCompletedState
-                 });
-                 // La UI se actualizará automáticamente via onSnapshot
-             } catch (e) {
-                 console.error("Error al cambiar estado sub-tarea:", e);
-                 alert("Error al actualizar la sub-tarea en la nube.");
+                     saveTodos(todos).then(() => { // Esperar a que guarde online
+                         renderTodos(todos); // Renderiza el estado actual
+                     });
+                 } else {
+                     console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
+                 }
+             } else {
+                 console.error("Índice de tarea principal inválido para cambiar estado de sub-tarea:", mainTaskIndex);
              }
         }
 
          // Función para cambiar el estado de completado de la TAREA PRINCIPAL
-        async function toggleMainCompletion(firebaseId, isChecked) {
-             if (!firebaseId) return;
-             const taskDocRef = doc(db, "tareas", firebaseId);
+        function toggleMainCompletion(mainTaskIndex, isChecked) {
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
 
-             // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTask = currentTodos.find(task => task.firebaseId === firebaseId);
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
 
-             if (!mainTask) {
-                 console.error("Tarea principal no encontrada localmente para cambiar estado:", firebaseId);
-                 alert("Error: Tarea no encontrada.");
-                 return;
-             }
+                 mainTask.completed = isChecked;
 
-             // Crear una copia del array de sub-tareas y sincronizar su estado
-             const updatedSubtasks = Array.isArray(mainTask.subtasks) ? [...mainTask.subtasks] : [];
-             if (updatedSubtasks.length > 0) {
-                 updatedSubtasks.forEach(subtask => {
-                     subtask.completed = isChecked;
+                 // Si la tarea principal tiene sub-tareas, sincronizar el estado de sus sub-tareas
+                 if (Array.isArray(mainTask.subtasks) && mainTask.subtasks.length > 0) {
+                     mainTask.subtasks.forEach(subtask => {
+                         subtask.completed = isChecked;
+                     });
+                 }
+                 // Si no tiene sub-tareas, solo se actualiza el estado principal.
+
+
+                 saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
                  });
-             }
-
-             try {
-                 // Actualizar el documento en Firestore
-                 await updateDoc(taskDocRef, {
-                     completed: isChecked,
-                     subtasks: updatedSubtasks // Actualizar sub-tareas sincronizadas
-                 });
-                 // La UI se actualizará automáticamente via onSnapshot
-             } catch (e) {
-                 console.error("Error al cambiar estado tarea principal:", e);
-                 alert("Error al actualizar la tarea en la nube.");
+             } else {
+                  console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
              }
         }
 
-        // --- Función de Reordenar (Actualiza el campo 'order' en Firestore) ---
-        async function reorderTodos() {
-             // Cargar el estado actual (ya está en currentTodos, pero aseguramos)
-             const todosToReorder = [...currentTodos]; // Trabajar con una copia
+        // --- Función de Reordenar (Modifica array local y llama a saveTodos) ---
+        function reorderTodos() {
+             const todos = loadTodos(); // Cargar el estado actual (desde LS)
 
              // Aplicar la lógica de ordenación localmente
-             todosToReorder.sort((a, b) => {
+             todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
 
@@ -1233,7 +1289,7 @@
 
                  // Si las prioridades son iguales:
                  // 2. Ordenar por Fecha (tareas con fecha antes, luego cronológicamente)
-                 // Usar 0 para fechas nulas o inválidas para que vayan al final de las tareas con fecha
+                 // Usar Infinity para fechas nulas o inválidas para que vayan al final de las tareas con fecha
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) {
@@ -1248,35 +1304,17 @@
                  return orderA - orderB; // Ordenar por 'order' ascendente
              });
 
-             // Crear un batch para actualizar los campos 'order' en Firestore
-             const batch = writeBatch(db);
-             const updates = []; // Para rastrear las actualizaciones
-
-             todosToReorder.forEach((task, index) => {
-                 if (task.firebaseId) {
-                     const taskDocRef = doc(db, "tareas", task.firebaseId);
-                     // Asignar un nuevo valor de orden basado en el índice en la lista ordenada
-                     // Usar un timestamp para evitar colisiones si se reordena rápido
-                     // Añadir el índice asegura que tareas con el mismo timestamp inicial tengan un orden definido
-                     const newOrderValue = Date.now() + index;
-                     batch.update(taskDocRef, { order: newOrderValue });
-                     updates.push({ id: task.firebaseId, order: newOrderValue });
-                 }
+             // Al reordenar, actualizamos el campo 'order' en el array local
+             // para que el orden se mantenga en futuras cargas desde LS o Firestore
+             todos.forEach((task, index) => {
+                 task.order = Date.now() + index; // Asignar un nuevo timestamp + índice
              });
 
-             if (updates.length > 0) {
-                 try {
-                     await batch.commit();
-                     // La UI se actualizará automáticamente via onSnapshot cuando el batch se complete
-                     alert("Tareas reordenadas.");
-                 } catch (e) {
-                     console.error("Error al reordenar tareas:", e);
-                     alert("Error al reordenar las tareas en la nube.");
-                 }
-             } else {
-                 // No hay tareas para reordenar o no tienen firebaseId
-                 console.warn("No hay tareas válidas para reordenar.");
-             }
+
+             saveTodos(todos).then(() => { // Esperar a que guarde online
+                 renderTodos(todos); // Renderiza la lista en el nuevo orden
+                 alert("Tareas reordenadas.");
+             });
         }
 
 
@@ -1337,83 +1375,34 @@
                 disableDarkMode();
             }
 
-            // Cargar datos iniciales desde Local Storage para carga rápida
-            currentTodos = loadTodosFromLocalStorage();
-            renderTodos(currentTodos);
-            console.log("Cargado inicialmente desde Local Storage:", currentTodos);
+            // Cargar los datos: intentar desde Firestore, si falla, cargar desde Local Storage
+            let initialTodos = [];
+            try {
+                 initialTodos = await loadTodosOnline(); // Intentar cargar de Firestore
+            } catch (e) {
+                 console.error("Error al cargar datos iniciales desde Firestore. Cayendo a Local Storage:", e);
+                 initialTodos = loadTodos(); // Fallback a Local Storage
+                 alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
+            }
+
+            // Ordenar la lista inicial después de cargarla (ya sea de Firestore o LS)
+             initialTodos.sort((a, b) => {
+                 const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
+                 const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
+
+                 if (rankA !== rankB) return rankA - rankB;
+
+                 const dateA = a.date ? new Date(a.date).getTime() : Infinity;
+                 const dateB = b.date ? new Date(b.date).getTime() : Infinity;
+                 if (dateA !== dateB) return dateA - dateB;
+
+                 const orderA = a.order || 0;
+                 const orderB = b.order || 0;
+                 return orderA - orderB;
+             });
 
 
-            // --- Configurar el listener de Firestore ---
-            // Crear una consulta que ordene principalmente por el campo 'order'
-            // Esto ayuda a Firestore a optimizar la entrega de datos, especialmente después de un reordenamiento.
-            // La ordenación final por prioridad y fecha se sigue haciendo en JS.
-            const q = query(tareasRef,
-                orderBy("order", "asc") // Ordenar por el campo 'order' de Firestore
-            );
-
-
-            // Establecer el listener en tiempo real
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
-                console.log("Firestore snapshot received.");
-                const todosFromFirestore = [];
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    todosFromFirestore.push({
-                        firebaseId: docSnap.id, // ¡Guardar el ID de Firebase!
-                        text: data.text || 'Tarea sin nombre',
-                        completed: typeof data.completed === 'boolean' ? data.completed : false,
-                        subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [],
-                        showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
-                        priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
-                        date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
-                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // Usar el campo order de Firestore, fallback a fecha o Infinity
-                    });
-                });
-
-                // Ordenar la lista *localmente* después de cargar desde Firestore
-                // Aplicamos la lógica de ordenación completa aquí
-                todosFromFirestore.sort((a, b) => {
-                    const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
-                    const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
-
-                    // 1. Ordenar por Prioridad (rojo, naranja, amarillo, verde, ninguno)
-                    if (rankA !== rankB) {
-                        return rankA - rankB;
-                    }
-
-                    // Si las prioridades son iguales:
-                    // 2. Ordenar por Fecha (tareas con fecha antes, luego cronológicamente)
-                    // Usar Infinity para fechas nulas o inválidas para que vayan al final de las tareas con fecha
-                    const dateA = a.date ? new Date(a.date).getTime() : Infinity;
-                    const dateB = b.date ? new Date(b.date).getTime() : Infinity;
-                    if (dateA !== dateB) {
-                        return dateA - dateB; // Ordenar por fecha ascendente (más antigua primero)
-                    }
-
-                    // Si prioridad y fecha son iguales:
-                    // 3. Ordenar por el campo 'order' (para mantener el orden manual o de creación)
-                    const orderA = a.order || 0;
-                    const orderB = b.order || 0;
-                    return orderA - orderB; // Ordenar por 'order' ascendente
-                });
-
-
-                currentTodos = todosFromFirestore; // Actualizar la lista local
-                saveTodosToLocalStorage(currentTodos); // Guardar la lista actualizada en Local Storage
-                renderTodos(currentTodos); // Renderizar la lista actualizada
-                console.log("Lista sincronizada con Firestore y renderizada:", currentTodos);
-
-            }, (error) => {
-                console.error("Error al escuchar cambios en Firestore:", error);
-                alert("Error al sincronizar con la nube. Es posible que los cambios no se guarden o actualicen.");
-            });
-
-            // Opcional: Guardar la función unsubscribe si necesitas detener el listener más tarde
-            // window.unsubscribeFirestore = unsubscribe;
-
+            renderTodos(initialTodos); // Renderiza la lista inicial
 
             // --- Attach Event Listeners AFTER DOM is ready and references are obtained ---
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
@@ -1429,7 +1418,7 @@
 
             // --- Event Listener para el botón de Reordenar ---
             if (reorderButton) {
-                reorderButton.addEventListener('click', reorderTodos); // Llama a la nueva función reorderTodos
+                reorderButton.addEventListener('click', reorderTodos); // Llama a la función reorderTodos
             }
 
 
@@ -1440,17 +1429,8 @@
                  console.error("Dark mode toggle button not found.");
             }
 
-             console.log("Inicialización completa. Listener de Firestore activo.");
+             console.log("Inicialización completa.");
         });
-
-        // Opcional: Limpiar el listener al cerrar la ventana/pestaña
-        // window.addEventListener('beforeunload', () => {
-        //     if (window.unsubscribeFirestore) {
-        //         window.unsubscribeFirestore();
-        //         console.log("Firestore listener unsubscribed.");
-        //     }
-        // });
-
 
     </script>
 
