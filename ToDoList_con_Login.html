@@ -13,21 +13,21 @@
 
 
     <style>
-        /* --- Estilos Ultra Minimalistas (Modo Claro por defecto) --- */
+        /* --- Estilos Ultra Minimalistas (Modo Oscuro por defecto) --- */
         body {
             font-family: 'Lexend', sans-serif;
             margin: 30px auto;
             max-width: 600px;
-            background-color: white; /* Fondo claro por defecto */
-            color: black; /* Texto oscuro por defecto */
+            background-color: #1e1e1e; /* Fondo oscuro por defecto */
+            color: #f0f0f0; /* Texto claro por defecto */
             line-height: 1.6;
             padding-bottom: 80px; /* Espacio extra al final para botones fijos */
-            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
+            /* transition: background-color 0.3s ease, color 0.3s ease; REMOVED: No transition needed if theme doesn't change */
         }
 
         h1 {
             font-family: 'Quicksand', sans-serif;
-            color: black; /* Color oscuro por defecto */
+            color: #f0f0f0; /* Título claro por defecto */
             text-align: center;
             margin-bottom: 30px;
             border-bottom: none;
@@ -44,16 +44,16 @@
         }
 
         .todo-item {
-            background-color: white; /* Fondo claro por defecto */
+            background-color: #2d2d30; /* Fondo de item oscuro por defecto */
             /* border-bottom: 1px solid #eee; REMOVED: La línea inferior ya no es necesaria con margen */
             padding: 15px 0;
             border-radius: 0;
             word-break: break-word;
             box-sizing: border-box;
-            transition: background-color 0.3s ease, border-bottom-color 0.3s ease; /* Transición suave */
+            /* transition: background-color 0.3s ease, border-bottom-color 0.3s ease; REMOVED: No transition needed if theme doesn't change */
             /* --- MODIFICACIÓN AQUÍ: Añadir margen inferior para separar items --- */
             margin-bottom: 10px; /* Espacio entre tareas */
-            border: 1px solid #eee; /* Añadir un borde sutil alrededor de cada item */
+            border: 1px solid #444; /* Añadir un borde sutil oscuro alrededor de cada item */
             /* --- FIN MODIFICACIÓN --- */
         }
 
@@ -68,12 +68,12 @@
          /* Estilo del checkbox principal */
         .todo-item .main-task-header input[type="checkbox"] {
              margin-right: 8px;
-             border: 1px solid black; /* Borde oscuro por defecto */
+             border: 1px solid #888; /* Borde del checkbox más claro por defecto */
              appearance: none;
              -webkit-appearance: none;
              width: 18px;
              height: 18px;
-             background-color: white; /* Fondo claro por defecto */
+             background-color: #2d2d30; /* Fondo del checkbox oscuro por defecto */
              cursor: pointer;
              position: relative;
              flex-shrink: 0;
@@ -82,11 +82,11 @@
         }
 
          .todo-item .main-task-header input[type="checkbox"]:checked {
-              background-color: black; /* Fondo oscuro al marcar */
-              border-color: black; /* Borde oscuro al marcar */
+              background-color: #f0f0f0; /* Fondo claro al marcar por defecto */
+              border-color: #f0f0f0; /* Borde claro al marcar por defecto */
          }
 
-          /* Custom checkmark para checkbox principal (Modo Claro) */
+          /* Custom checkmark para checkbox principal (Modo Oscuro) */
          .todo-item .main-task-header input[type="checkbox"]:checked::after {
              content: '';
              position: absolute;
@@ -94,7 +94,7 @@
              left: 5px;
              width: 4px;
              height: 8px;
-             border: solid white; /* Checkmark blanco */
+             border: solid #1e1e1e !important; /* Checkmark oscuro por defecto - Usar !important para asegurar */
              border-width: 0 2px 2px 0;
              transform: rotate(45deg);
          }
@@ -105,7 +105,7 @@
              width: 12px;
              height: 12px;
              margin-right: 10px;
-             border: 1px solid #ccc; /* Borde gris claro por defecto */
+             border: 1px solid #ccc; /* Borde gris claro por defecto (no cambia con el tema) */
              border-radius: 0;
              cursor: pointer;
              flex-shrink: 0;
@@ -126,7 +126,7 @@
             font-size: 1.1rem;
             flex-grow: 1; /* Permite que el texto ocupe el espacio disponible */
             margin-right: 15px; /* Espacio antes de la fecha/botón */
-            color: black; /* Color oscuro por defecto */
+            color: #f0f0f0; /* Texto de tarea principal claro por defecto */
             transition: color 0.3s ease; /* Transición suave */
         }
 
@@ -138,7 +138,7 @@
             padding: 0;
             font-family: 'Lexend', sans-serif;
             font-size: 0.85rem; /* Tamaño más pequeño */
-            color: #888; /* Color gris discreto por defecto */
+            color: #b0b0b0; /* Gris claro discreto por defecto */
             cursor: pointer;
             margin-left: auto; /* Empuja a la derecha, después del span */
             margin-right: 10px; /* Espacio antes del botón eliminar */
@@ -157,14 +157,14 @@
         /* Estilo al pasar el mouse o enfocar el input de fecha */
         .todo-item .main-task-header input[type="date"]:hover,
         .todo-item .main-task-header input[type="date"]:focus {
-             color: red; /* Usar el color rojo de hover unificado */
+             color: #ff6b6b; /* Rojo más brillante por defecto */
              text-decoration: underline; /* Subrayar al pasar el mouse/enfocar */
         }
 
          /* Botón eliminar principal - Alineado a la derecha, discreto */
         .todo-item .main-task-header button {
             background: none;
-            color: red; /* Color rojo por defecto */
+            color: #ff6b6b; /* Rojo un poco más brillante por defecto */
             border: none;
             border-radius: 0;
             cursor: pointer;
@@ -174,7 +174,7 @@
         }
 
         .todo-item .main-task-header button:hover {
-            color: darkred; /* Rojo oscuro al pasar el mouse */
+            color: #ffaaaa; /* Rojo más claro al pasar el mouse */
         }
 
         /* --- Estilos UNIFICADOS para Inputs de AÑADIR --- */
@@ -188,8 +188,8 @@
             min-width: 150px;
             font-size: 0.85rem;
             box-sizing: border-box;
-            background-color: #f8f8f8; /* Fondo gris suave por defecto */
-            color: black; /* Texto oscuro por defecto */
+            background-color: #3c3c3c; /* Fondo de input oscuro por defecto */
+            color: #f0f0f0; /* Texto de input claro por defecto */
             outline: none;
             transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
         }
@@ -197,6 +197,13 @@
         .todo-item .subtask-input-container input[type="text"]:focus {
             /* No borde rojo al enfocar */
         }
+         /* Placeholder color (puede variar entre navegadores) */
+        #new-todo-input::placeholder,
+        .todo-item .subtask-input-container input[type="text"]::placeholder {
+             color: #b0b0b0; /* Color de placeholder más claro por defecto */
+             opacity: 1; /* Asegura que no esté atenuado por defecto */
+        }
+
 
         /* --- Estilos UNIFICADOS para Botones --- */
         /* Base style for ALL custom buttons */
@@ -205,8 +212,7 @@
         .todo-item .add-subtasks-toggle,
         .todo-item .main-task-header button,
         .todo-item .subtasks-list li button,
-        #reorder-button,
-        #dark-mode-toggle
+        #reorder-button
          {
              background: none;
              border: none;
@@ -214,7 +220,7 @@
              cursor: pointer;
              transition: color 0.3s ease;
              flex-shrink: 0;
-             /* Color base definido por cada tipo de botón (+, -, reorder, data) */
+             /* Color base definido por cada tipo de botón (+, -, reorder) */
         }
         /* Hover style for ALL custom buttons */
         #add-todo-button:hover,
@@ -222,8 +228,7 @@
         .todo-item .add-subtasks-toggle:hover,
         .todo-item .main-task-header button:hover,
         .todo-item .subtasks-list li button:hover,
-        #reorder-button:hover,
-        #dark-mode-toggle:hover
+        #reorder-button:hover
          {
              color: red; /* Rojo al pasar el mouse */
         }
@@ -243,7 +248,7 @@
              letter-spacing: normal;
              font-size: 1rem;
              padding: 4px 10px;
-             color: black; /* Color oscuro por defecto */
+             color: #cccccc; /* Color gris claro para los '+' por defecto */
         }
 
         /* Styles for the '-' buttons */
@@ -252,7 +257,7 @@
              text-transform: none;
              font-size: 1rem;
              padding: 4px 10px;
-             color: red; /* Color rojo por defecto */
+             color: #ff6b6b; /* Rojo un poco más brillante por defecto */
          }
 
          /* Style for the Reorder button (Icon) */
@@ -261,38 +266,15 @@
              width: fit-content;
              margin: 25px 15px 0 auto;
              font-size: 1rem;
-             color: #888; /* Color gris por defecto */
+             color: #b0b0b0; /* Icono gris claro por defecto */
              text-transform: none;
              letter-spacing: normal;
              padding: 4px 10px;
-             /* --- MODIFICACIÓN AQUÍ: Ajustar line-height si el nuevo carácter lo necesita --- */
              line-height: 1; /* Ajustar si el carácter vertical necesita centrado */
-             /* --- FIN MODIFICACIÓN --- */
          }
 
          /* Style for the Dark Mode Toggle button (Icon) */
-         #dark-mode-toggle {
-             position: fixed; /* Posición fija en la pantalla */
-             bottom: 20px; /* 20px desde abajo */
-             right: 20px; /* 20px desde la derecha */
-             font-size: 1.5rem; /* Tamaño más grande para el icono */
-             color: #888; /* Color gris por defecto */
-             z-index: 1000; /* Asegura que esté por encima de otros elementos */
-             background-color: white; /* Fondo blanco por defecto */
-             border: 1px solid #ccc; /* Borde sutil */
-             border-radius: 50%; /* Forma redonda */
-             width: 40px; /* Ancho fijo */
-             height: 40px; /* Alto fijo */
-             display: flex; /* Para centrar el icono */
-             justify-content: center; /* Centrar horizontalmente */
-             align-items: center; /* Centrar verticalmente */
-             box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra sutil */
-             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
-         }
-         #dark-mode-toggle:hover {
-             color: red; /* Rojo al pasar el mouse (usando la regla unificada) */
-             /* background-color: #f0f0f0; */ /* Fondo ligeramente gris al pasar el mouse */
-         }
+         /* REMOVED: #dark-mode-toggle styles */
 
 
         /* --- Elementos relacionados con Sub-tareas --- */
@@ -313,7 +295,7 @@
             list-style: none;
             padding: 0 15px;
             margin-top: 15px;
-            border-left: 1px solid #ccc; /* Línea de indentación gris claro */
+            border-left: 1px solid #444; /* Línea de indentación más oscura por defecto */
             padding-left: 30px;
             transition: border-left-color 0.3s ease; /* Transición suave */
         }
@@ -328,12 +310,12 @@
          /* Estilo del checkbox de sub-tarea */
         .todo-item .subtasks-list li input[type="checkbox"] {
             margin-right: 10px;
-            border: 1px solid black; /* Borde oscuro por defecto */
+            border: 1px solid #888; /* Borde del checkbox más claro por defecto */
             appearance: none;
             -webkit-appearance: none;
             width: 16px;
             height: 16px;
-            background-color: white; /* Fondo claro por defecto */
+            background-color: #2d2d30; /* Fondo del checkbox oscuro por defecto */
             cursor: pointer;
             position: relative;
             flex-shrink: 0;
@@ -342,11 +324,11 @@
         }
 
         .todo-item .subtasks-list li input[type="checkbox"]:checked {
-             background-color: black; /* Fondo oscuro al marcar */
-             border-color: black; /* Borde oscuro al marcar */
+             background-color: #f0f0f0; /* Fondo claro al marcar por defecto */
+             border-color: #f0f0f0; /* Borde claro al marcar por defecto */
         }
 
-         /* Custom checkmark para checkbox de sub-tarea (Modo Claro) */
+         /* Custom checkmark para checkbox de sub-tarea (Modo Oscuro) */
         .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
             content: '';
             position: absolute;
@@ -354,17 +336,17 @@
             left: 4px;
             width: 4px;
             height: 8px;
-            border: solid white; /* Checkmark blanco */
+            border: solid #1e1e1e !important; /* Checkmark oscuro por defecto - Usar !important para asegurar */
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
 
 
-        /* Texto de la sub-tarea - Color grisáceo por defecto */
+        /* Texto de sub-tarea */
         .todo-item .subtasks-list li span {
              flex-grow: 1;
              margin-right: 10px;
-             color: #555; /* Color gris por defecto */
+             color: #b0b0b0; /* Texto de sub-tarea gris claro por defecto */
              text-decoration: none;
              transition: color 0.3s ease; /* Transición suave */
         }
@@ -380,14 +362,14 @@
             position: relative;
             box-sizing: border-box;
             margin-left: 15px;
-            background-color: #e0ffe0; /* Fondo VERDE MUY CLARITO por defecto */
+            background-color: #3a4a4a; /* Fondo de progreso más oscuro por defecto */
             overflow: hidden;
-            transition: background-color 0.3s ease; /* Transición suave */
+            /* transition: background-color 0.3s ease; REMOVED: No transition needed if theme doesn't change */
         }
 
         .todo-item .progress-bar {
             height: 100%;
-            background-color: #66c266; /* Verde algo más oscuro por defecto */
+            background-color: #8bc34a; /* Verde un poco más brillante por defecto */
             width: 0%;
             transition: width 0.5s ease-in-out, background-color 0.3s ease; /* Transición suave */
             box-sizing: border-box;
@@ -402,10 +384,10 @@
             content: "No hay tareas. ¡Agrega una!";
             display: block;
             text-align: center;
-            color: #888; /* Color gris por defecto */
+            color: #b0b0b0; /* Mensaje gris claro por defecto */
             margin-top: 20px;
             font-style: italic;
-            transition: color 0.3s ease; /* Transición suave */
+            /* transition: color 0.3s ease; REMOVED: No transition needed if theme doesn't change */
         }
 
         /* --- Clases de Visibilidad (Añadidas/Quitadas por JS para controlar CSS display) --- */
@@ -427,7 +409,7 @@
         /* Color de texto gris claro para tareas completadas */
         .todo-item.completed .main-task-header span,
         .todo-item.completed .subtasks-list li span {
-            color: #888; /* Color gris claro por defecto */
+            color: #666; /* Texto gris más oscuro por defecto para completadas */
             text-decoration: none;
         }
          /* Barra de progreso verde oscuro cuando 100% y completada (sin sub-tareas) */
@@ -441,15 +423,13 @@
         }
          /* Atenuar el input de fecha en tareas completadas */
          .todo-item.completed .main-task-header input[type="date"] {
-             color: #aaa; /* Gris más claro */
+             color: #555; /* Gris más oscuro */
              text-decoration: none;
              cursor: default;
          }
           .todo-item.completed .main-task-header input[type="date"]:hover,
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:hover, /* Asegurar que no cambie en hover en dark mode completada */
-          .todo-item.completed .main-task-header input[type="date"]:focus,
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:focus { /* Asegurar que no cambie en focus en dark mode completada */
-              color: #aaa; /* Mantener gris claro al pasar el mouse/enfocar */
+          .todo-item.completed .main-task-header input[type="date"]:focus {
+              color: #555; /* Mantener gris más oscuro */
               text-decoration: none;
               cursor: default;
           }
@@ -471,191 +451,7 @@
           }
 
 
-        /* --- Estilos para el MODO OSCURO --- */
-        body.dark-mode {
-            background-color: #1e1e1e; /* Fondo oscuro */
-            color: #f0f0f0; /* Texto claro */
-        }
-
-        body.dark-mode h1 {
-            color: #f0f0f0; /* Título claro */
-        }
-
-        body.dark-mode .todo-item {
-            background-color: #2d2d30; /* Fondo de item oscuro */
-            border-bottom-color: #444; /* Borde más oscuro */
-            border-color: #444; /* Borde oscuro para el item */
-        }
-
-        body.dark-mode .todo-item .main-task-header input[type="checkbox"] {
-             border-color: #888; /* Borde del checkbox más claro */
-             background-color: #2d2d30; /* Fondo del checkbox oscuro */
-        }
-
-        body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked {
-             background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
-             border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
-        }
-
-         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox principal (Modo Oscuro) --- */
-         body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked::after {
-             border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
-             border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
-         }
-         /* --- FIN MODIFICACIÓN --- */
-
-
-        body.dark-mode .todo-item .main-task-header span {
-            color: #f0f0f0; /* Texto de tarea principal claro */
-        }
-
-        /* Estilo para el input de fecha en modo oscuro */
-        body.dark-mode .todo-item .main-task-header input[type="date"] {
-            color: #b0b0b0; /* Gris claro discreto en modo oscuro */
-        }
-         body.dark-mode .todo-item .main-task-header input[type="date"]:hover,
-         body.dark-mode .todo-item.main-task-header input[type="date"]:hover, /* Asegurar que no cambie en hover en dark mode */
-         body.dark-mode .todo-item .main-task-header input[type="date"]:focus,
-         body.dark-mode .todo-item.main-task-header input[type="date"]:focus { /* Asegurar que no cambie en focus en dark mode */
-             color: #ff6b6b; /* Rojo más brillante en modo oscuro */
-         }
-
-
-        /* Botones de eliminar (rojo) */
-        body.dark-mode .todo-item .main-task-header button,
-        body.dark-mode .todo-item .subtasks-list li button {
-             color: #ff6b6b; /* Rojo un poco más brillante para contraste */
-        }
-         body.dark-mode .todo-item .main-task-header button:hover,
-         body.dark-mode .todo-item .subtasks-list li button:hover {
-             color: #ffaaaa; /* Rojo más claro al pasar el mouse */
-         }
-
-
-        /* Inputs de añadir */
-        body.dark-mode #new-todo-input,
-        body.dark-mode .todo-item .subtask-input-container input[type="text"] {
-            background-color: #3c3c3c; /* Fondo de input oscuro */
-            color: #f0f0f0; /* Texto de input claro */
-        }
-         /* Placeholder color (puede variar entre navegadores) */
-        body.dark-mode #new-todo-input::placeholder,
-        body.dark-mode .todo-item .subtask-input-container input[type="text"]::placeholder {
-             color: #b0b0b0; /* Color de placeholder más claro */
-             opacity: 1; /* Asegura que no esté atenuado por defecto */
-        }
-
-
-        /* Botones de añadir (+) y mostrar sub-tareas (+) */
-        body.dark-mode #add-todo-button,
-        body.dark-mode .todo-item .subtask-input-container button,
-        body.dark-mode .add-subtasks-toggle {
-            color: #cccccc; /* Color gris claro para los '+' */
-        }
-         body.dark-mode #add-todo-button:hover,
-         body.dark-mode .todo-item .subtask-input-container button:hover,
-         body.dark-mode .add-subtasks-toggle:hover {
-             color: #ff6b6b; /* Rojo un poco más brillante al pasar el mouse */
-         }
-
-
-        /* Línea de indentación de sub-tareas */
-        body.dark-mode .todo-item .subtasks-list {
-            border-left-color: #444; /* Línea de indentación más oscura */
-        }
-
-        /* Checkbox de sub-tarea */
-        body.dark-mode .todo-item .subtasks-list li input[type="checkbox"] {
-             border-color: #888; /* Borde del checkbox más claro */
-             background-color: #2d2d30; /* Fondo del checkbox oscuro */
-        }
-         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked {
-             background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
-             border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
-         }
-         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox de sub-tarea (Modo Oscuro) --- */
-         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
-             border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
-             border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
-         }
-         /* --- FIN MODIFICACIÓN --- */
-
-
-        /* Texto de sub-tarea */
-        body.dark-mode .todo-item .subtasks-list li span {
-             color: #b0b0b0; /* Texto de sub-tarea gris claro */
-        }
-
-        /* Progress bar container */
-        body.dark-mode .todo-item .progress-container {
-             background-color: #3a4a4a; /* Fondo de progreso más oscuro */
-        }
-         /* Progress bar (el color de la barra en sí puede seguir siendo verde) */
-         body.dark-mode .todo-item .progress-bar {
-             background-color: #8bc34a; /* Verde un poco más brillante para contraste */
-         }
-
-
-        /* Mensaje de lista vacía */
-        body.dark-mode #todo-list:empty:before {
-            color: #b0b0b0; /* Mensaje gris claro */
-        }
-
-        /* Tarea completada (texto) */
-        body.dark-mode .todo-item.completed .main-task-header span,
-        body.dark-mode .todo-item.completed .subtasks-list li span {
-            color: #666; /* Texto gris más oscuro en dark mode para completadas */
-        }
-         /* Atenuar el input de fecha en tareas completadas */
-         body.dark-mode .todo-item.completed .main-task-header input[type="date"] {
-             color: #555; /* Gris más oscuro */
-         }
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:hover,
-          body.dark-mode .todo-item.completed .main-task-header input[type="date"]:focus {
-              color: #555; /* Mantener gris más oscuro */
-          }
-
-
-        /* Botón de Reordenar (Icono) */
-         #reorder-button {
-             display: block;
-             width: fit-content;
-             margin: 25px 15px 0 auto;
-             font-size: 1rem;
-             color: #888; /* Color gris por defecto */
-             text-transform: none;
-             letter-spacing: normal;
-             padding: 4px 10px;
-             /* --- MODIFICACIÓN AQUÍ: Ajustar line-height si el nuevo carácter lo necesita --- */
-             line-height: 1; /* Ajustar si el carácter vertical necesita centrado */
-             /* --- FIN MODIFICACIÓN --- */
-         }
-
-         /* Style for the Dark Mode Toggle button (Icon) */
-         #dark-mode-toggle {
-             position: fixed; /* Posición fija en la pantalla */
-             bottom: 20px; /* 20px desde abajo */
-             right: 20px; /* 20px desde la derecha */
-             font-size: 1.5rem; /* Tamaño más grande para el icono */
-             color: #888; /* Color gris por defecto */
-             z-index: 1000; /* Asegura que esté por encima de otros elementos */
-             background-color: white; /* Fondo blanco por defecto */
-             border: 1px solid #ccc; /* Borde sutil */
-             border-radius: 50%; /* Forma redonda */
-             width: 40px; /* Ancho fijo */
-             height: 40px; /* Alto fijo */
-             display: flex; /* Para centrar el icono */
-             justify-content: center; /* Centrar horizontalmente */
-             align-items: center; /* Centrar verticalmente */
-             box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra sutil */
-             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
-         }
-         #dark-mode-toggle:hover {
-             color: red; /* Rojo al pasar el mouse (usando la regla unificada) */
-             /* background-color: #f0f0f0; */ /* Fondo ligeramente gris al pasar el mouse */
-         }
-
-         /* --- Estilos para la sección de Gestión de Datos (Importar/Exportar) --- */
+        /* --- Estilos para la sección de Gestión de Datos (Importar/Exportar) --- */
          /* REMOVED: #data-management styles */
 
 
@@ -679,16 +475,14 @@
     </div>
 
     <!-- Botón para reordenar (icono) -->
-    <!-- --- MODIFICACIÓN AQUÍ: Cambiar el carácter del icono --- -->
     <button id="reorder-button" aria-label="Reordenar tareas por prioridad">⋮</button> <!-- Puntos suspensivos verticales -->
-    <!-- --- FIN MODIFICACIÓN --- -->
 
     <!-- Sección para Importar/Exportar datos -->
     <!-- REMOVED: <div id="data-management"> ... </div> -->
 
 
     <!-- Botón para alternar modo oscuro/claro (icono) -->
-    <button id="dark-mode-toggle" aria-label="Alternar modo oscuro/claro">◑</button> <!-- Símbolo de luna -->
+    <!-- REMOVED: <button id="dark-mode-toggle"> ... </button> -->
 
 
     <script type="module">
@@ -720,7 +514,7 @@
         let addTodoButton;
         let todoListContainer;
         let reorderButton;
-        let darkModeToggle;
+        // REMOVED: let darkModeToggle; // Eliminado
         let body;
         // REMOVED: let exportDataButton; // Eliminado
         // REMOVED: let importDataButton; // Eliminado
@@ -1287,32 +1081,11 @@
              }
         }
 
-        // --- Dark Mode Toggle Functionality ---
-        function enableDarkMode() {
-            if (body) body.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark');
-            if (darkModeToggle) { // Check if element exists
-                darkModeToggle.innerHTML = '☀'; // Usar innerHTML para el símbolo de sol
-                darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
-            }
-        }
+        // --- Dark Mode Toggle Functionality (REMOVED) ---
+        // REMOVED: enableDarkMode function
+        // REMOVED: disableDarkMode function
+        // REMOVED: toggleDarkMode function
 
-        function disableDarkMode() {
-            if (body) body.classList.remove('dark-mode');
-            localStorage.setItem('theme', 'light');
-            if (darkModeToggle) { // Check if element exists
-                 darkModeToggle.innerHTML = '◑'; // Usar innerHTML para el símbolo de luna
-                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
-            }
-        }
-
-        function toggleDarkMode() {
-            if (body && body.classList.contains('dark-mode')) {
-                disableDarkMode();
-            } else {
-                enableDarkMode();
-            }
-        }
 
         // --- Funciones de Importación/Exportación (REMOVED) ---
         // REMOVED: exportData function
@@ -1329,20 +1102,17 @@
             addTodoButton = document.getElementById('add-todo-button');
             todoListContainer = document.getElementById('todo-list');
             reorderButton = document.getElementById('reorder-button');
-            darkModeToggle = document.getElementById('dark-mode-toggle');
+            // REMOVED: darkModeToggle = document.getElementById('dark-mode-toggle'); // Eliminado
             body = document.body;
             // REMOVED: exportDataButton = document.getElementById('export-data-button'); // Eliminado
             // REMOVED: importDataButton = document.getElementById('import-data-button'); // Eliminado
             // REMOVED: importFileInput = document.getElementById('import-file-input'); // Eliminado
 
 
-            // Cargar la preferencia de tema al inicio (no depende de los datos)
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                enableDarkMode(); // Aplicar modo oscuro si estaba guardado
-            } else {
-                disableDarkMode(); // Asegurar modo claro si no hay preferencia o es 'light'
-            }
+            // REMOVED: Cargar la preferencia de tema al inicio (ya no hay preferencia, siempre es oscuro)
+            // REMOVED: const savedTheme = localStorage.getItem('theme');
+            // REMOVED: if (savedTheme === 'dark') { enableDarkMode(); } else { disableDarkMode(); }
+
 
             // Cargar los datos desde Firestore (con fallback a Local Storage)
             let initialTodos = [];
@@ -1396,13 +1166,8 @@
             }
 
 
-            // --- Event Listener para el botón de Dark Mode ---
-            if (darkModeToggle) {
-                 darkModeToggle.addEventListener('click', toggleDarkMode);
-                 console.log("Dark mode toggle listener attached."); // Diagnóstico
-            } else {
-                 console.error("Dark mode toggle button not found."); // Diagnóstico
-            }
+            // --- Event Listener para el botón de Dark Mode (REMOVED) ---
+            // REMOVED: if (darkModeToggle) { ... }
 
 
             // --- Event Listeners para Importar/Exportar (REMOVED) ---
