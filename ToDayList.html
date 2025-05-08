@@ -352,12 +352,13 @@
              border-radius: 4px;
              cursor: pointer;
              flex-shrink: 0;
-             transition: border-color 0.2s ease, transform 0.1s ease;
+             transition: border-color 0.2s ease, transform 0.1s ease, background-color 0.2s ease; /* Añadir transición para background-color */
              box-sizing: border-box;
         }
          .todo-item .priority-color-label:hover {
              transform: scale(1.1);
          }
+        /* Usar variables CSS para los colores de fondo y borde */
         .priority-color-label[data-color="red"] { background-color: var(--priority-red-color); border-color: var(--priority-red-color); }
         .priority-color-label[data-color="orange"] { background-color: var(--priority-orange-color); border-color: var(--priority-orange-color); }
         .priority-color-label[data-color="yellow"] { background-color: var(--priority-yellow-color); border-color: var(--priority-yellow-color); }
@@ -413,8 +414,7 @@
             cursor: pointer;
             flex-shrink: 0;
             outline: none;
-            /* Quitar transiciones de background, border, box-shadow */
-            transition: color 0.2s ease;
+            transition: color 0.2s ease; /* Solo transición de color */
         }
         /* Estilo para fecha válida (no vacía) */
          .todo-item .main-task-header .task-body input[type="date"]:valid {
@@ -929,7 +929,7 @@
                     dateInput.style.color = priorityColor;
                     dateInput.style.fontWeight = 'bold';
                     // Asegurarse de que no tenga estilos de .date-today si existieran por error
-                    dateInput.classList.remove('date-today');
+                    dateInput.classList.remove('date-today'); // Asegurar que la clase no esté
                 } else {
                     // Si no es hoy o está completada, resetear estilos
                     dateInput.style.color = ''; // Esto hará que use el color por defecto (:valid o .completed)
@@ -1063,8 +1063,7 @@
 
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
-            taskBody.appendChild(taskActionsGroup); // Asegurarse de que taskActionsGroup esté dentro de taskBody
-            mainTaskHeader.appendChild(taskBody); // Asegurarse de que taskBody esté dentro de mainTaskHeader
+            mainTaskHeader.appendChild(taskBody);
 
 
             return mainTaskHeader;
@@ -1263,13 +1262,23 @@
                  const currentColor = typeof task.priorityColor === 'string' ? task.priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
                  task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
-                 saveTaskToFirestore(task);
-                 // No llamamos a syncAndRender aquí, solo actualizamos el color del borde y el highlight de fecha si aplica
+
+                 // Find the list item and priority label
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
                  if (listItemElement) {
-                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualizar el data attribute
-                     updateDateHighlight(listItemElement, task); // Re-evaluar el highlight de fecha
+                     const priorityLabelElement = listItemElement.querySelector('.priority-color-label');
+                     if (priorityLabelElement) {
+                         // --- ACTUALIZAR DATA ATTRIBUTE EN AMBOS ELEMENTOS ---
+                         listItemElement.dataset.priorityColor = task.priorityColor; // Para el borde izquierdo
+                         priorityLabelElement.dataset.color = task.priorityColor; // Para el color del label
+                         // --- FIN ACTUALIZACIÓN ---
+
+                         // Re-evaluar el highlight de fecha ya que el color de prioridad afecta el color de la fecha
+                         updateDateHighlight(listItemElement, task);
+                     }
                  }
+
+                 saveTaskToFirestore(task); // Guardar después de actualizar el objeto task
              } else {
                   console.error("Tarea no encontrada para ciclar color:", taskId);
              }
@@ -1519,7 +1528,13 @@
                 darkModeToggle.title = 'Alternar a modo claro';
             }
              // Re-renderizar para aplicar colores de prioridad correctos en modo oscuro
-             syncAndRender();
+             // syncAndRender(); // Ya no es necesario redibujar todo, solo actualizar el highlight si aplica
+             // Pero sí necesitamos re-evaluar el highlight de fecha para que tome el color correcto del tema
+             document.querySelectorAll('.todo-item').forEach(item => {
+                 const taskId = item.dataset.taskId;
+                 const task = findTaskById(taskId);
+                 if (task) updateDateHighlight(item, task);
+             });
         }
 
         function disableDarkMode() {
@@ -1535,7 +1550,13 @@
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
             // Re-renderizar para aplicar colores de prioridad correctos en modo claro
-            syncAndRender();
+            // syncAndRender(); // Ya no es necesario redibujar todo, solo actualizar el highlight si aplica
+            // Pero sí necesitamos re-evaluar el highlight de fecha para que tome el color correcto del tema
+            document.querySelectorAll('.todo-item').forEach(item => {
+                const taskId = item.dataset.taskId;
+                const task = findTaskById(taskId);
+                if (task) updateDateHighlight(item, task);
+            });
         }
 
         function toggleDarkMode() {
