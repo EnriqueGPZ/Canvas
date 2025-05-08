@@ -5,6 +5,15 @@
     <!-- Mantener user-scalable=no y maximum-scale=1.0 para intentar prevenir zoom en input focus en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>ToDoList</title>
+
+    <!-- Línea para añadir el Favicon -->
+    <!-- Usamos el nombre de archivo que proporcionaste: iconToDoList.png -->
+    <link rel="icon" href="iconToDoList.png" type="image/png">
+    <!-- Si tuvieras otros tamaños, podrías añadirlos así: -->
+    <!-- <link rel="icon" href="iconToDoList-32x32.png" sizes="32x32" type="image/png"> -->
+    <!-- <link rel="apple-touch-icon" href="iconToDoList-180x180.png"> -->
+
+
     <!-- Enlace a Google Font: Quicksand (para el título) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,6 +48,7 @@
             --fixed-button-border: #ccc; /* Borde del botón fijo */
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra del botón fijo */
             --legend-text-color: #666; /* Color para el texto de la leyenda */
+            --alert-icon-color: #e74c3c; /* Rojo para el icono de aviso */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -64,6 +74,7 @@
             --fixed-button-border: #4a627a; /* Borde del botón fijo oscuro */
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.4); /* Sombra del botón fijo oscuro */
             --legend-text-color: #a0a0a0; /* Color para el texto de la leyenda oscuro */
+            --alert-icon-color: #e74c3c; /* Rojo para el icono de aviso (mismo) */
 
             /* Custom checkmark color for dark mode */
             --checkbox-checkmark-color: var(--bg-color); /* Usar el color de fondo principal */
@@ -195,7 +206,7 @@
 
          /* Specific styles for '-' (delete) buttons */
          .delete-button {
-             color: var(--delete-button-color); /* Color rojo para eliminar */
+             color: var(--delete-button-color); /* Rojo para eliminar */
          }
          .delete-button:hover {
              color: var(--delete-button-hover-color);
@@ -228,14 +239,17 @@
          }
 
 
-        /* --- Estilos UNIFICADOS para Inputs de Texto --- */
+        /* --- Estilos UNIFICADOS para Inputs de Texto y Número --- */
         #new-todo-input,
-        .todo-item .subtask-input-container input[type="text"] {
+        .todo-item .subtask-input-container input[type="text"],
+        .todo-item .main-task-header input[type="number"], /* Estilo para input de número */
+        .todo-item .subtasks-list li input[type="number"] /* Estilo para input de número en sub-tarea */
+         {
             padding: 10px 12px; /* Más padding */
             border: 1px solid var(--border-color); /* Borde sutil */
             border-radius: 4px; /* Bordes redondeados */
             flex-grow: 1;
-            min-width: 150px;
+            min-width: 100px; /* Ajustar min-width para inputs más pequeños */
             font-size: 0.95rem; /* Tamaño ligeramente mayor */
             box-sizing: border-box;
             background-color: var(--input-bg);
@@ -243,14 +257,30 @@
             outline: none;
             transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
         }
+         /* Ajuste específico para inputs de número para que sean más estrechos */
+         .todo-item .main-task-header input[type="number"],
+         .todo-item .subtasks-list li input[type="number"] {
+             flex-grow: 0; /* No crecer */
+             width: 60px; /* Ancho fijo */
+             padding: 6px 8px; /* Padding más pequeño */
+             text-align: center; /* Centrar texto */
+         }
+
+
         #new-todo-input:focus,
-        .todo-item .subtask-input-container input[type="text"]:focus {
+        .todo-item .subtask-input-container input[type="text"]:focus,
+        .todo-item .main-task-header input[type="number"]:focus, /* Focus para input de número */
+        .todo-item .subtasks-list li input[type="number"]:focus /* Focus para input de número en sub-tarea */
+         {
             border-color: var(--button-hover-color); /* Borde rojo al enfocar */
             box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25); /* Sombra suave al enfocar */
         }
          /* Placeholder color */
         #new-todo-input::placeholder,
-        .todo-item .subtask-input-container input[type="text"]::placeholder {
+        .todo-item .subtask-input-container input[type="text"]::placeholder,
+        .todo-item .main-task-header input[type="number"]::placeholder, /* Placeholder para input de número */
+        .todo-item .subtasks-list li input[type="number"]::placeholder /* Placeholder para input de número en sub-tarea */
+         {
              color: var(--placeholder-color);
              opacity: 1; /* Asegura que no esté atenuado por defecto */
         }
@@ -351,13 +381,14 @@
             font-weight: 700; /* Negrita */
             font-size: 1.1rem;
             flex-grow: 1; /* Permite que el texto ocupe el espacio disponible */
-            margin-right: 10px; /* Espacio antes de la fecha/botón */
+            margin-right: 10px; /* Espacio antes de la fecha/hora/duración */
             color: var(--text-color);
             transition: color 0.3s ease, text-decoration 0.3s ease; /* Transición suave */
         }
 
-        /* Estilo para el input de fecha dentro del main-task-header */
-        .todo-item .main-task-header input[type="date"] {
+        /* Estilo para el input de fecha y hora dentro del main-task-header */
+        .todo-item .main-task-header input[type="date"],
+        .todo-item .main-task-header input[type="time"] {
             background: none;
             border: none;
             padding: 0;
@@ -365,28 +396,47 @@
             font-size: 0.85rem;
             color: var(--placeholder-color); /* Color gris discreto */
             cursor: pointer;
-            margin-left: auto; /* Empuja a la derecha */
-            margin-right: 5px; /* Espacio antes del botón eliminar */
+            /* margin-left: auto; /* Esto empujaba la fecha a la derecha, ahora queremos que estén juntas */
+            margin-right: 5px; /* Espacio antes del siguiente elemento */
             flex-shrink: 0;
             outline: none;
             transition: color 0.2s ease;
-            /* Ocultar el icono de calendario nativo - puede variar */
+            /* Ocultar el icono nativo - puede variar */
              /* appearance: none; */
              /* -webkit-appearance: none; */
         }
-         /* Estilo al pasar el mouse o enfocar el input de fecha */
+         /* Estilo al pasar el mouse o enfocar el input de fecha/hora */
         .todo-item .main-task-header input[type="date"]:hover,
-        .todo-item .main-task-header input[type="date"]:focus {
+        .todo-item .main-task-header input[type="date"]:focus,
+        .todo-item .main-task-header input[type="time"]:hover,
+        .todo-item .main-task-header input[type="time"]:focus {
              color: var(--button-hover-color); /* Usar el color rojo de hover */
              text-decoration: underline; /* Subrayar */
          }
-         /* Estilo para el input de fecha cuando tiene valor */
-         .todo-item .main-task-header input[type="date"]:valid {
-             color: var(--text-color); /* Color normal si tiene fecha */
+         /* Estilo para el input de fecha/hora cuando tiene valor */
+         .todo-item .main-task-header input[type="date"]:valid,
+         .todo-item .main-task-header input[type="time"]:valid {
+             color: var(--text-color); /* Color normal si tiene fecha/hora */
          }
-         .todo-item .main-task-header input[type="date"]:valid:hover,
-         .todo-item .main-task-header input[type="date"]:valid:focus {
-              color: var(--button-hover-color); /* Rojo de hover si tiene fecha */
+         .todo-item.completed .main-task-header input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header input[type="date"]:valid:focus,
+         .todo-item.completed .main-task-header input[type="time"]:valid:hover,
+         .todo-item.completed .main-task-header input[type="time"]:valid:focus {
+              color: var(--completed-text-color); /* Color gris si está completada */
+              text-decoration: none; /* No subrayar si está completada */
+         }
+          /* Asegurar que los inputs de fecha/hora en tareas completadas no cambien color al pasar el mouse */
+         .todo-item.completed .main-task-header input[type="date"]:hover,
+         .todo-item.completed .main-task-header input[type="date"]:focus,
+         .todo-item.completed .main-task-header input[type="time"]:hover,
+         .todo-item.completed .main-task-header input[type="time"]:focus {
+             color: var(--completed-text-color); /* Mantener color gris */
+             text-decoration: none; /* No subrayar */
+         }
+
+         /* Estilo para el input de duración en la tarea principal */
+         .todo-item .main-task-header input[type="number"] {
+             margin-right: 5px; /* Espacio antes del siguiente elemento */
          }
 
 
@@ -396,6 +446,15 @@
             /* Color ya en .delete-button */
              padding: 6px; /* Padding más pequeño para iconos */
              font-size: 1.2rem; /* Tamaño del icono */
+             margin-left: auto; /* Empuja el botón eliminar a la derecha */
+        }
+
+        /* Icono de aviso de tiempo excedido */
+        .todo-item .alert-icon {
+            color: var(--alert-icon-color); /* Rojo */
+            font-size: 1.1rem; /* Tamaño del icono */
+            margin-left: 5px; /* Espacio a la izquierda */
+            flex-shrink: 0;
         }
 
 
@@ -474,7 +533,7 @@
               border-color: var(--text-color);
          }
          /* Checkmark color in Dark Mode for subtasks */
-         body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
+         body.dark-mode .todo-item.subtasks-list li input[type="checkbox"]:checked::after {
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
@@ -487,6 +546,11 @@
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
         }
+
+         /* Estilo para el input de duración en la sub-tarea */
+         .todo-item .subtasks-list li input[type="number"] {
+             margin-right: 5px; /* Espacio antes del siguiente elemento */
+         }
 
          /* Botones de mover sub-tarea */
          .todo-item .subtasks-list li .subtask-move-button {
@@ -515,6 +579,14 @@
              /* Color ya en .delete-button */
              padding: 4px 8px; /* Padding más pequeño */
              font-size: 1rem;
+         }
+
+         /* Icono de aviso de tiempo excedido en sub-tarea */
+         .todo-item .subtasks-list li .alert-icon {
+             color: var(--alert-icon-color); /* Rojo */
+             font-size: 0.9rem; /* Tamaño del icono ligeramente menor que el principal */
+             margin-left: 5px; /* Espacio a la izquierda */
+             flex-shrink: 0;
          }
 
 
@@ -575,19 +647,31 @@
         .todo-item.completed .progress-bar {
             background-color: var(--progress-bar-completed-color); /* Verde completado */
         }
-         /* Atenuar botones y fecha en tareas completadas */
+         /* Atenuar botones y fecha/hora/duración en tareas completadas */
         .todo-item.completed .main-task-header button,
         .todo-item.completed .subtasks-list li .app-button, /* Aplicar a todos los botones de sub-tarea */
         .todo-item.completed .main-task-header input[type="date"],
-        .todo-item.completed .priority-color-label {
+        .todo-item.completed .main-task-header input[type="time"], /* Atenuar input de hora */
+        .todo-item.completed .main-task-header input[type="number"], /* Atenuar input de duración */
+        .todo-item.completed .subtasks-list li input[type="number"], /* Atenuar input de duración en sub-tarea */
+        .todo-item.completed .priority-color-label,
+        .todo-item.completed .alert-icon /* Ocultar icono de alerta si está completada */
+         {
             opacity: 0.7;
             cursor: default; /* Cambiar cursor */
-        }
+            pointer-events: none; /* Deshabilitar clics */
+         }
          /* Desactivar hover en elementos atenuados */
          .todo-item.completed .main-task-header button:hover,
          .todo-item.completed .subtasks-list li .app-button:hover, /* Aplicar a todos los botones de sub-tarea */
          .todo-item.completed .main-task-header input[type="date"]:hover,
          .todo-item.completed .main-task-header input[type="date"]:focus,
+         .todo-item.completed .main-task-header input[type="time"]:hover, /* Desactivar hover en input de hora */
+         .todo-item.completed .main-task-header input[type="time"]:focus, /* Desactivar focus en input de hora */
+         .todo-item.completed .main-task-header input[type="number"]:hover, /* Desactivar hover en input de duración */
+         .todo-item.completed .main-task-header input[type="number"]:focus, /* Desactivar focus en input de duración */
+         .todo-item.completed .subtasks-list li input[type="number"]:hover, /* Desactivar hover en input de duración en sub-tarea */
+         .todo-item.completed .subtasks-list li input[type="number"]:focus, /* Desactivar focus en input de duración en sub-tarea */
          .todo-item.completed .priority-color-label:hover {
              opacity: 0.7; /* Mantener opacidad */
              color: inherit; /* No cambiar color */
@@ -598,6 +682,8 @@
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
              background-color: var(--completed-text-color);
+             opacity: 1; /* No atenuar el checkbox */
+             pointer-events: auto; /* Permitir clic en el checkbox */
          }
           body.dark-mode .todo-item.completed .main-task-header input[type="checkbox"] {
               border-color: var(--completed-text-color);
@@ -718,6 +804,9 @@
             'none': 5 // Las tareas sin color van al final
         };
 
+        // Variable para almacenar el ID del intervalo de re-renderizado
+        let renderIntervalId = null;
+
 
         // --- Funciones para Local Storage (Se mantienen para carga rápida y fallback) ---
 
@@ -728,21 +817,39 @@
                     const todos = JSON.parse(storedTodos);
                     // Asegurarse de que las tareas antiguas tengan las propiedades necesarias
                     // y limpiar datos potencialmente corruptos o faltantes
-                    return todos.map(todo => ({
-                        // No necesitamos firebaseId para la lógica JS en este modelo, pero lo mantenemos si existe en los datos
-                        firebaseId: todo.firebaseId || null,
-                        text: todo.text || 'Tarea sin nombre', // Default text if missing
-                        completed: typeof todo.completed === 'boolean' ? todo.completed : false, // Ensure boolean
-                        subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
-                            text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [], // Ensure subtasks is an array and clean its items
-                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false, // Ensure boolean with default false
-                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none', // Ensure valid color with default 'none'
-                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null, // Add date property, validate format
-                         // Mantener el campo order si existe, aunque no se use activamente en este modelo de guardado
-                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
-                    }));
+                    return todos.map(todo => {
+                        const mainTask = {
+                            firebaseId: todo.firebaseId || null,
+                            text: todo.text || 'Tarea sin nombre',
+                            completed: typeof todo.completed === 'boolean' ? todo.completed : false,
+                            subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
+                                text: sub.text || 'Sub-tarea sin nombre',
+                                completed: typeof sub.completed === 'boolean' ? sub.completed : false,
+                                durationMinutes: typeof sub.durationMinutes === 'number' && sub.durationMinutes > 0 ? sub.durationMinutes : null, // Cargar duración
+                                startTime: typeof sub.startTime === 'number' ? sub.startTime : null // Cargar hora de inicio
+                            })) : [],
+                            showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
+                            priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
+                            date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
+                            time: typeof todo.time === 'string' && todo.time.match(/^\d{2}:\d{2}$/) ? todo.time : null, // Cargar campo time (separado del temporizador)
+                            durationMinutes: typeof todo.durationMinutes === 'number' && todo.durationMinutes > 0 ? todo.durationMinutes : null, // Cargar duración
+                            startTime: typeof todo.startTime === 'number' ? todo.startTime : null, // Cargar hora de inicio
+                            order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
+                        };
+
+                        // Si la tarea principal no está completada y tiene duración pero no hora de inicio, establecerla ahora
+                        if (!mainTask.completed && mainTask.durationMinutes !== null && mainTask.startTime === null) {
+                             mainTask.startTime = Date.now();
+                        }
+                         // Hacer lo mismo para las sub-tareas
+                         mainTask.subtasks.forEach(subtask => {
+                             if (!subtask.completed && subtask.durationMinutes !== null && subtask.startTime === null) {
+                                 subtask.startTime = Date.now();
+                             }
+                         });
+
+                        return mainTask;
+                    });
                 } else {
                     return [];
                 }
@@ -754,6 +861,7 @@
 
         function saveTodosToLocalStorage(todosArray) {
              try {
+                 // Al guardar en LS, guardamos todos los campos, incluyendo durationMinutes y startTime
                  localStorage.setItem('todos', JSON.stringify(todosArray));
              } catch (e) {
                  console.error("Error al guardar en localStorage:", e);
@@ -796,19 +904,37 @@
                 querySnapshot.forEach(docSnap => {
                     // Asegurarse de que los datos cargados tengan la estructura esperada
                     const data = docSnap.data();
-                     todos.push({
+                    const mainTask = {
                         firebaseId: docSnap.id, // Guardar el ID de Firebase si existe
                         text: data.text || 'Tarea sin nombre',
                         completed: typeof data.completed === 'boolean' ? data.completed : false,
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
                             text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
+                            completed: typeof sub.completed === 'boolean' ? sub.completed : false,
+                            durationMinutes: typeof sub.durationMinutes === 'number' && sub.durationMinutes > 0 ? sub.durationMinutes : null, // Cargar duración
+                            startTime: typeof sub.startTime === 'number' ? sub.startTime : null // Cargar hora de inicio
                         })) : [],
                         showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
+                        time: typeof data.time === 'string' && data.time.match(/^\d{2}:\d{2}$/) ? data.time : null, // Cargar campo time
+                        durationMinutes: typeof data.durationMinutes === 'number' && data.durationMinutes > 0 ? data.durationMinutes : null, // Cargar duración
+                        startTime: typeof data.startTime === 'number' ? data.startTime : null, // Cargar hora de inicio
                         order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // Cargar el campo order si existe
-                    });
+                    };
+
+                    // Si la tarea principal no está completada y tiene duración pero no hora de inicio, establecerla ahora
+                    if (!mainTask.completed && mainTask.durationMinutes !== null && mainTask.startTime === null) {
+                         mainTask.startTime = Date.now();
+                    }
+                     // Hacer lo mismo para las sub-tareas
+                     mainTask.subtasks.forEach(subtask => {
+                         if (!subtask.completed && subtask.durationMinutes !== null && subtask.startTime === null) {
+                             subtask.startTime = Date.now();
+                         }
+                     });
+
+                    todos.push(mainTask);
                 });
                 console.log("Datos cargados de Firestore:", todos);
 
@@ -851,6 +977,23 @@
             const completed = subtasks.filter(sub => sub.completed).length;
             return (completed / subtasks.length) * 100;
         }
+
+        // --- NUEVA Función para calcular si una tarea/sub-tarea está pasada de tiempo ---
+        function isOverdue(item) {
+            // Debe tener duración, hora de inicio y no estar completada
+            if (item.durationMinutes === null || item.startTime === null || item.completed) {
+                return false;
+            }
+
+            const startTimeMillis = item.startTime; // startTime ya es un timestamp en milisegundos
+            const durationMillis = item.durationMinutes * 60 * 1000; // Convertir minutos a milisegundos
+            const endTimeMillis = startTimeMillis + durationMillis;
+            const currentTimeMillis = Date.now();
+
+            // Está pasado de tiempo si la hora actual es posterior a la hora de fin
+            return currentTimeMillis > endTimeMillis;
+        }
+
 
         // --- Functions for Creating DOM Elements ---
         // Centralize the creation of recurring elements for consistency
@@ -901,6 +1044,47 @@
                  }
             });
 
+            // --- Input de Hora (para scheduling, no para el temporizador actual) ---
+            const timeInput = document.createElement('input');
+            timeInput.type = 'time';
+            timeInput.classList.add('task-time-input');
+            timeInput.value = mainTask.time || ''; // Usar el valor de la tarea o cadena vacía si es null
+            timeInput.title = 'Establecer hora específica (opcional)'; // Tooltip
+             // Listener para guardar la hora cuando cambia
+            timeInput.addEventListener('change', (event) => {
+                 // Solo permitir cambiar hora si la tarea no está completada
+                 if (!mainTask.completed) {
+                    updateTaskTime(mainIndex, event.target.value);
+                 } else {
+                     // Si estaba completada, revertir el cambio y notificar
+                     event.target.value = mainTask.time || ''; // Revertir al valor guardado
+                     alert("No puedes cambiar la hora de una tarea completada.");
+                 }
+            });
+
+            // --- Input de Duración (para el temporizador) ---
+            const durationInput = document.createElement('input');
+            durationInput.type = 'number';
+            durationInput.classList.add('task-duration-input'); // Reutilizar clase de estilo
+            durationInput.min = "1"; // Duración mínima 1 minuto
+            durationInput.step = "1"; // Pasos de 1 minuto
+            durationInput.placeholder = "min"; // Placeholder
+            durationInput.title = 'Duración estimada en minutos'; // Tooltip
+            durationInput.value = mainTask.durationMinutes !== null ? mainTask.durationMinutes : ''; // Mostrar valor si existe
+             // Listener para guardar la duración cuando cambia
+            durationInput.addEventListener('change', (event) => {
+                 // Solo permitir cambiar duración si la tarea no está completada
+                 if (!mainTask.completed) {
+                    // Convertir el valor a número, usar null si está vacío o no es un número válido > 0
+                    const newDuration = event.target.value === '' ? null : parseInt(event.target.value, 10);
+                    updateTaskDuration(mainIndex, newDuration);
+                 } else {
+                     // Si estaba completada, revertir el cambio y notificar
+                     event.target.value = mainTask.durationMinutes !== null ? mainTask.durationMinutes : ''; // Revertir al valor guardado
+                     alert("No puedes cambiar la duración de una tarea completada.");
+                 }
+            });
+
 
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button'); // Aplicar clases de estilo
@@ -921,6 +1105,18 @@
             mainTaskHeader.appendChild(priorityLabel);
             mainTaskHeader.appendChild(mainTaskSpan);
             mainTaskHeader.appendChild(dateInput); // Añadir el input de fecha
+            mainTaskHeader.appendChild(timeInput); // Añadir el input de hora
+            mainTaskHeader.appendChild(durationInput); // Añadir el input de duración
+
+            // --- Añadir icono de aviso si está pasado de tiempo ---
+            if (isOverdue(mainTask)) {
+                 const alertIcon = document.createElement('i');
+                 alertIcon.classList.add('fas', 'fa-times-circle', 'alert-icon');
+                 alertIcon.title = `Tiempo estimado excedido (${mainTask.durationMinutes} min)`;
+                 mainTaskHeader.appendChild(alertIcon);
+            }
+
+
             mainTaskHeader.appendChild(deleteMainButton);
 
             return mainTaskHeader;
@@ -1013,6 +1209,28 @@
                     const subtaskSpan = document.createElement('span');
                     subtaskSpan.textContent = subtask.text;
 
+                    // --- Input de Duración para Sub-tarea ---
+                    const durationInput = document.createElement('input');
+                    durationInput.type = 'number';
+                    durationInput.classList.add('task-duration-input'); // Reutilizar clase de estilo
+                    durationInput.min = "1";
+                    durationInput.step = "1";
+                    durationInput.placeholder = "min";
+                    durationInput.title = 'Duración estimada en minutos';
+                    durationInput.value = subtask.durationMinutes !== null ? subtask.durationMinutes : '';
+                     // Listener para guardar la duración cuando cambia
+                    durationInput.addEventListener('change', (event) => {
+                         // Solo permitir cambiar duración si la sub-tarea no está completada
+                         if (!subtask.completed) {
+                            const newDuration = event.target.value === '' ? null : parseInt(event.target.value, 10);
+                            updateSubtaskDuration(mainIndex, subIndex, newDuration);
+                         } else {
+                             event.target.value = subtask.durationMinutes !== null ? subtask.durationMinutes : '';
+                             alert("No puedes cambiar la duración de una sub-tarea completada.");
+                         }
+                    });
+
+
                     // --- Botones de Mover Sub-tarea ---
                     const moveUpButton = document.createElement('button');
                     moveUpButton.classList.add('app-button', 'subtask-move-button'); // Clases de estilo
@@ -1039,6 +1257,14 @@
                     });
                     // --- Fin Botones de Mover Sub-tarea ---
 
+                    // --- Añadir icono de aviso si está pasado de tiempo ---
+                    if (isOverdue(subtask)) {
+                         const alertIcon = document.createElement('i');
+                         alertIcon.classList.add('fas', 'fa-times-circle', 'alert-icon');
+                         alertIcon.title = `Tiempo estimado excedido (${subtask.durationMinutes} min)`;
+                         subtaskItem.appendChild(alertIcon); // Añadir al item de sub-tarea
+                    }
+
 
                     const deleteSubtaskButton = document.createElement('button');
                     deleteSubtaskButton.classList.add('app-button', 'delete-button'); // Aplicar clases de estilo
@@ -1052,9 +1278,11 @@
 
                     subtaskItem.appendChild(checkbox);
                     subtaskItem.appendChild(subtaskSpan);
+                    subtaskItem.appendChild(durationInput); // Añadir input de duración
                     // Añadir botones de mover ANTES del botón de eliminar
                     subtaskItem.appendChild(moveUpButton);
                     subtaskItem.appendChild(moveDownButton);
+                    // El icono de alerta se añade condicionalmente antes del botón eliminar
                     subtaskItem.appendChild(deleteSubtaskButton);
                     subtasksList.appendChild(subtaskItem);
                 });
@@ -1120,6 +1348,9 @@
                  if (mainTask.showSubtaskUI) {
                     listItem.classList.add('show-subtask-ui');
                  }
+                 // No necesitamos una clase 'alert' en el item principal para este tipo de aviso,
+                 // el icono se añade directamente en el header/item de sub-tarea.
+
 
                 // Agregar los elementos a la tarea principal (li) en el orden deseado
                 // Pasamos el índice local a las funciones de creación de elementos interactivos
@@ -1148,7 +1379,7 @@
                 mainTask.showSubtaskUI = show;
                 // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
                 if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
-                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
+                     mainTask.subtasks = [];
                 }
 
                 saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
@@ -1233,6 +1464,87 @@
             }
         }
 
+        // Función para actualizar la hora de una tarea principal (para scheduling, no temporizador)
+        function updateTaskTime(mainTaskIndex, newTimeValue) {
+             const todos = loadTodos(); // Cargar estado actual (desde LS)
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 // Guardar null si el valor está vacío (el usuario borró la hora)
+                 todos[mainTaskIndex].time = newTimeValue || null;
+
+                 // No reordenamos por hora, solo guardamos y renderizamos
+                 saveTodos(todos).then(() => { // Esperar a que guarde online
+                     renderTodos(todos); // Renderiza el estado actual
+                 })
+                 .catch(e => console.error("Error guardando updateTaskTime:", e)); // Capturar error de guardado
+             } else {
+                 console.error("Índice de tarea principal inválido para actualizar hora:", mainTaskIndex);
+             }
+        }
+
+        // --- NUEVA Función para actualizar la duración de una tarea principal ---
+        function updateTaskDuration(mainTaskIndex, newDuration) {
+             const todos = loadTodos(); // Cargar estado actual
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                 const oldDuration = mainTask.durationMinutes;
+
+                 // Asegurarse de que la duración sea un número positivo o null
+                 const validatedDuration = (newDuration !== null && newDuration > 0) ? newDuration : null;
+
+                 mainTask.durationMinutes = validatedDuration;
+
+                 // Si se establece una duración válida (y antes no había o no había hora de inicio)
+                 // O si se quita la duración, resetear la hora de inicio
+                 if (validatedDuration !== null && (oldDuration === null || mainTask.startTime === null)) {
+                     mainTask.startTime = Date.now(); // Establecer hora de inicio ahora
+                 } else if (validatedDuration === null) {
+                     mainTask.startTime = null; // Quitar hora de inicio si se quita la duración
+                 }
+                 // Si se cambia la duración a otro valor válido y ya tenía hora de inicio, la hora de inicio se mantiene.
+
+                 saveTodos(todos).then(() => {
+                     renderTodos(todos); // Re-renderizar para actualizar visualmente (icono X)
+                 }).catch(e => console.error("Error guardando updateTaskDuration:", e));
+             } else {
+                 console.error("Índice de tarea principal inválido para actualizar duración:", mainTaskIndex);
+             }
+        }
+
+        // --- NUEVA Función para actualizar la duración de una sub-tarea ---
+        function updateSubtaskDuration(mainTaskIndex, subtaskIndex, newDuration) {
+             const todos = loadTodos(); // Cargar estado actual
+             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                 const mainTask = todos[mainTaskIndex];
+                 if (Array.isArray(mainTask.subtasks) && subtaskIndex >= 0 && subtaskIndex < mainTask.subtasks.length) {
+                     const subtask = mainTask.subtasks[subtaskIndex];
+                     const oldDuration = subtask.durationMinutes;
+
+                     // Asegurarse de que la duración sea un número positivo o null
+                     const validatedDuration = (newDuration !== null && newDuration > 0) ? newDuration : null;
+
+                     subtask.durationMinutes = validatedDuration;
+
+                     // Si se establece una duración válida (y antes no había o no había hora de inicio)
+                     // O si se quita la duración, resetear la hora de inicio
+                     if (validatedDuration !== null && (oldDuration === null || subtask.startTime === null)) {
+                         subtask.startTime = Date.now(); // Establecer hora de inicio ahora
+                     } else if (validatedDuration === null) {
+                         subtask.startTime = null; // Quitar hora de inicio si se quita la duración
+                     }
+                     // Si se cambia la duración a otro valor válido y ya tenía hora de inicio, la hora de inicio se mantiene.
+
+
+                     saveTodos(todos).then(() => {
+                         renderTodos(todos); // Re-renderizar para actualizar visualmente (icono X)
+                     }).catch(e => console.error("Error guardando updateSubtaskDuration:", e));
+                 } else {
+                     console.error("Índice de sub-tarea inválido para actualizar duración:", subtaskIndex);
+                 }
+             } else {
+                 console.error("Índice de tarea principal inválido para actualizar duración de sub-tarea:", mainTaskIndex);
+             }
+        }
+
 
         // Función para agregar una nueva tarea principal
         function addTodo() {
@@ -1254,6 +1566,9 @@
                 showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
                 priorityColor: 'none', // Color de prioridad por defecto
                 date: null, // Fecha inicialmente nula
+                time: null, // Hora inicialmente nula (para scheduling)
+                durationMinutes: null, // Duración inicialmente nula
+                startTime: null, // Hora de inicio inicialmente nula
                 order: Date.now() // Usar timestamp para el orden inicial
             });
 
@@ -1302,7 +1617,9 @@
 
                  mainTask.subtasks.push({
                      text: newSubtaskText,
-                     completed: false
+                     completed: false,
+                     durationMinutes: null, // Duración inicialmente nula
+                     startTime: null // Hora de inicio inicialmente nula
                  });
 
                  // Al añadir una sub-tarea, la tarea principal ya no puede considerarse "completada"
@@ -1384,7 +1701,19 @@
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const mainTask = todos[mainTaskIndex];
                   if (Array.isArray(mainTask.subtasks) && subtaskIndexToToggle >= 0 && subtaskIndexToToggle < mainTask.subtasks.length) {
-                     mainTask.subtasks[subtaskIndexToToggle].completed = !mainTask.subtasks[subtaskIndexToToggle].completed;
+                     const subtask = mainTask.subtasks[subtaskIndexToToggle];
+                     subtask.completed = !subtask.completed;
+
+                     // Si se marca como completada, resetear hora de inicio
+                     if (subtask.completed) {
+                         subtask.startTime = null;
+                     } else {
+                         // Si se desmarca, y tiene duración, establecer hora de inicio ahora
+                         if (subtask.durationMinutes !== null) {
+                             subtask.startTime = Date.now();
+                         }
+                     }
+
 
                      // Recalcular si todas las sub-tareas están completadas
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
@@ -1395,7 +1724,6 @@
                      }
                      // Si no tiene sub-tareas, el checkbox principal se controla solo manualmente.
 
-                     // No reordenar al cambiar estado sub-tarea, solo guardar y renderizar
                      saveTodos(todos).then(() => { // Esperar a que guarde online
                          renderTodos(todos); // Renderiza el estado actual
                      })
@@ -1417,13 +1745,33 @@
 
                  mainTask.completed = isChecked;
 
+                 // Si se marca como completada, resetear hora de inicio
+                 if (isChecked) {
+                     mainTask.startTime = null;
+                 } else {
+                     // Si se desmarca, y tiene duración, establecer hora de inicio ahora
+                     if (mainTask.durationMinutes !== null) {
+                         mainTask.startTime = Date.now();
+                     }
+                 }
+
+
                  // Si la tarea principal tiene sub-tareas, sincronizar el estado de sus sub-tareas
                  if (Array.isArray(mainTask.subtasks) && mainTask.subtasks.length > 0) {
                      mainTask.subtasks.forEach(subtask => {
                          subtask.completed = isChecked;
+                         // También sincronizar hora de inicio de sub-tareas si se completa/descompleta la principal
+                         if (isChecked) {
+                             subtask.startTime = null;
+                         } else {
+                             if (subtask.durationMinutes !== null) {
+                                 subtask.startTime = Date.now(); // Reiniciar temporizador de sub-tarea
+                             }
+                         }
                      });
                  }
                  // Si no tiene sub-tareas, solo se actualiza el estado principal.
+
 
                  // No reordenar al cambiar estado principal, solo guardar y renderizar
                  saveTodos(todos).then(() => { // Esperar a que guarde online
@@ -1435,7 +1783,7 @@
              }
         }
 
-        // --- NUEVAS Funciones para Mover Sub-tareas ---
+        // --- Funciones para Mover Sub-tareas ---
 
         function moveSubtaskUp(mainTaskIndex, subtaskIndex) {
             const todos = loadTodos(); // Cargar estado actual
@@ -1574,6 +1922,7 @@
             darkModeToggle = document.getElementById('dark-mode-toggle');
             body = document.body;
 
+
             // Cargar la preferencia de tema al inicio
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
@@ -1636,10 +1985,41 @@
                  console.error("Dark mode toggle button not found.");
             }
 
+            // --- Iniciar el re-renderizado periódico para actualizar el estado de tiempo excedido ---
+            // Re-renderizar cada 10 segundos (10000 milisegundos)
+            renderIntervalId = setInterval(() => {
+                // Cargar el estado actual (que incluye startTime y durationMinutes)
+                const currentTodos = loadTodos();
+                // Re-renderizar para que la función isOverdue se evalúe y muestre/oculte el icono
+                renderTodos(currentTodos);
+            }, 10000); // Ajusta este valor si 10 segundos es demasiado o muy poco frecuente
+            console.log("Re-renderizado periódico iniciado (cada 10 segundos) para actualizar estado de tiempo.");
+
+
              console.log("Inicialización completa.");
         });
+
+        // Limpiar el intervalo si la página se cierra
+        window.addEventListener('beforeunload', () => {
+            if (renderIntervalId !== null) {
+                clearInterval(renderIntervalId);
+                console.log("Intervalo de re-renderizado detenido.");
+            }
+        });
+
 
     </script>
 
 </body>
 </html>
+```
+
+**Instrucciones para usarlo:**
+
+1.  Copia todo el código de arriba.
+2.  Pega el código en tu archivo HTML, reemplazando todo el contenido anterior.
+3.  Asegúrate de que el archivo de imagen de tu favicon (`iconToDoList.png`) esté en el mismo directorio que tu archivo HTML.
+4.  Abre el archivo HTML en tu navegador.
+5.  Ahora, al agregar o editar una tarea o sub-tarea, verás un pequeño campo numérico al lado del input de texto (o fecha/hora en la tarea principal). Puedes ingresar la duración estimada en minutos allí.
+6.  Si la tarea o sub-tarea no está completada y el tiempo transcurrido desde que estableciste la duración (o cargaste la página si ya tenía duración) excede la duración especificada, aparecerá un icono de "X" en rojo junto a ella.
+7.  Este icono se actualizará automáticamente cada 10 segundos. Si completas la tarea/sub-tarea, el icono desaparecerá. Si cambias la duración o desmarcas una tarea/sub-tarea completada que tenía duración, el temporizador se reiniciará desde el momento actual.
