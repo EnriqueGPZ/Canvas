@@ -352,7 +352,7 @@
              border-radius: 4px;
              cursor: pointer;
              flex-shrink: 0;
-             transition: border-color 0.2s ease, transform 0.1s ease;
+             transition: border-color 0.2s ease, transform 0.1s ease, background-color 0.2s ease; /* Added background-color transition */
              box-sizing: border-box;
         }
          .todo-item .priority-color-label:hover {
@@ -1264,10 +1264,20 @@
                  const currentIndex = currentColors.indexOf(currentColor);
                  task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
                  saveTaskToFirestore(task);
-                 // No llamamos a syncAndRender aquí, solo actualizamos el color del borde y el highlight de fecha si aplica
+                 
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
                  if (listItemElement) {
-                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualizar el data attribute
+                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualiza el data attribute del LI para el borde izquierdo
+
+                     // --- INICIO DE LA MODIFICACIÓN ---
+                     // Encuentra el elemento priority-color-label dentro del listItem y actualiza su dataset y title
+                     const priorityLabelElement = listItemElement.querySelector('.priority-color-label');
+                     if (priorityLabelElement) {
+                         priorityLabelElement.dataset.color = task.priorityColor;
+                         priorityLabelElement.title = `Prioridad: ${task.priorityColor.charAt(0).toUpperCase() + task.priorityColor.slice(1)}`;
+                     }
+                     // --- FIN DE LA MODIFICACIÓN ---
+
                      updateDateHighlight(listItemElement, task); // Re-evaluar el highlight de fecha
                  }
              } else {
