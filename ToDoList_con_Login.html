@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <!-- Mantener user-scalable=no y maximum-scale=1.0 para intentar prevenir zoom en input focus en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>ToDoList</title>
+    <!-- Título de la página cambiado -->
+    <title>ToDayList</title>
 
     <!-- Línea para añadir el Favicon -->
-    <!-- Usamos el nombre de archivo que proporcionaste: iconToDoList.png -->
-    <link rel="icon" href="iconToDoList.png" type="image/png">
+    <!-- ¡IMPORTANTE! Debes renombrar tu archivo 'iconToDoList.png' a 'iconToDayList.png' -->
+    <link rel="icon" href="iconToDayList.png" type="image/png">
     <!-- Si tuvieras otros tamaños, podrías añadirlos así: -->
-    <!-- <link rel="icon" href="iconToDoList-32x32.png" sizes="32x32" type="image/png"> -->
-    <!-- <link rel="apple-touch-icon" href="iconToDoList-180x180.png"> -->
+    <!-- <link rel="icon" href="iconToDayList-32x32.png" sizes="32x32" type="image/png"> -->
+    <!-- <link rel="apple-touch-icon" href="iconToDayList-180x180.png"> -->
 
 
     <!-- Enlace a Google Font: Quicksand (para el título) -->
@@ -666,8 +667,8 @@
 <body>
 
     <div class="container">
-        <!-- Título principal -->
-        <h1>ToDoList</h1>
+        <!-- Título principal cambiado -->
+        <h1>ToDayList</h1>
 
         <!-- La lista de tareas va PRIMERO -->
         <ul id="todo-list">
@@ -712,10 +713,11 @@
         // !! IMPORTANTE: Asegúrate de que las reglas de seguridad de Firestore
         //    estén configuradas para permitir lectura y escritura SIN autenticación
         //    si este es un proyecto público o de prueba.
+        // El projectId "todolist-5cc91" no se puede cambiar desde aquí.
         const firebaseConfig = {
             apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4",
             authDomain: "todolist-5cc91.firebaseapp.com",
-            projectId: "todolist-5cc91",
+            projectId: "todolist-5cc91", // Este ID no cambia con el nombre de la app en el código
             storageBucket: "todolist-5cc91.firebaseapp.com",
             messagingSenderId: "834516228026",
             appId: "1:834516228026:web:772d2e3a6fbe958a212f83"
@@ -1204,7 +1206,7 @@
                  const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
                  todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
 
-                 // *** ELIMINADO: Ya NO ordenamos la lista después de cambiar la prioridad ***
+                 // Ya NO ordenamos la lista después de cambiar la prioridad
                  // todos.sort(...)
 
                  saveTodos(todos).then(() => { // Esperar a que guarde online
@@ -1223,7 +1225,7 @@
                 // Guardar null si el valor está vacío (el usuario borró la fecha)
                 todos[mainTaskIndex].date = newDateValue || null;
 
-                 // *** ELIMINADO: Ya NO ordenamos la lista después de cambiar la fecha ***
+                 // Ya NO ordenamos la lista después de cambiar la fecha
                  // todos.sort(...)
 
                 saveTodos(todos).then(() => { // Esperar a que guarde online
@@ -1259,7 +1261,7 @@
                 order: Date.now() // Usar timestamp para el orden inicial (desempate)
             });
 
-            // *** ELIMINADO: Ya NO ordenamos la lista inmediatamente después de añadir ***
+            // Ya NO ordenamos la lista inmediatamente después de añadir
             // todos.sort(...)
 
             saveTodos(todos).then(() => { // Esperar a que guarde online
@@ -1509,7 +1511,7 @@
 
              saveTodos(todos).then(() => { // Esperar a que guarde online
                  renderTodos(todos); // Renderiza la lista en el nuevo orden
-                 // *** ELIMINADO: alert("Tareas reordenadas."); ***
+                 // Eliminado: alert("Tareas reordenadas.");
              })
              .catch(e => console.error("Error guardando performManualSort:", e)); // Capturar error de guardado
         }
