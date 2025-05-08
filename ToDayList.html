@@ -179,6 +179,8 @@
         .todo-item[data-priority-color="orange"] { border-left-color: #f39c12; }
         .todo-item[data-priority-color="yellow"] { border-left-color: #f1c40f; }
         .todo-item[data-priority-color="green"] { border-left-color: #2ecc71; }
+        /* Estilo para cuando no hay color */
+        .todo-item[data-priority-color="none"] { border-left-color: var(--border-color); }
 
 
          .app-button {
@@ -1346,6 +1348,11 @@
 
                 if (isChecked) {
                     task.completedDate = today;
+                    // --- INICIO CAMBIO SOLICITADO ---
+                    // Cuando se marca como completada, quitar la etiqueta de color
+                    task.priorityColor = 'none';
+                    // --- FIN CAMBIO SOLICITADO ---
+
                     if (!wasCompletedTodayBefore) {
                        updateMedalCount(1);
                     }
@@ -1359,6 +1366,8 @@
                     }
                     task.completedDate = null;
                     task.showSubtaskUI = false;
+                    // NOTA: No restauramos el color aquí. Si se descompleta, el usuario puede
+                    // volver a asignarle una prioridad manualmente si lo desea.
                 }
 
                 if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
