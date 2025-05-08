@@ -369,6 +369,9 @@
             display: flex;
             flex-grow: 1;
             align-items: center; /* Alinea el span y actions-group verticalmente */
+            /* --- CAMBIO SOLICITADO: Añadir align-self --- */
+            align-self: center; /* Asegura que este div se centre verticalmente dentro del flex padre */
+            /* --- FIN CAMBIO SOLICITADO --- */
             gap: 10px;
             min-width: 0;
             flex-wrap: wrap; /* Permite que los elementos se envuelvan en móvil */
