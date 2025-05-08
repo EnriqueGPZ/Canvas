@@ -688,7 +688,7 @@
                         subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
                             text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [],
+                        })) : [], // Ensure subtasks is an array and clean its items
                         showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
                         priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
                         date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
@@ -858,7 +858,7 @@
 
                     deleteSubtaskButton.addEventListener('click', () => {
                         // Llamar a la función que elimina en Firestore
-                        deleteSubtask(mainTask.firebaseId, subIndex);
+                        deleteSubtask(mainTask.firebaseId, subIndex); // Usar subIndex correcto
                     });
 
                     subtaskItem.appendChild(checkbox);
@@ -918,6 +918,9 @@
             todosArray.forEach((mainTask, mainIndex) => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('todo-item');
+                // Añadir el firebaseId como data attribute para referencia rápida si es necesario (opcional)
+                listItem.dataset.firebaseId = mainTask.firebaseId;
+
 
                 // Añadir clases CSS según el estado
                 if (mainTask.completed) {
@@ -1040,16 +1043,14 @@
 
              const taskDocRef = doc(db, "tareas", firebaseId);
 
-             // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTaskIndex = currentTodos.findIndex(task => task.firebaseId === firebaseId);
+             // Encontrar la tarea principal en el array local (currentTodos) para obtener el estado actual de subtasks
+             const mainTask = currentTodos.find(task => task.firebaseId === firebaseId);
 
-             if (mainTaskIndex === -1) {
+             if (!mainTask) {
                  console.error("Tarea principal no encontrada localmente para agregar sub-tarea:", firebaseId);
                  alert("Error: Tarea no encontrada.");
                  return;
              }
-
-             const mainTask = currentTodos[mainTaskIndex];
 
              // Crear una copia del array de sub-tareas y añadir la nueva
              const updatedSubtasks = Array.isArray(mainTask.subtasks) ? [...mainTask.subtasks] : [];
@@ -1096,15 +1097,13 @@
              const taskDocRef = doc(db, "tareas", mainTaskFirebaseId);
 
              // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTaskIndex = currentTodos.findIndex(task => task.firebaseId === mainTaskFirebaseId);
+             const mainTask = currentTodos.find(task => task.firebaseId === mainTaskFirebaseId);
 
-             if (mainTaskIndex === -1) {
+             if (!mainTask) {
                  console.error("Tarea principal no encontrada localmente para eliminar sub-tarea:", mainTaskFirebaseId);
                  alert("Error: Tarea no encontrada.");
                  return;
              }
-
-             const mainTask = currentTodos[mainTaskIndex];
 
              if (!Array.isArray(mainTask.subtasks) || subtaskIndexToDelete < 0 || subtaskIndexToDelete >= mainTask.subtasks.length) {
                  console.error("Índice de sub-tarea a eliminar fuera de rango o subtasks no es array:", subtaskIndexToDelete);
@@ -1146,15 +1145,13 @@
              const taskDocRef = doc(db, "tareas", mainTaskFirebaseId);
 
              // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTaskIndex = currentTodos.findIndex(task => task.firebaseId === mainTaskFirebaseId);
+             const mainTask = currentTodos.find(task => task.firebaseId === mainTaskFirebaseId);
 
-             if (mainTaskIndex === -1) {
+             if (!mainTask) {
                  console.error("Tarea principal no encontrada localmente para cambiar estado sub-tarea:", mainTaskFirebaseId);
                  alert("Error: Tarea no encontrada.");
                  return;
              }
-
-             const mainTask = currentTodos[mainTaskIndex];
 
              if (!Array.isArray(mainTask.subtasks) || subtaskIndexToToggle < 0 || subtaskIndexToToggle >= mainTask.subtasks.length) {
                  console.error("Índice de sub-tarea a cambiar estado fuera de rango o subtasks no es array:", subtaskIndexToToggle);
@@ -1190,15 +1187,13 @@
              const taskDocRef = doc(db, "tareas", firebaseId);
 
              // Encontrar la tarea principal en el array local (currentTodos)
-             const mainTaskIndex = currentTodos.findIndex(task => task.firebaseId === firebaseId);
+             const mainTask = currentTodos.find(task => task.firebaseId === firebaseId);
 
-             if (mainTaskIndex === -1) {
+             if (!mainTask) {
                  console.error("Tarea principal no encontrada localmente para cambiar estado:", firebaseId);
                  alert("Error: Tarea no encontrada.");
                  return;
              }
-
-             const mainTask = currentTodos[mainTaskIndex];
 
              // Crear una copia del array de sub-tareas y sincronizar su estado
              const updatedSubtasks = Array.isArray(mainTask.subtasks) ? [...mainTask.subtasks] : [];
@@ -1238,7 +1233,8 @@
 
                  // Si las prioridades son iguales:
                  // 2. Ordenar por Fecha (tareas con fecha antes, luego cronológicamente)
-                 const dateA = a.date ? new Date(a.date).getTime() : Infinity; // Infinity para que las sin fecha vayan al final
+                 // Usar 0 para fechas nulas o inválidas para que vayan al final de las tareas con fecha
+                 const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) {
                      return dateA - dateB; // Ordenar por fecha ascendente (más antigua primero)
@@ -1261,7 +1257,8 @@
                      const taskDocRef = doc(db, "tareas", task.firebaseId);
                      // Asignar un nuevo valor de orden basado en el índice en la lista ordenada
                      // Usar un timestamp para evitar colisiones si se reordena rápido
-                     const newOrderValue = Date.now() + index; // Asegurar que cada uno tenga un valor único y creciente
+                     // Añadir el índice asegura que tareas con el mismo timestamp inicial tengan un orden definido
+                     const newOrderValue = Date.now() + index;
                      batch.update(taskDocRef, { order: newOrderValue });
                      updates.push({ id: task.firebaseId, order: newOrderValue });
                  }
@@ -1343,15 +1340,15 @@
             // Cargar datos iniciales desde Local Storage para carga rápida
             currentTodos = loadTodosFromLocalStorage();
             renderTodos(currentTodos);
-            console.log("Cargado desde Local Storage:", currentTodos);
+            console.log("Cargado inicialmente desde Local Storage:", currentTodos);
 
 
             // --- Configurar el listener de Firestore ---
-            // Crear una consulta que ordene por prioridad, luego fecha, luego el campo 'order'
+            // Crear una consulta que ordene principalmente por el campo 'order'
+            // Esto ayuda a Firestore a optimizar la entrega de datos, especialmente después de un reordenamiento.
+            // La ordenación final por prioridad y fecha se sigue haciendo en JS.
             const q = query(tareasRef,
-                orderBy("priorityColor", "asc"), // Ordenar por color (el rank numérico se maneja en JS) - Firestore ordena por string, 'none' va antes que 'red', etc. Esto *no* es el orden deseado. Necesitamos ordenar *después* de cargar.
-                // orderBy("date", "asc"), // Firestore no puede ordenar por fecha y luego por otro campo sin un índice compuesto, y la lógica de 'null' al final es compleja en la consulta. Es mejor ordenar en JS.
-                orderBy("order", "asc") // Usaremos el campo 'order' como el principal para que el reordenamiento manual funcione
+                orderBy("order", "asc") // Ordenar por el campo 'order' de Firestore
             );
 
 
@@ -1377,6 +1374,7 @@
                 });
 
                 // Ordenar la lista *localmente* después de cargar desde Firestore
+                // Aplicamos la lógica de ordenación completa aquí
                 todosFromFirestore.sort((a, b) => {
                     const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                     const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
@@ -1388,7 +1386,8 @@
 
                     // Si las prioridades son iguales:
                     // 2. Ordenar por Fecha (tareas con fecha antes, luego cronológicamente)
-                    const dateA = a.date ? new Date(a.date).getTime() : Infinity; // Infinity para que las sin fecha vayan al final
+                    // Usar Infinity para fechas nulas o inválidas para que vayan al final de las tareas con fecha
+                    const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                     const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                     if (dateA !== dateB) {
                         return dateA - dateB; // Ordenar por fecha ascendente (más antigua primero)
