@@ -282,7 +282,7 @@
         /* --- Cabecera de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
-            align-items: flex-start; /* Alinea items al inicio (arriba) */
+            align-items: baseline; /* <-- CAMBIO CLAVE: Alinea por la línea base */
             margin-bottom: 15px; /* Espacio antes de la barra de progreso o sub-tareas */
             padding: 0; /* Sin padding extra aquí */
             gap: 10px; /* Espacio entre checkbox, etiqueta de prioridad y el nuevo task-body */
@@ -292,7 +292,7 @@
              /* hereda de .custom-checkbox, aquí puedes anular si es necesario */
              border-color: var(--text-color);
              background-color: var(--item-bg);
-             margin-top: 3px; /* Ajuste visual para alinear con la primera línea de texto */
+             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
         }
          .todo-item .main-task-header input[type="checkbox"]:checked {
               background-color: var(--text-color);
@@ -310,7 +310,7 @@
              flex-shrink: 0; /* No se encoge */
              transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
-             margin-top: 3px; /* Ajuste visual para alinear con la primera línea de texto */
+             /* margin-top: 3px; */ /* <-- ELIMINADO: Ya no es necesario con baseline */
         }
          .todo-item .priority-color-label:hover {
              transform: scale(1.1); /* Efecto sutil al pasar el mouse */
@@ -633,7 +633,7 @@
             .todo-item .main-task-header {
                 /* flex-wrap: wrap; */ /* Ya está definido arriba */
                 row-gap: 8px;    /* Espacio vertical entre la línea del checkbox/color y la línea del task-body si envuelve */
-                align-items: flex-start; /* Asegura que la alineación vertical sea arriba */
+                /* align-items: flex-start; */ /* <-- ELIMINADO: Usamos baseline ahora */
             }
 
             /* El nuevo contenedor task-body ahora ocupa el espacio restante en la primera línea
@@ -1173,7 +1173,7 @@
                 syncAndRender();
             } else {
                  console.error("Tarea no encontrada para actualizar fecha:", taskId);
-            }
+             }
         }
 
         async function addTodo() {
