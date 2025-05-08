@@ -1,8 +1,11 @@
+--- START OF FILE code-33.html ---
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- MODIFICACIÓN AQUÍ: Añadir user-scalable=no y maximum-scale=1.0 para intentar prevenir zoom en input focus en móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>ToDoList</title>
     <!-- Enlace a Google Font: Quicksand (para el título) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,6 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
     <!-- Enlace a Google Font: Lexend (para el resto del texto) -->
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- NUEVO: Enlace a Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
     <style>
@@ -51,9 +57,7 @@
             word-break: break-word;
             box-sizing: border-box;
             transition: background-color 0.3s ease, border-bottom-color 0.3s ease; /* Transición suave */
-            /* --- MODIFICACIÓN AQUÍ: Añadir margen inferior para separar items --- */
             margin-bottom: 10px; /* Espacio entre tareas */
-            /* --- FIN MODIFICACIÓN --- */
         }
 
         .todo-item .main-task-header {
@@ -259,7 +263,7 @@
              display: block;
              width: fit-content;
              margin: 25px 15px 0 auto;
-             font-size: 1rem;
+             font-size: 1.2rem; /* Ajustar tamaño para el icono */
              color: #888; /* Color gris por defecto */
              text-transform: none;
              letter-spacing: normal;
@@ -492,12 +496,11 @@
              border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
         }
 
-         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox principal (Modo Oscuro) --- */
+         /* Custom checkmark para checkbox principal (Modo Oscuro) */
          body.dark-mode .todo-item .main-task-header input[type="checkbox"]:checked::after {
              border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
              border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
          }
-         /* --- FIN MODIFICACIÓN --- */
 
 
         body.dark-mode .todo-item .main-task-header span {
@@ -566,12 +569,11 @@
              background-color: #f0f0f0; /* Fondo claro al marcar en dark mode */
              border-color: #f0f0f0; /* Borde claro al marcar en dark mode */
          }
-         /* --- MODIFICACIÓN AQUÍ: Custom checkmark para checkbox de sub-tarea (Modo Oscuro) --- */
+         /* Custom checkmark para checkbox de sub-tarea (Modo Oscuro) */
          body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
              border-color: #1e1e1e !important; /* Checkmark oscuro en dark mode - Usar !important para asegurar */
              border-width: 0 2px 2px 0; /* Asegurar que el ancho del borde se mantiene */
          }
-         /* --- FIN MODIFICACIÓN --- */
 
 
         /* Texto de sub-tarea */
@@ -612,9 +614,6 @@
         /* Botón de Reordenar (Icono) */
         body.dark-mode #reorder-button {
             color: #b0b0b0; /* Icono gris claro */
-            /* background-color: #2d2d30; */ /* Fondo oscuro para el botón fijo */
-            /* border-color: #444; */ /* Borde oscuro para el botón fijo */
-            /* box-shadow: 0 2px 5px rgba(0,0,0,0.5); */ /* Sombra más oscura */
         }
          body.dark-mode #reorder-button:hover {
              color: #ff6b6b; /* Rojo un poco más brillante al pasar el mouse */
@@ -655,14 +654,16 @@
     </div>
 
     <!-- Botón para reordenar (icono) -->
-    <button id="reorder-button" aria-label="Reordenar tareas por prioridad">↕</button>
+    <!-- MODIFICACIÓN AQUÍ: Usar icono de Font Awesome -->
+    <button id="reorder-button" aria-label="Reordenar tareas por prioridad"><i class="fas fa-arrows-alt-v"></i></button>
 
     <!-- Sección para Importar/Exportar datos -->
     <!-- REMOVED: <div id="data-management"> ... </div> -->
 
 
     <!-- Botón para alternar modo oscuro/claro (icono) -->
-    <button id="dark-mode-toggle" aria-label="Alternar modo oscuro/claro">◑</button> <!-- Símbolo de luna -->
+    <!-- MODIFICACIÓN AQUÍ: Usar icono de Font Awesome -->
+    <button id="dark-mode-toggle" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button> <!-- Icono de luna por defecto -->
 
 
     <script type="module">
@@ -932,7 +933,7 @@
              addSubtasksToggle.textContent = '+'; // Cambiado a '+'
              addSubtasksToggle.setAttribute('aria-label', 'Mostrar/Ocultar sección de sub-tareas'); // Añadir para accesibilidad
 
-             // --- MODIFICACIÓN AQUÍ: Listener para alternar visibilidad del INPUT ---
+             // Listener para alternar visibilidad del INPUT
              addSubtasksToggle.addEventListener('click', () => {
                  // Cargar el estado actual
                  const todos = loadTodos();
@@ -969,7 +970,6 @@
                       console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
                  }
              });
-             // --- FIN MODIFICACIÓN ---
 
              return addSubtasksToggle;
         }
@@ -1228,9 +1228,8 @@
                      mainTask.completed = false;
                  }
 
-                 // --- MODIFICACIÓN AQUÍ: Ocultar el input de sub-tarea después de añadir ---
+                 // Ocultar el input de sub-tarea después de añadir
                  mainTask.showSubtaskUI = false;
-                 // --- FIN MODIFICACIÓN ---
 
 
                  saveTodos(todos); // Guardar cambios (LS + Firestore)
@@ -1357,7 +1356,12 @@
             if (body) body.classList.add('dark-mode');
             localStorage.setItem('theme', 'dark');
             if (darkModeToggle) { // Check if element exists
-                darkModeToggle.innerHTML = '☀'; // Usar innerHTML para el símbolo de sol
+                // MODIFICACIÓN AQUÍ: Cambiar clase del icono Font Awesome
+                const icon = darkModeToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun'); // Icono de sol para modo claro
+                }
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
             }
         }
@@ -1366,7 +1370,12 @@
             if (body) body.classList.remove('dark-mode');
             localStorage.setItem('theme', 'light');
             if (darkModeToggle) { // Check if element exists
-                 darkModeToggle.innerHTML = '◑'; // Usar innerHTML para el símbolo de luna
+                 // MODIFICACIÓN AQUÍ: Cambiar clase del icono Font Awesome
+                 const icon = darkModeToggle.querySelector('i');
+                 if (icon) {
+                     icon.classList.remove('fa-sun');
+                     icon.classList.add('fa-moon'); // Icono de luna para modo oscuro
+                 }
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
             }
         }
@@ -1442,7 +1451,6 @@
                         const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                         const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
 
-                        // --- Nuevo: Ordenar por fecha después de prioridad ---
                         // Si las prioridades son iguales, ordenar por fecha.
                         // Tareas con fecha van antes que tareas sin fecha.
                         // Entre tareas con fecha, ordenar cronológicamente.
