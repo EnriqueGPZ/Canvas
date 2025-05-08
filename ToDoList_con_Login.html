@@ -38,6 +38,7 @@
             --fixed-button-bg: #ffffff; /* Fondo del botón fijo (dark mode toggle) */
             --fixed-button-border: #ccc; /* Borde del botón fijo */
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra del botón fijo */
+            --legend-text-color: #666; /* Color para el texto de la leyenda */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -62,6 +63,7 @@
             --fixed-button-bg: #34495e; /* Fondo del botón fijo oscuro */
             --fixed-button-border: #4a627a; /* Borde del botón fijo oscuro */
             --fixed-button-shadow: 0 2px 5px rgba(0,0,0,0.4); /* Sombra del botón fijo oscuro */
+            --legend-text-color: #a0a0a0; /* Color para el texto de la leyenda oscuro */
 
             /* Custom checkmark color for dark mode */
             --checkbox-checkmark-color: var(--bg-color); /* Usar el color de fondo principal */
@@ -94,11 +96,41 @@
             color: var(--heading-color);
             text-align: center;
             margin-top: 0; /* Eliminar margen superior por defecto */
-            margin-bottom: 30px;
+            margin-bottom: 15px; /* Reducir margen para la leyenda */
             font-weight: 700;
             font-size: 2.5rem;
             letter-spacing: -0.5px; /* Ajuste sutil */
         }
+
+        /* --- Estilo de la Leyenda de Prioridad --- */
+        #priority-legend {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--legend-text-color);
+            margin-bottom: 30px; /* Espacio después de la leyenda */
+            display: flex; /* Usar flexbox para alinear items */
+            justify-content: center; /* Centrar horizontalmente */
+            align-items: center;
+            flex-wrap: wrap; /* Permitir que se envuelva en pantallas pequeñas */
+            gap: 5px 10px; /* Espacio entre items y entre líneas */
+        }
+        #priority-legend .priority-legend-item {
+             display: inline-flex; /* Alinear el punto de color y el texto */
+             align-items: center;
+             gap: 4px; /* Espacio entre el punto y el texto */
+        }
+         #priority-legend .priority-color-label {
+             /* Reutilizar estilos base, pero ajustar tamaño */
+             width: 10px;
+             height: 10px;
+             margin-right: 0; /* Eliminar margen extra */
+             flex-shrink: 0;
+             /* Los colores específicos se aplican por data-color */
+         }
+         #priority-legend .priority-color-label:hover {
+             transform: none; /* Desactivar animación de hover en la leyenda */
+         }
+
 
         #todo-list {
             list-style: none;
@@ -166,19 +198,6 @@
          }
          .delete-button:hover {
              color: var(--delete-button-hover-color);
-         }
-
-         /* Specific style for Reorder button (Icon) */
-         #reorder-button {
-             display: block;
-             width: fit-content;
-             margin: 25px auto 0 auto; /* Centrado */
-             font-size: 1.2rem; /* Ajustar tamaño para el icono */
-             color: var(--button-color); /* Color base */
-             padding: 8px 15px; /* Más padding */
-         }
-         #reorder-button:hover {
-             color: var(--button-hover-color);
          }
 
          /* Dark Mode Toggle button */
@@ -590,6 +609,21 @@
         <!-- Título principal -->
         <h1>ToDoList</h1>
 
+        <!-- Leyenda de Prioridad -->
+        <div id="priority-legend">
+            Prioridad:
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span> Rojo</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="orange"></span> Naranja</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span> Amarillo</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span> Verde</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="none"></span> Ninguna</span>
+        </div>
+
+
         <!-- La lista de tareas va PRIMERO -->
         <ul id="todo-list">
             <!-- Las tareas se agregarán aquí dinámicamente -->
@@ -602,8 +636,8 @@
             <button id="add-todo-button" class="app-button add-button" aria-label="Agregar Tarea"><i class="fas fa-plus"></i></button>
         </div>
 
-        <!-- Botón para reordenar (icono) - Aplicar clase app-button -->
-        <button id="reorder-button" class="app-button" aria-label="Reordenar tareas por prioridad y fecha"><i class="fas fa-arrows-alt-v"></i> Reordenar</button>
+        <!-- Botón para reordenar (ELIMINADO) -->
+        <!-- <button id="reorder-button" ...>...</button> -->
 
 
     </div> <!-- Fin .container -->
@@ -640,7 +674,7 @@
         let todoInput;
         let addTodoButton;
         let todoListContainer;
-        let reorderButton;
+        // let reorderButton; // Eliminado
         let darkModeToggle;
         let body;
 
@@ -714,7 +748,7 @@
                 console.log("Datos guardados en Firestore correctamente.");
             } catch (e) {
                 console.error("Error al guardar en Firestore:", e);
-                alert("Error al guardar la lista de tareas en la nube.");
+                // alert("Error al guardar la lista de tareas en la nube."); // Ya se muestra en saveTodos
             }
         }
 
@@ -750,9 +784,8 @@
 
             } catch (e) {
                  console.error("Error al cargar de Firestore:", e);
-                 // Si falla la carga de Firestore, intentar cargar de Local Storage como fallback
-                 alert("Error al cargar la lista de tareas desde la nube. Intentando cargar datos locales.");
-                 return loadTodos(); // Fallback a Local Storage
+                 // Si falla la carga de Firestore, lanzar el error para que el llamador (DOMContentLoaded) lo capture
+                 throw e; // Lanzar el error para que el fallback a LS funcione
             }
         }
 
@@ -768,8 +801,7 @@
                 console.log("Guardado completo (local y online).");
             } catch (e) {
                 console.error("Error general al guardar datos:", e);
-                // La función saveTodosOnline ya maneja sus propios errores,
-                // pero este catch general puede ser útil si hay un problema antes de llamarla.
+                alert("Error al guardar la lista de tareas."); // Notificar al usuario si falla el guardado general
             }
         }
 
@@ -1051,9 +1083,10 @@
                      mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
                 }
 
-                saveTodos(todos).then(() => { // Esperar a que guarde online
+                saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
                      renderTodos(todos); // Renderiza el estado actual
-                });
+                 })
+                 .catch(e => console.error("Error guardando toggleSubtaskSection:", e)); // Capturar error de guardado
             } else {
                  console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
             }
@@ -1075,7 +1108,8 @@
 
                  saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
-                 });
+                 })
+                 .catch(e => console.error("Error guardando cyclePriorityColor:", e)); // Capturar error de guardado
              } else {
                   console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
              }
@@ -1090,7 +1124,8 @@
 
                 saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
-                });
+                 })
+                 .catch(e => console.error("Error guardando updateTaskDate:", e)); // Capturar error de guardado
             } else {
                  console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
             }
@@ -1122,7 +1157,8 @@
 
             saveTodos(todos).then(() => { // Esperar a que guarde online
                  renderTodos(todos); // Renderiza el estado actual
-            });
+            })
+            .catch(e => console.error("Error guardando addTodo:", e)); // Capturar error de guardado
             if (todoInput) todoInput.value = ''; // Limpiar input inmediatamente
         }
 
@@ -1162,7 +1198,8 @@
 
                  saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
-                 });
+                 })
+                 .catch(e => console.error("Error guardando addSubtask:", e)); // Capturar error de guardado
                  subtaskInput.value = ''; // Limpiar input inmediatamente
 
              } else {
@@ -1179,7 +1216,8 @@
 
                 saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
-                });
+                })
+                .catch(e => console.error("Error guardando deleteTodo:", e)); // Capturar error de guardado
             } else {
                 console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
             }
@@ -1208,7 +1246,8 @@
 
                      saveTodos(todos).then(() => { // Esperar a que guarde online
                          renderTodos(todos); // Renderiza el estado actual
-                     });
+                     })
+                     .catch(e => console.error("Error guardando deleteSubtask:", e)); // Capturar error de guardado
                  } else {
                      console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
                  }
@@ -1238,7 +1277,8 @@
 
                      saveTodos(todos).then(() => { // Esperar a que guarde online
                          renderTodos(todos); // Renderiza el estado actual
-                     });
+                     })
+                     .catch(e => console.error("Error guardando toggleSubtaskCompletion:", e)); // Capturar error de guardado
                  } else {
                      console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
                  }
@@ -1267,13 +1307,15 @@
 
                  saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
-                 });
+                 })
+                 .catch(e => console.error("Error guardando toggleMainCompletion:", e)); // Capturar error de guardado
              } else {
                   console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
              }
         }
 
         // --- Función de Reordenar (Modifica array local y llama a saveTodos) ---
+        // Esta función ahora es la única forma de reordenar explícitamente
         function reorderTodos() {
              const todos = loadTodos(); // Cargar el estado actual (desde LS)
 
@@ -1314,7 +1356,8 @@
              saveTodos(todos).then(() => { // Esperar a que guarde online
                  renderTodos(todos); // Renderiza la lista en el nuevo orden
                  alert("Tareas reordenadas.");
-             });
+             })
+             .catch(e => console.error("Error guardando reorderTodos:", e)); // Capturar error de guardado
         }
 
 
@@ -1363,7 +1406,7 @@
             todoInput = document.getElementById('new-todo-input');
             addTodoButton = document.getElementById('add-todo-button');
             todoListContainer = document.getElementById('todo-list');
-            reorderButton = document.getElementById('reorder-button');
+            // reorderButton = document.getElementById('reorder-button'); // Eliminado
             darkModeToggle = document.getElementById('dark-mode-toggle');
             body = document.body;
 
@@ -1416,10 +1459,10 @@
                 });
             }
 
-            // --- Event Listener para el botón de Reordenar ---
-            if (reorderButton) {
-                reorderButton.addEventListener('click', reorderTodos); // Llama a la función reorderTodos
-            }
+            // --- Event Listener para el botón de Reordenar (ELIMINADO) ---
+            // if (reorderButton) {
+            //     reorderButton.addEventListener('click', reorderTodos);
+            // }
 
 
             // --- Event Listener para el botón de Dark Mode ---
