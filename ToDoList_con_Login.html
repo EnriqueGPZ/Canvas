@@ -96,7 +96,7 @@
             color: var(--heading-color);
             text-align: center;
             margin-top: 0; /* Eliminar margen superior por defecto */
-            margin-bottom: 15px; /* Reducir margen para la leyenda */
+            margin-bottom: 30px; /* Restaurar margen inferior del título */
             font-weight: 700;
             font-size: 2.5rem;
             letter-spacing: -0.5px; /* Ajuste sutil */
@@ -105,9 +105,10 @@
         /* --- Estilo de la Leyenda de Prioridad --- */
         #priority-legend {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Texto más pequeño */
             color: var(--legend-text-color);
-            margin-bottom: 30px; /* Espacio después de la leyenda */
+            margin-top: 30px; /* Espacio encima de la leyenda (si está abajo) */
+            margin-bottom: 0; /* Sin margen inferior */
             display: flex; /* Usar flexbox para alinear items */
             justify-content: center; /* Centrar horizontalmente */
             align-items: center;
@@ -378,7 +379,7 @@
         .todo-item .main-task-header input[type="date"]:focus {
              color: var(--button-hover-color); /* Usar el color rojo de hover */
              text-decoration: underline; /* Subrayar */
-        }
+         }
          /* Estilo para el input de fecha cuando tiene valor */
          .todo-item .main-task-header input[type="date"]:valid {
              color: var(--text-color); /* Color normal si tiene fecha */
@@ -588,7 +589,7 @@
              gap: 10px;
              padding: 0; /* Padding ya en .container */
              align-items: center;
-             margin-bottom: 20px; /* Espacio antes del botón reordenar */
+             margin-bottom: 20px; /* Espacio antes de la leyenda si está abajo */
          }
           #todo-input-container input[type="text"] {
               /* Ya usan el estilo unificado base */
@@ -609,21 +610,6 @@
         <!-- Título principal -->
         <h1>ToDoList</h1>
 
-        <!-- Leyenda de Prioridad -->
-        <div id="priority-legend">
-            Prioridad:
-            <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span> Rojo</span>
-            >
-            <span class="priority-legend-item"><span class="priority-color-label" data-color="orange"></span> Naranja</span>
-            >
-            <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span> Amarillo</span>
-            >
-            <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span> Verde</span>
-            >
-            <span class="priority-legend-item"><span class="priority-color-label" data-color="none"></span> Ninguna</span>
-        </div>
-
-
         <!-- La lista de tareas va PRIMERO -->
         <ul id="todo-list">
             <!-- Las tareas se agregarán aquí dinámicamente -->
@@ -638,6 +624,19 @@
 
         <!-- Botón para reordenar (ELIMINADO) -->
         <!-- <button id="reorder-button" ...>...</button> -->
+
+        <!-- Leyenda de Prioridad (MOVIMIENTO: Ahora está al final del container) -->
+        <div id="priority-legend">
+            Prioridad:
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span> Roja</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="orange"></span> Naranja</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span> Amarilla</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span> Verde</span>
+            <!-- Eliminado: > <span class="priority-legend-item"><span class="priority-color-label" data-color="none"></span> Ninguna</span> -->
+        </div>
 
 
     </div> <!-- Fin .container -->
@@ -723,6 +722,14 @@
                  console.error("Error al cargar de localStorage:", e);
                  return []; // Si hay error, empezar con lista vacía localmente
             }
+        }
+
+        function saveTodosToLocalStorage(todosArray) {
+             try {
+                 localStorage.setItem('todos', JSON.stringify(todosArray));
+             } catch (e) {
+                 console.error("Error al guardar en localStorage:", e);
+             }
         }
 
         // --- Funciones para Firebase Firestore (Modelo anterior: Delete All + Add All) ---
@@ -946,7 +953,8 @@
                                   }
                               }
                          }
-                     });
+                     })
+                     .catch(e => console.error("Error guardando toggleSubtaskSection:", e)); // Capturar error de guardado
                  } else {
                       console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
                  }
@@ -1106,8 +1114,25 @@
                  const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
                  todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
 
+                 // Ordenar la lista después de cambiar la prioridad
+                 todos.sort((a, b) => {
+                     const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
+                     const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
+
+                     if (rankA !== rankB) return rankA - rankB;
+
+                     const dateA = a.date ? new Date(a.date).getTime() : Infinity;
+                     const dateB = b.date ? new Date(b.date).getTime() : Infinity;
+                     if (dateA !== dateB) return dateA - dateB;
+
+                     const orderA = a.order || 0;
+                     const orderB = b.order || 0;
+                     return orderA - orderB;
+                 });
+
+
                  saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
+                     renderTodos(todos); // Renderiza el estado actual (ya ordenado)
                  })
                  .catch(e => console.error("Error guardando cyclePriorityColor:", e)); // Capturar error de guardado
              } else {
@@ -1122,8 +1147,25 @@
                 // Guardar null si el valor está vacío (el usuario borró la fecha)
                 todos[mainTaskIndex].date = newDateValue || null;
 
+                 // Ordenar la lista después de cambiar la fecha
+                 todos.sort((a, b) => {
+                     const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
+                     const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
+
+                     if (rankA !== rankB) return rankA - rankB;
+
+                     const dateA = a.date ? new Date(a.date).getTime() : Infinity;
+                     const dateB = b.date ? new Date(b.date).getTime() : Infinity;
+                     if (dateA !== dateB) return dateA - dateB;
+
+                     const orderA = a.order || 0;
+                     const orderB = b.order || 0;
+                     return orderA - orderB;
+                 });
+
+
                 saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
+                     renderTodos(todos); // Renderiza el estado actual (ya ordenado)
                  })
                  .catch(e => console.error("Error guardando updateTaskDate:", e)); // Capturar error de guardado
             } else {
@@ -1152,11 +1194,28 @@
                 showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
                 priorityColor: 'none', // Color de prioridad por defecto
                 date: null, // Fecha inicialmente nula
-                order: Date.now() // Usar timestamp para el orden inicial (aunque solo se usa en reordenar)
+                order: Date.now() // Usar timestamp para el orden inicial
             });
 
+            // Ordenar la lista después de añadir una tarea
+             todos.sort((a, b) => {
+                 const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
+                 const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
+
+                 if (rankA !== rankB) return rankA - rankB;
+
+                 const dateA = a.date ? new Date(a.date).getTime() : Infinity;
+                 const dateB = b.date ? new Date(b.date).getTime() : Infinity;
+                 if (dateA !== dateB) return dateA - dateB;
+
+                 const orderA = a.order || 0;
+                 const orderB = b.order || 0;
+                 return orderA - orderB;
+             });
+
+
             saveTodos(todos).then(() => { // Esperar a que guarde online
-                 renderTodos(todos); // Renderiza el estado actual
+                 renderTodos(todos); // Renderiza el estado actual (ya ordenado)
             })
             .catch(e => console.error("Error guardando addTodo:", e)); // Capturar error de guardado
             if (todoInput) todoInput.value = ''; // Limpiar input inmediatamente
@@ -1195,7 +1254,7 @@
                  // Ocultar el input de sub-tarea después de añadir
                  mainTask.showSubtaskUI = false;
 
-
+                 // No reordenar al añadir sub-tarea, solo guardar y renderizar
                  saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
                  })
@@ -1214,6 +1273,7 @@
             if (indexToDelete >= 0 && indexToDelete < todos.length) {
                 todos.splice(indexToDelete, 1);
 
+                // No reordenar al eliminar tarea principal, solo guardar y renderizar
                 saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
                 })
@@ -1244,6 +1304,7 @@
                          mainTask.completed = allSubtasksCompleted;
                      }
 
+                     // No reordenar al eliminar sub-tarea, solo guardar y renderizar
                      saveTodos(todos).then(() => { // Esperar a que guarde online
                          renderTodos(todos); // Renderiza el estado actual
                      })
@@ -1274,7 +1335,7 @@
                      }
                      // Si no tiene sub-tareas, el checkbox principal se controla solo manualmente.
 
-
+                     // No reordenar al cambiar estado sub-tarea, solo guardar y renderizar
                      saveTodos(todos).then(() => { // Esperar a que guarde online
                          renderTodos(todos); // Renderiza el estado actual
                      })
@@ -1304,7 +1365,7 @@
                  }
                  // Si no tiene sub-tareas, solo se actualiza el estado principal.
 
-
+                 // No reordenar al cambiar estado principal, solo guardar y renderizar
                  saveTodos(todos).then(() => { // Esperar a que guarde online
                      renderTodos(todos); // Renderiza el estado actual
                  })
