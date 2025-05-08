@@ -38,8 +38,9 @@
             --legend-text-color: #666;
             --sort-button-color: #555;
             --sort-button-hover-color: #3498db; /* Color de hover para el botón de ordenar */
-            --completion-icon-bg-color: #f1c40f; /* <-- Nuevo: Color de fondo para el icono de completado */
-            --completion-icon-color: white; /* <-- Nuevo: Color del icono de completado */
+            --completion-icon-bg-color: #f1c40f; /* Color de fondo para el icono de completado */
+            --completion-icon-color: white; /* Color del icono de completado */
+            --footer-text-color: #aaa; /* <-- Nuevo: Color para el texto del footer */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -68,8 +69,9 @@
             --sort-button-color: #bdc3c7;
             --sort-button-hover-color: #3498db; /* Mantenido el color de hover de ordenar */
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
-            --completion-icon-bg-color: #f39c12; /* <-- Nuevo: Color de fondo para el icono de completado en dark mode */
-            --completion-icon-color: white; /* <-- Nuevo: Color del icono de completado en dark mode */
+            --completion-icon-bg-color: #f39c12; /* Color de fondo para el icono de completado en dark mode */
+            --completion-icon-color: white; /* Color del icono de completado en dark mode */
+            --footer-text-color: #777; /* <-- Nuevo: Color para el texto del footer en dark mode */
         }
 
         /* --- Estilos Generales --- */
@@ -83,7 +85,8 @@
             padding-bottom: 80px; /* Asegura espacio para el botón de dark mode */
             transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* <-- Añadido: Para que los elementos se apilen verticalmente */
+            align-items: center; /* <-- Añadido: Para centrar el contenido (container y footer) */
         }
 
         .container {
@@ -91,6 +94,7 @@
             max-width: 600px;
             padding: 0 10px; /* Añade un poco de padding lateral al contenedor principal */
             box-sizing: border-box;
+            flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio disponible */
         }
 
         h1 {
@@ -149,8 +153,8 @@
             /* --- Añadido: Borde izquierdo más grueso por defecto --- */
             border-left: 5px solid var(--border-color);
             padding-left: 10px; /* Ajusta el padding izquierdo para compensar el borde */
-            position: relative; /* <-- Añadido: Necesario para posicionar el mensaje de completado */
-            overflow: hidden; /* <-- Añadido: Para recortar el mensaje si se desborda */
+            position: relative; /* Necesario para posicionar el mensaje de completado */
+            overflow: hidden; /* Para recortar el mensaje si se desborda */
         }
          .todo-item:last-child {
              margin-bottom: 0; /* El último ítem no necesita margen inferior si la lista lo tiene */
@@ -644,20 +648,18 @@
                margin-left: auto; /* Empuja el botón de reordenar a la derecha */
           }
 
-        /* --- Añadido: Estilos para el mensaje de completado temporal --- */
+        /* --- Estilos para el mensaje de completado temporal --- */
         .completion-message {
             position: absolute;
             top: 50%; /* Centrar verticalmente */
             left: 50%; /* Centrar horizontalmente */
             transform: translate(-50%, -50%) scale(0.5); /* Iniciar pequeño y centrado */
-            /* font-size: 3em; */ /* <-- ELIMINADO: El tamaño se aplica al contenedor ahora */
-            /* color: var(--completion-icon-color); */ /* <-- ELIMINADO: El color del icono se aplica al i */
             opacity: 0; /* Inicialmente invisible */
             pointer-events: none; /* No bloquea clics debajo */
             z-index: 500; /* Asegura que esté por encima de la tarjeta */
             transition: all 0.3s ease-out; /* Transición para animación */
 
-            /* --- Nuevos estilos para el círculo amarillo --- */
+            /* --- Estilos para el círculo amarillo --- */
             background-color: var(--completion-icon-bg-color); /* Color de fondo amarillo */
             border-radius: 50%; /* Forma de círculo */
             width: 50px; /* Tamaño del círculo */
@@ -678,6 +680,17 @@
         .completion-message.show {
             opacity: 1; /* Hacer visible */
             transform: translate(-50%, -50%) scale(1); /* Aumentar tamaño a normal */
+        }
+
+        /* --- Añadido: Estilos para el pie de página de créditos --- */
+        #credits {
+            text-align: center; /* Centrar el texto */
+            font-size: 0.8rem; /* Tamaño de fuente pequeño */
+            color: var(--footer-text-color); /* Color discreto usando la variable */
+            margin-top: 40px; /* Espacio arriba para separarlo del último elemento */
+            padding-bottom: 10px; /* Espacio abajo */
+            width: 100%; /* Asegura que ocupe el ancho disponible */
+            box-sizing: border-box;
         }
 
 
@@ -777,6 +790,11 @@
         </div>
     </div>
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
+
+    <!-- --- Añadido: Pie de página de créditos --- -->
+    <footer id="credits">
+        AppWeb realizada por Enrique G. para Arteextremeño
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
@@ -1438,7 +1456,7 @@
              syncAndRender(); // Renderizar la UI con el orden actualizado localmente
         }
 
-        // --- Añadido: Función para mostrar el mensaje de completado ---
+        // --- Función para mostrar el mensaje de completado ---
         function showCompletionMessage(taskId) {
             const listItem = todoListContainer.querySelector(`li[data-task-id="${taskId}"]`);
             if (!listItem) return;
@@ -1450,7 +1468,7 @@
 
             const messageElement = document.createElement('div');
             messageElement.classList.add('completion-message');
-            // Usamos fa-thumbs-up para el pulgar arriba, o fa-check-circle si prefieres el check
+            // Usamos fa-thumbs-up para el pulgar arriba, o fa-check si prefieres el check simple
             messageElement.innerHTML = '<i class="fas fa-thumbs-up"></i>'; // Icono de pulgar arriba
 
             listItem.appendChild(messageElement);
