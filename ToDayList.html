@@ -45,9 +45,9 @@
             --medal-text-color: var(--text-color);
 
             /* Nuevas variables para el control de fecha */
-            --date-control-color: var(--button-color);
+            --date-control-color: var(--button-color); /* Color base para icono y texto de fecha */
             --date-control-hover-color: var(--button-hover-color);
-            --date-control-empty-color: var(--placeholder-color);
+            /* --date-control-empty-color: var(--placeholder-color); */ /* Ya no necesitamos una variable específica para el color vacío, usaremos opacidad */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -84,7 +84,7 @@
             /* Nuevas variables para el control de fecha en dark mode */
             --date-control-color: var(--button-color);
             --date-control-hover-color: var(--button-hover-color);
-            --date-control-empty-color: var(--placeholder-color);
+            /* --date-control-empty-color: var(--placeholder-color); */
         }
 
         /* --- Estilos Generales --- */
@@ -402,8 +402,8 @@
             display: inline-flex; /* Usar flex para alinear icono y texto */
             align-items: center;
             gap: 5px; /* Espacio entre icono y texto */
-            font-size: 0.85rem;
-            color: var(--date-control-color); /* Color por defecto */
+            font-size: 0.85rem; /* Fuente pequeña */
+            color: var(--date-control-color); /* Color base apagado */
             cursor: pointer;
             position: relative; /* Necesario para posicionar el input invisible */
             padding: 4px 0; /* Pequeño padding para el área clicable */
@@ -416,10 +416,11 @@
          .todo-item .task-date-control .date-text {
              /* Estilos para el texto de la fecha */
              white-space: nowrap; /* Evita que la fecha se rompa en varias líneas */
+             /* Color ya heredado de .task-date-control */
          }
          .todo-item .task-date-control .date-text.empty {
              /* Estilos cuando no hay fecha seleccionada */
-             color: var(--date-control-empty-color);
+             opacity: 0.5; /* Opacidad para que se vea apagado */
              font-style: italic;
          }
 
@@ -1031,10 +1032,12 @@
             const updateDateText = (dateValue) => {
                 if (dateValue) {
                     try {
-                        // Formatear la fecha para mostrarla de forma legible
+                        // Formatear la fecha como DD/MM/AAAA
                         const dateObj = new Date(dateValue + 'T00:00:00'); // Añadir T00:00:00 para evitar problemas de zona horaria
-                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                        dateTextSpan.textContent = dateObj.toLocaleDateString('es-ES', options);
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // getMonth() es 0-indexed
+                        const year = dateObj.getFullYear();
+                        dateTextSpan.textContent = `${day}/${month}/${year}`;
                         dateTextSpan.classList.remove('empty');
                     } catch (e) {
                         console.error("Error formateando fecha:", dateValue, e);
