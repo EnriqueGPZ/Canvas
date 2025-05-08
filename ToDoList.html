@@ -407,9 +407,6 @@
              width: fit-content;
              margin: 10px 0 0 auto; /* Alineado a la derecha dentro del padding del item */
              padding: 4px 8px; /* Padding más pequeño */
-             /* font-size: 1.1rem; /* Tamaño del icono - Mantener este tamaño para el icono */
-             /* font-weight: bold; /* Eliminar negrita */
-             /* color: var(--button-color); /* Cambiar color */
              font-size: 1.1rem; /* Keep icon size */
              font-weight: normal; /* Make it not bold */
              color: var(--legend-text-color); /* Use legend text color */
@@ -491,8 +488,29 @@
              transition: color 0.3s ease, text-decoration 0.3s ease;
         }
 
+         /* Botones de mover sub-tarea */
+         .todo-item .subtasks-list li .subtask-move-button {
+             /* Heredan estilos base de .app-button */
+             color: var(--button-color); /* Color por defecto */
+             padding: 4px; /* Padding pequeño */
+             font-size: 0.9rem; /* Tamaño del icono ligeramente menor */
+         }
+         .todo-item .subtasks-list li .subtask-move-button:hover {
+             color: var(--button-hover-color); /* Color de hover */
+         }
+         /* Deshabilitar visualmente los botones de mover en los extremos */
+         .todo-item .subtasks-list li .subtask-move-button:disabled {
+             opacity: 0.3;
+             cursor: not-allowed;
+             color: var(--button-color); /* Mantener color base */
+         }
+         .todo-item .subtasks-list li .subtask-move-button:disabled:hover {
+             color: var(--button-color); /* No cambiar color al pasar el mouse si está deshabilitado */
+         }
+
+
          /* Botón eliminar sub-tarea - Aplicar clase delete-button */
-         .todo-item .subtasks-list li button {
+         .todo-item .subtasks-list li .delete-button {
              /* Estilos base ya en .app-button */
              /* Color ya en .delete-button */
              padding: 4px 8px; /* Padding más pequeño */
@@ -559,7 +577,7 @@
         }
          /* Atenuar botones y fecha en tareas completadas */
         .todo-item.completed .main-task-header button,
-        .todo-item.completed .subtasks-list li button,
+        .todo-item.completed .subtasks-list li .app-button, /* Aplicar a todos los botones de sub-tarea */
         .todo-item.completed .main-task-header input[type="date"],
         .todo-item.completed .priority-color-label {
             opacity: 0.7;
@@ -567,7 +585,7 @@
         }
          /* Desactivar hover en elementos atenuados */
          .todo-item.completed .main-task-header button:hover,
-         .todo-item.completed .subtasks-list li button:hover,
+         .todo-item.completed .subtasks-list li .app-button:hover, /* Aplicar a todos los botones de sub-tarea */
          .todo-item.completed .main-task-header input[type="date"]:hover,
          .todo-item.completed .main-task-header input[type="date"]:focus,
          .todo-item.completed .priority-color-label:hover {
@@ -932,7 +950,7 @@
              const addSubtasksToggle = document.createElement('button');
              // Mantener app-button y add-button para estilos base y hover, pero sobreescribir en CSS
              addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle');
-             // *** MODIFICACIÓN AQUÍ: Cambiar el contenido a solo el icono ***
+             // Cambiar el contenido a solo el icono
              addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i>'; // Solo icono
              addSubtasksToggle.setAttribute('aria-label', 'Agregar sub-tarea'); // Ajustar aria-label
 
@@ -995,6 +1013,33 @@
                     const subtaskSpan = document.createElement('span');
                     subtaskSpan.textContent = subtask.text;
 
+                    // --- Botones de Mover Sub-tarea ---
+                    const moveUpButton = document.createElement('button');
+                    moveUpButton.classList.add('app-button', 'subtask-move-button'); // Clases de estilo
+                    moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Icono de flecha arriba
+                    moveUpButton.setAttribute('aria-label', 'Mover sub-tarea arriba');
+                    // Deshabilitar si es la primera sub-tarea
+                    if (subIndex === 0) {
+                        moveUpButton.disabled = true;
+                    }
+                    moveUpButton.addEventListener('click', () => {
+                        moveSubtaskUp(mainIndex, subIndex);
+                    });
+
+                    const moveDownButton = document.createElement('button');
+                    moveDownButton.classList.add('app-button', 'subtask-move-button'); // Clases de estilo
+                    moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>'; // Icono de flecha abajo
+                    moveDownButton.setAttribute('aria-label', 'Mover sub-tarea abajo');
+                     // Deshabilitar si es la última sub-tarea
+                    if (subIndex === mainTask.subtasks.length - 1) {
+                        moveDownButton.disabled = true;
+                    }
+                    moveDownButton.addEventListener('click', () => {
+                        moveSubtaskDown(mainIndex, subIndex);
+                    });
+                    // --- Fin Botones de Mover Sub-tarea ---
+
+
                     const deleteSubtaskButton = document.createElement('button');
                     deleteSubtaskButton.classList.add('app-button', 'delete-button'); // Aplicar clases de estilo
                     deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Icono de papelera
@@ -1007,6 +1052,9 @@
 
                     subtaskItem.appendChild(checkbox);
                     subtaskItem.appendChild(subtaskSpan);
+                    // Añadir botones de mover ANTES del botón de eliminar
+                    subtaskItem.appendChild(moveUpButton);
+                    subtaskItem.appendChild(moveDownButton);
                     subtaskItem.appendChild(deleteSubtaskButton);
                     subtasksList.appendChild(subtaskItem);
                 });
@@ -1386,6 +1434,49 @@
                   console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
              }
         }
+
+        // --- NUEVAS Funciones para Mover Sub-tareas ---
+
+        function moveSubtaskUp(mainTaskIndex, subtaskIndex) {
+            const todos = loadTodos(); // Cargar estado actual
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                const mainTask = todos[mainTaskIndex];
+                if (Array.isArray(mainTask.subtasks) && subtaskIndex > 0 && subtaskIndex < mainTask.subtasks.length) {
+                    // Intercambiar la sub-tarea actual con la anterior
+                    [mainTask.subtasks[subtaskIndex - 1], mainTask.subtasks[subtaskIndex]] =
+                    [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex - 1]];
+
+                    saveTodos(todos).then(() => {
+                        renderTodos(todos); // Renderizar con el nuevo orden
+                    }).catch(e => console.error("Error guardando moveSubtaskUp:", e));
+                } else {
+                    console.warn("No se puede mover la sub-tarea arriba (índice inválido o ya es la primera).");
+                }
+            } else {
+                console.error("Índice de tarea principal inválido para mover sub-tarea arriba:", mainTaskIndex);
+            }
+        }
+
+        function moveSubtaskDown(mainTaskIndex, subtaskIndex) {
+            const todos = loadTodos(); // Cargar estado actual
+            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
+                const mainTask = todos[mainTaskIndex];
+                if (Array.isArray(mainTask.subtasks) && subtaskIndex >= 0 && subtaskIndex < mainTask.subtasks.length - 1) {
+                    // Intercambiar la sub-tarea actual con la siguiente
+                    [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex + 1]] =
+                    [mainTask.subtasks[subtaskIndex + 1], mainTask.subtasks[subtaskIndex]];
+
+                    saveTodos(todos).then(() => {
+                        renderTodos(todos); // Renderizar con el nuevo orden
+                    }).catch(e => console.error("Error guardando moveSubtaskDown:", e));
+                } else {
+                     console.warn("No se puede mover la sub-tarea abajo (índice inválido o ya es la última).");
+                }
+            } else {
+                console.error("Índice de tarea principal inválido para mover sub-tarea abajo:", mainTaskIndex);
+            }
+        }
+
 
         // --- Función de Reordenar (Modifica array local y llama a saveTodos) ---
         // Esta función ahora es la única forma de reordenar explícitamente
