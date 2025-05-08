@@ -38,6 +38,7 @@
             --legend-text-color: #666;
             --sort-button-color: #555;
             --sort-button-hover-color: #3498db; /* Color de hover para el botón de ordenar */
+            --footer-text-color: #aaa; /* Color para el texto del footer */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -65,6 +66,7 @@
             --sort-button-color: #bdc3c7;
             --sort-button-hover-color: #3498db; /* Mantenido el color de hover de ordenar */
             --checkbox-checkmark-color: var(--bg-color); /* Color del checkmark en dark mode */
+            --footer-text-color: #666; /* Color para el texto del footer en dark mode */
         }
 
         /* --- Estilos Generales --- */
@@ -75,10 +77,11 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
-            padding-bottom: 80px; /* Asegura espacio para el botón de dark mode */
+            padding-bottom: 80px; /* Asegura espacio para el botón de dark mode Y el footer */
             transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Cambiado a columna para que el footer vaya abajo */
+            align-items: center; /* Centra el contenido */
         }
 
         .container {
@@ -86,6 +89,7 @@
             max-width: 600px;
             padding: 0 10px; /* Añade un poco de padding lateral al contenedor principal */
             box-sizing: border-box;
+            flex-grow: 1; /* Permite que el contenedor principal ocupe espacio */
         }
 
         h1 {
@@ -104,7 +108,7 @@
             font-size: 0.75rem;
             color: var(--legend-text-color);
             margin-top: 30px;
-            margin-bottom: 0; /* Ajustado para que no haya espacio extra debajo */
+            margin-bottom: 20px; /* Ajustado para que haya espacio antes del footer */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -340,7 +344,7 @@
             flex-grow: 1; /* Ocupa todo el espacio disponible en la línea del main-task-header */
             align-items: center; /* Alinea verticalmente el texto y las acciones *dentro* de task-body */
             gap: 10px; /* Espacio entre el texto y el grupo de acciones */
-            min-width: 0; /* Permite que este contenedor se encoja si es necesario */
+            min-width: 0; /* Permite que este contenedor se encoja if necessary (word-break) */
             flex-wrap: wrap; /* Permite que el texto y las acciones envuelvan dentro de él */
         }
 
@@ -637,6 +641,19 @@
                margin-left: auto; /* Empuja el botón de reordenar a la derecha */
           }
 
+        /* --- ESTILO PARA EL FOOTER CON EL TEXTO --- */
+        .footer-text {
+            text-align: center;
+            font-size: 0.75rem; /* Tamaño pequeño */
+            color: var(--footer-text-color); /* Color definido en variables */
+            margin-top: 40px; /* Espacio arriba */
+            padding: 10px; /* Padding interno */
+            width: 100%; /* Ocupa todo el ancho */
+            max-width: 600px; /* Igual que el contenedor principal */
+            box-sizing: border-box;
+        }
+
+
         /* ------------------------------------------------------------- */
         /* --- AJUSTES PARA PANTALLAS PEQUEÑAS (MÓVILES) --- */
         /* ------------------------------------------------------------- */
@@ -732,6 +749,10 @@
             <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span>Puede Esperar</span>
         </div>
     </div>
+
+    <!-- Texto al final -->
+    <p class="footer-text">WebApp creada por Enrique Gil para Arteextremeño</p>
+
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
 
     <script type="module">
