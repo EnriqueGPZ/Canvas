@@ -2,27 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Mantener user-scalable=no y maximum-scale=1.0 para intentar prevenir zoom en input focus en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <!-- Título de la página cambiado -->
     <title>ToDayList</title>
-
-    <!-- Línea para añadir el Favicon -->
-    <!-- ¡IMPORTANTE! Debes renombrar tu archivo 'iconToDoList.png' a 'iconToDayList.png' -->
     <link rel="icon" href="iconToDayList.png" type="image/png">
-    <!-- Si tuvieras otros tamaños, podrías añadirlos así: -->
-    <!-- <link rel="icon" href="iconToDayList-32x32.png" sizes="32x32" type="image/png"> -->
-    <!-- <link rel="apple-touch-icon" href="iconToDayList-180x180.png"> -->
-
-
-    <!-- Enlace a Google Font: Quicksand (para el título) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Enlace a Google Font: Lexend (para el resto del texto) -->
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- Enlace a Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
@@ -51,8 +37,6 @@
             --legend-text-color: #666; /* Color para el texto de la leyenda */
             --sort-button-color: #555; /* Color para el botón de ordenar */
             --sort-button-hover-color: #3498db; /* Azul para el hover del botón de ordenar */
-            --link-icon-color: #3498db; /* Color para el icono de link (azul) */
-            --link-icon-hover-color: #2980b9; /* Azul oscuro para hover */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -80,30 +64,27 @@
             --legend-text-color: #a0a0a0; /* Color para el texto de la leyenda oscuro */
             --sort-button-color: #bdc3c7; /* Color para el botón de ordenar oscuro */
             --sort-button-hover-color: #3498db; /* Azul para el hover del botón de ordenar (mismo) */
-
-            /* Custom checkmark color for dark mode */
             --checkbox-checkmark-color: var(--bg-color); /* Usar el color de fondo principal */
         }
-
 
         /* --- Estilos Generales --- */
         body {
             font-family: 'Lexend', sans-serif;
-            margin: 0; /* Eliminar margen por defecto */
-            padding: 20px; /* Añadir padding general */
+            margin: 0;
+            padding: 20px;
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
-            padding-bottom: 80px; /* Espacio extra al final para botones fijos */
-            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
-            display: flex; /* Usar flexbox para centrar contenido */
+            padding-bottom: 80px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
             justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 600px; /* Ancho máximo */
-            padding: 0 10px; /* Padding horizontal para evitar que el contenido toque los bordes */
+            max-width: 600px;
+            padding: 0 10px;
             box-sizing: border-box;
         }
 
@@ -111,151 +92,119 @@
             font-family: 'Quicksand', sans-serif;
             color: var(--heading-color);
             text-align: center;
-            margin-top: 0; /* Eliminar margen superior por defecto */
-            margin-bottom: 30px; /* Restaurar margen inferior del título */
+            margin-top: 0;
+            margin-bottom: 30px;
             font-weight: 700;
             font-size: 2.5rem;
-            letter-spacing: -0.5px; /* Ajuste sutil */
+            letter-spacing: -0.5px;
         }
 
-        /* --- Estilo de la Leyenda de Prioridad --- */
         #priority-legend {
             text-align: center;
-            font-size: 0.75rem; /* Texto más pequeño */
+            font-size: 0.75rem;
             color: var(--legend-text-color);
-            margin-top: 30px; /* Espacio encima de la leyenda (si está abajo) */
-            margin-bottom: 0; /* Sin margen inferior */
-            display: flex; /* Usar flexbox para alinear items */
-            justify-content: center; /* Centrar horizontalmente */
+            margin-top: 30px;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            flex-wrap: wrap; /* Permitir que se envuelva en pantallas pequeñas */
-            gap: 5px 10px; /* Espacio entre items y entre líneas */
+            flex-wrap: wrap;
+            gap: 5px 10px;
         }
         #priority-legend .priority-legend-item {
-             display: inline-flex; /* Alinear el punto de color y el texto */
+             display: inline-flex;
              align-items: center;
-             gap: 4px; /* Espacio entre el punto y el texto */
+             gap: 4px;
         }
          #priority-legend .priority-color-label {
-             /* Reutilizar estilos base, pero ajustar tamaño */
              width: 10px;
              height: 10px;
-             margin-right: 0; /* Eliminar margen extra */
+             margin-right: 0;
              flex-shrink: 0;
-             /* Los colores específicos se aplican por data-color */
          }
          #priority-legend .priority-color-label:hover {
-             transform: none; /* Desactivar animación de hover en la leyenda */
+             transform: none;
          }
-
 
         #todo-list {
             list-style: none;
             padding: 0;
-            margin: 0 0 30px 0; /* Margen inferior */
+            margin: 0 0 30px 0;
         }
 
         .todo-item {
             background-color: var(--item-bg);
-            border: 1px solid var(--border-color); /* Borde suave */
-            border-radius: 8px; /* Bordes redondeados */
-            padding: 15px; /* Padding interno */
-            margin-bottom: 15px; /* Espacio entre tareas */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
             word-break: break-word;
             box-sizing: border-box;
-            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* Sombra sutil */
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
          .todo-item:last-child {
-             margin-bottom: 0; /* Sin margen inferior en el último item */
+             margin-bottom: 0;
          }
 
-
-        /* --- Estilos de Elementos Interactivos (Inputs, Buttons, Checkboxes) --- */
-
-         /* Base style for ALL custom buttons */
-         /* Usamos una clase común para los estilos base y luego modificamos */
          .app-button {
              background: none;
              border: none;
-             border-radius: 4px; /* Bordes ligeramente redondeados */
+             border-radius: 4px;
              cursor: pointer;
              transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
              flex-shrink: 0;
-             padding: 6px 10px; /* Padding para botones */
-             font-size: 1rem; /* Base font size for buttons */
-             line-height: 1; /* Asegurar alineación vertical */
-             display: inline-flex; /* Para centrar icono/texto */
+             padding: 6px 10px;
+             font-size: 1rem;
+             line-height: 1;
+             display: inline-flex;
              align-items: center;
              justify-content: center;
-             text-decoration: none; /* Eliminar subrayado por defecto */
+             text-decoration: none;
          }
-
          .app-button:hover {
-             /* Color de hover unificado (rojo por defecto, pero puede ser sobreescrito) */
              color: var(--button-hover-color);
          }
          .app-button:focus {
-              outline: 2px solid var(--button-hover-color); /* Outline en focus */
+              outline: 2px solid var(--button-hover-color);
               outline-offset: 2px;
          }
-
-         /* Specific styles for '+' buttons */
          .add-button {
-             color: var(--button-color); /* Color base para añadir */
-             font-weight: bold; /* Default bold for add buttons */
+             color: var(--button-color);
+             font-weight: bold;
          }
          .add-button:hover {
              color: var(--button-hover-color);
          }
-
-         /* Specific styles for '-' (delete) buttons */
          .delete-button {
-             color: var(--delete-button-color); /* Rojo para eliminar */
+             color: var(--delete-button-color);
          }
          .delete-button:hover {
              color: var(--delete-button-hover-color);
          }
-
-         /* Specific styles for the Sort button */
          .sort-button {
-             color: var(--sort-button-color); /* Color base para ordenar */
-             font-weight: normal; /* No negrita */
-             padding: 10px 15px; /* Padding similar al add button */
-             font-size: 1.1rem; /* Tamaño similar al add button */
+             color: var(--sort-button-color);
+             font-weight: normal;
+             padding: 10px 15px;
+             font-size: 1.1rem;
          }
          .sort-button:hover {
-             color: var(--sort-button-hover-color); /* Color de hover azul */
+             color: var(--sort-button-hover-color);
          }
 
-         /* Style for the clickable link icon */
-         .link-icon {
-             color: var(--link-icon-color); /* Color azul */
-             font-size: 1rem; /* Tamaño del icono */
-             margin-right: 8px; /* Espacio a la derecha */
-             cursor: pointer;
-             transition: color 0.2s ease;
-             flex-shrink: 0;
-         }
-         .link-icon:hover {
-             color: var(--link-icon-hover-color); /* Azul oscuro en hover */
-         }
-
-
-         /* Dark Mode Toggle button */
          #dark-mode-toggle {
-             position: fixed; /* Posición fija en la pantalla */
-             bottom: 20px; /* 20px desde abajo */
-             right: 20px; /* 20px desde la derecha */
-             font-size: 1.3rem; /* Tamaño del icono */
-             color: var(--button-color); /* Color base */
-             z-index: 1000; /* Asegura que esté por encima */
+             position: fixed;
+             bottom: 20px;
+             right: 20px;
+             font-size: 1.3rem;
+             color: var(--button-color);
+             z-index: 1000;
              background-color: var(--fixed-button-bg);
              border: 1px solid var(--fixed-button-border);
-             border-radius: 50%; /* Forma redonda */
-             width: 45px; /* Ancho fijo */
-             height: 45px; /* Alto fijo */
-             display: flex; /* Para centrar el icono */
+             border-radius: 50%;
+             width: 45px;
+             height: 45px;
+             display: flex;
              justify-content: center;
              align-items: center;
              box-shadow: var(--fixed-button-shadow);
@@ -265,20 +214,17 @@
              color: var(--button-hover-color);
          }
          #dark-mode-toggle i {
-             line-height: 1; /* Asegurar que el icono esté centrado */
+             line-height: 1;
          }
 
-
-        /* --- Estilos UNIFICADOS para Inputs de Texto --- */
         #new-todo-input,
-        .todo-item .subtask-input-container input[type="text"],
-        .todo-item .link-input-container input[type="url"] { /* Añadido input de link */
-            padding: 10px 12px; /* Más padding */
-            border: 1px solid var(--border-color); /* Borde sutil */
-            border-radius: 4px; /* Bordes redondeados */
+        .todo-item .subtask-input-container input[type="text"] {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             flex-grow: 1;
             min-width: 150px;
-            font-size: 0.95rem; /* Tamaño ligeramente mayor */
+            font-size: 0.95rem;
             box-sizing: border-box;
             background-color: var(--input-bg);
             color: var(--input-text-color);
@@ -286,345 +232,274 @@
             transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
         }
         #new-todo-input:focus,
-        .todo-item .subtask-input-container input[type="text"]:focus,
-        .todo-item .link-input-container input[type="url"]:focus { /* Añadido input de link */
-            border-color: var(--button-hover-color); /* Borde rojo al enfocar */
-            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25); /* Sombra suave al enfocar */
+        .todo-item .subtask-input-container input[type="text"]:focus {
+            border-color: var(--button-hover-color);
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
         }
-         /* Placeholder color */
         #new-todo-input::placeholder,
-        .todo-item .subtask-input-container input[type="text"]::placeholder,
-        .todo-item .link-input-container input[type="url"]::placeholder { /* Añadido input de link */
+        .todo-item .subtask-input-container input[type="text"]::placeholder {
              color: var(--placeholder-color);
-             opacity: 1; /* Asegura que no esté atenuado por defecto */
+             opacity: 1;
         }
 
-
-        /* --- Estilos UNIFICADOS para Checkboxes --- */
          .custom-checkbox {
-             /* Apariencia de texto plano por defecto */
-             margin-right: 10px; /* Espacio a la derecha */
-             border: 1px solid var(--text-color); /* Borde basado en color de texto */
-             border-radius: 4px; /* Bordes redondeados */
+             margin-right: 10px;
+             border: 1px solid var(--text-color);
+             border-radius: 4px;
              appearance: none;
              -webkit-appearance: none;
-             width: 20px; /* Tamaño */
+             width: 20px;
              height: 20px;
-             background-color: var(--item-bg); /* Fondo basado en item */
+             background-color: var(--item-bg);
              cursor: pointer;
              position: relative;
              flex-shrink: 0;
              box-sizing: border-box;
              transition: background-color 0.2s ease, border-color 0.2s ease;
          }
-
          .custom-checkbox:checked {
-              background-color: var(--text-color); /* Fondo oscuro al marcar */
-              border-color: var(--text-color); /* Borde oscuro al marcar */
+              background-color: var(--text-color);
+              border-color: var(--text-color);
          }
-
-          /* Custom checkmark */
          .custom-checkbox:checked::after {
              content: '';
              position: absolute;
-             top: 4px; /* Ajustar posición del checkmark */
+             top: 4px;
              left: 6px;
              width: 4px;
              height: 8px;
-             border: solid var(--item-bg); /* Checkmark basado en fondo de item */
+             border: solid var(--item-bg);
              border-width: 0 2px 2px 0;
              transform: rotate(45deg);
          }
-
-         /* Checkmark color in Dark Mode */
          body.dark-mode .custom-checkbox:checked::after {
-             border-color: var(--checkbox-checkmark-color) !important; /* Usar variable para dark mode */
+             border-color: var(--checkbox-checkmark-color) !important;
          }
 
-
-        /* --- Estilos de Tarea Principal --- */
         .todo-item .main-task-header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px; /* Más espacio */
-            padding: 0; /* Padding ya en .todo-item */
-            flex-wrap: wrap; /* Permite que los elementos se envuelvan si no caben */
-            gap: 10px; /* Espacio entre elementos flex */
+            margin-bottom: 15px;
+            padding: 0;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
-         /* Aplicar estilo custom-checkbox al checkbox principal */
         .todo-item .main-task-header input[type="checkbox"] {
-            /* margin-right ya definido en .custom-checkbox */
-            /* border, appearance, width, height, background, cursor, position, flex-shrink, box-sizing, transition ya definidos en .custom-checkbox */
-             border-color: var(--text-color); /* Asegurar color de borde inicial */
-             background-color: var(--item-bg); /* Asegurar color de fondo inicial */
+             border-color: var(--text-color);
+             background-color: var(--item-bg);
         }
          .todo-item .main-task-header input[type="checkbox"]:checked {
               background-color: var(--text-color);
               border-color: var(--text-color);
          }
 
-
-         /* Etiqueta de prioridad de color */
         .todo-item .priority-color-label {
              display: inline-block;
-             width: 16px; /* Tamaño ligeramente mayor */
+             width: 16px;
              height: 16px;
-             margin-right: 8px; /* Espacio */
-             border: 1px solid var(--border-color); /* Borde suave */
-             border-radius: 4px; /* Bordes redondeados */
+             margin-right: 8px;
+             border: 1px solid var(--border-color);
+             border-radius: 4px;
              cursor: pointer;
              flex-shrink: 0;
-             transition: border-color 0.2s ease, transform 0.1s ease; /* Transición y pequeña animación */
+             transition: border-color 0.2s ease, transform 0.1s ease;
              box-sizing: border-box;
         }
          .todo-item .priority-color-label:hover {
-             transform: scale(1.1); /* Pequeño zoom al pasar el mouse */
+             transform: scale(1.1);
          }
+        .priority-color-label[data-color="red"] { background-color: #e74c3c; border-color: #e74c3c; }
+        .priority-color-label[data-color="orange"] { background-color: #f39c12; border-color: #f39c12; }
+        .priority-color-label[data-color="yellow"] { background-color: #f1c40f; border-color: #f1c40f; }
+        .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
+        .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
-         /* Colores de prioridad (estos no cambian en dark mode) */
-        .priority-color-label[data-color="red"] { background-color: #e74c3c; border-color: #e74c3c; } /* Alizarin */
-        .priority-color-label[data-color="orange"] { background-color: #f39c12; border-color: #f39c12; } /* Orange */
-        .priority-color-label[data-color="yellow"] { background-color: #f1c40f; border-color: #f1c40f; } /* Sunflower */
-        .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; } /* Emerald */
-        .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); } /* Sin color, solo borde */
-
-
-        /* Texto de la tarea principal */
         .todo-item .main-task-header span {
-            font-weight: 700; /* Negrita */
+            font-weight: 700;
             font-size: 1.1rem;
-            flex-grow: 1; /* Permite que el texto ocupe el espacio disponible */
-            margin-right: 10px; /* Espacio antes de la fecha/botón */
+            flex-grow: 1;
+            margin-right: 10px;
             color: var(--text-color);
-            transition: color 0.3s ease, text-decoration 0.3s ease; /* Transición suave */
+            transition: color 0.3s ease, text-decoration 0.3s ease;
         }
 
-        /* Estilo para el input de fecha dentro del main-task-header */
         .todo-item .main-task-header input[type="date"] {
             background: none;
             border: none;
             padding: 0;
             font-family: 'Lexend', sans-serif;
             font-size: 0.85rem;
-            color: var(--placeholder-color); /* Color gris discreto */
+            color: var(--placeholder-color);
             cursor: pointer;
-            margin-left: auto; /* Empuja a la derecha */
-            margin-right: 5px; /* Espacio antes del botón eliminar */
+            margin-left: auto;
+            margin-right: 5px;
             flex-shrink: 0;
             outline: none;
             transition: color 0.2s ease;
-            /* Ocultar el icono de calendario nativo - puede variar */
-             /* appearance: none; */
-             /* -webkit-appearance: none; */
         }
-         /* Estilo al pasar el mouse o enfocar el input de fecha */
         .todo-item .main-task-header input[type="date"]:hover,
         .todo-item .main-task-header input[type="date"]:focus {
-             color: var(--button-hover-color); /* Usar el color rojo de hover */
-             text-decoration: underline; /* Subrayar */
+             color: var(--button-hover-color);
+             text-decoration: underline;
          }
-         /* Estilo para el input de fecha cuando tiene valor */
          .todo-item .main-task-header input[type="date"]:valid {
-             color: var(--text-color); /* Color normal si tiene fecha */
+             color: var(--text-color);
          }
          .todo-item.completed .main-task-header input[type="date"]:valid:hover,
          .todo-item.completed .main-task-header input[type="date"]:valid:focus {
-              color: var(--button-hover-color); /* Rojo de hover si tiene fecha */
+              color: var(--button-hover-color);
          }
 
-
-         /* Botón eliminar principal - Aplicar clase delete-button */
         .todo-item .main-task-header button {
-            /* Estilos base ya en .app-button */
-            /* Color ya en .delete-button */
-             padding: 6px; /* Padding más pequeño para iconos */
-             font-size: 1.2rem; /* Tamaño del icono */
+             padding: 6px;
+             font-size: 1.2rem;
+        }
+
+        /* --- Estilos para el Botón de Enlace en Tareas --- */
+        .todo-item .main-task-header .link-button {
+            color: var(--button-color);
+            padding: 6px; /* Consistente con otros botones de icono */
+            font-size: 1.1rem; /* Tamaño del icono */
+            margin-right: 8px; /* Espacio antes del siguiente elemento (fecha) */
+            /* No establecer margin-left: auto aquí, para que se posicione después del texto */
+            opacity: 0.5; /* Estado "apagado" por defecto */
+        }
+
+        .todo-item .main-task-header .link-button.link-on {
+            opacity: 1; /* Estado "encendido" */
+        }
+
+        .todo-item .main-task-header .link-button:hover {
+            /* Hereda el color de hover de .app-button si se usa esa clase */
+            /* Si no, definir explícitamente: color: var(--button-hover-color); */
+        }
+
+        /* Comportamiento en tareas completadas para el botón de enlace */
+        .todo-item.completed .main-task-header .link-button.link-off {
+            cursor: default; /* No se puede añadir enlace a tarea completada */
+        }
+        .todo-item.completed .main-task-header .link-button.link-off:hover {
+            color: var(--button-color); /* No cambiar color en hover */
+            opacity: 0.5; /* Mantener opacidad de apagado */
+        }
+        /* Para .link-on.completed, el hover de .app-button es suficiente, ya que la acción (abrir) es válida */
+        /* Si se quiere un comportamiento específico para .link-on en completadas: */
+        .todo-item.completed .main-task-header .link-button.link-on {
+            /* La opacidad general de .completed .app-button ya lo atenúa un poco */
+            /* Si se quiere que no cambie en hover en absoluto: */
+            /* opacity: 0.7; */ /* Heredado de .completed .app-button */
+        }
+        .todo-item.completed .main-task-header .link-button.link-on:hover {
+            /* Si se quiere que no cambie en hover en absoluto: */
+            /* color: var(--button-color); */ /* O el color que tenga en estado completado */
+            /* opacity: 0.7; */
         }
 
 
-        /* --- Elementos relacionados con Sub-tareas y Links --- */
-
-         /* Botón para mostrar/ocultar input de sub-tarea - Aplicar clase add-button */
         .todo-item .add-subtasks-toggle {
              display: block;
              width: fit-content;
-             margin: 10px 0 0 auto; /* Alineado a la derecha dentro del padding del item */
-             padding: 4px 8px; /* Padding más pequeño */
-             font-size: 1.1rem; /* Keep icon size */
-             font-weight: normal; /* Make it not bold */
-             color: var(--legend-text-color); /* Use legend text color */
+             margin: 10px 0 0 auto;
+             padding: 4px 8px;
+             font-size: 1.1rem;
+             font-weight: normal;
+             color: var(--legend-text-color);
         }
-         /* Hover state for the discreet button */
          .todo-item .add-subtasks-toggle:hover {
-             color: var(--button-hover-color); /* Still use the hover color */
+             color: var(--button-hover-color);
          }
 
-         /* Botón para mostrar/ocultar input de link - Similar al de sub-tarea */
-         .todo-item .add-link-toggle {
-             display: block;
-             width: fit-content;
-             margin: 10px auto 0 0; /* Alineado a la izquierda dentro del padding del item */
-             padding: 4px 8px; /* Padding más pequeño */
-             font-size: 1.1rem; /* Keep icon size */
-             font-weight: normal; /* Make it not bold */
-             color: var(--legend-text-color); /* Use legend text color */
-         }
-          /* Hover state for the discreet button */
-         .todo-item .add-link-toggle:hover {
-             color: var(--button-hover-color); /* Still use the hover color */
-         }
-
-
-        /* Contenedor para input y botón de sub-tarea - Oculto por defecto */
         .todo-item .subtask-input-container {
-            display: none; /* Oculto por defecto */
+            display: none;
             flex-wrap: wrap;
-            gap: 8px; /* Espacio entre input y botón */
+            gap: 8px;
             margin-top: 15px;
-            padding: 0; /* Padding ya en .todo-item */
+            padding: 0;
             align-items: center;
         }
-         /* Input de sub-tarea - Ya usa el estilo unificado */
-         .todo-item .subtask-input-container input[type="text"] {
-             /* Estilos base ya definidos */
-         }
-         /* Botón de añadir sub-tarea - Aplicar clase add-button */
          .todo-item .subtask-input-container button {
-             /* Estilos base ya en .app-button */
-             /* Color ya en .add-button */
-             padding: 8px 12px; /* Padding */
+             padding: 8px 12px;
              font-size: 1rem;
          }
 
-         /* Contenedor para input y botón de link - Oculto por defecto */
-         .todo-item .link-input-container {
-             display: none; /* Oculto por defecto */
-             flex-wrap: wrap;
-             gap: 8px; /* Espacio entre input y botón */
-             margin-top: 15px;
-             padding: 0; /* Padding ya en .todo-item */
-             align-items: center;
-         }
-          /* Input de link - Ya usa el estilo unificado */
-          .todo-item .link-input-container input[type="url"] {
-              /* Estilos base ya definidos */
-          }
-          /* Botón de guardar link - Aplicar clase add-button (o similar) */
-          .todo-item .link-input-container button {
-              /* Estilos base ya en .app-button */
-              color: var(--button-color); /* Color base */
-              padding: 8px 12px; /* Padding */
-              font-size: 1rem;
-          }
-           .todo-item .link-input-container button:hover {
-               color: var(--sort-button-hover-color); /* Usar color azul de ordenar */
-           }
-
-
-        /* Lista de sub-tareas */
         .todo-item .subtasks-list {
             list-style: none;
             padding: 0;
             margin-top: 15px;
-            border-left: 2px solid var(--border-color); /* Línea de indentación */
-            padding-left: 20px; /* Espacio para la línea */
+            border-left: 2px solid var(--border-color);
+            padding-left: 20px;
             transition: border-left-color 0.3s ease;
         }
-
         .todo-item .subtasks-list li {
             display: flex;
             align-items: center;
             margin-bottom: 8px;
             font-size: 0.95rem;
-            gap: 5px; /* Espacio entre elementos flex */
+            gap: 5px;
         }
          .todo-item .subtasks-list li:last-child {
-             margin-bottom: 0; /* Sin margen inferior en el último item */
+             margin-bottom: 0;
          }
-
-         /* Checkbox de sub-tarea - Aplicar estilo custom-checkbox */
         .todo-item .subtasks-list li input[type="checkbox"] {
-            /* margin-right ya definido en .custom-checkbox */
-            /* border, appearance, width, height, background, cursor, position, flex-shrink, box-sizing, transition ya definidos en .custom-checkbox */
-             width: 18px; /* Tamaño ligeramente menor */
+             width: 18px;
              height: 18px;
-             border-color: var(--text-color); /* Asegurar color de borde inicial */
-             background-color: var(--item-bg); /* Asegurar color de fondo inicial */
+             border-color: var(--text-color);
+             background-color: var(--item-bg);
         }
          .todo-item .subtasks-list li input[type="checkbox"]:checked {
               background-color: var(--text-color);
               border-color: var(--text-color);
          }
-         /* Checkmark color in Dark Mode for subtasks */
          body.dark-mode .todo-item.subtasks-list li input[type="checkbox"]:checked::after {
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
-
-        /* Texto de la sub-tarea */
         .todo-item .subtasks-list li span {
              flex-grow: 1;
-             margin-right: 5px; /* Espacio antes del botón */
-             color: var(--text-color); /* Color normal por defecto */
+             margin-right: 5px;
+             color: var(--text-color);
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
         }
-
-         /* Botones de mover sub-tarea */
          .todo-item .subtasks-list li .subtask-move-button {
-             /* Heredan estilos base de .app-button */
-             color: var(--button-color); /* Color por defecto */
-             padding: 4px; /* Padding pequeño */
-             font-size: 0.9rem; /* Tamaño del icono ligeramente menor */
+             color: var(--button-color);
+             padding: 4px;
+             font-size: 0.9rem;
          }
          .todo-item .subtasks-list li .subtask-move-button:hover {
-             color: var(--button-hover-color); /* Color de hover */
+             color: var(--button-hover-color);
          }
-         /* Deshabilitar visualmente los botones de mover en los extremos */
          .todo-item .subtasks-list li .subtask-move-button:disabled {
              opacity: 0.3;
              cursor: not-allowed;
-             color: var(--button-color); /* Mantener color base */
+             color: var(--button-color);
          }
          .todo-item .subtasks-list li .subtask-move-button:disabled:hover {
-             color: var(--button-color); /* No cambiar color al pasar el mouse si está deshabilitado */
+             color: var(--button-color);
          }
-
-
-         /* Botón eliminar sub-tarea - Aplicar clase delete-button */
          .todo-item .subtasks-list li .delete-button {
-             /* Estilos base ya en .app-button */
-             /* Color ya en .delete-button */
-             padding: 4px 8px; /* Padding más pequeño */
+             padding: 4px 8px;
              font-size: 1rem;
          }
 
-
-        /* --- Progress Bar styles --- */
         .todo-item .progress-container {
-            width: 100%; /* Ocupa todo el ancho del item */
-            height: 6px; /* Altura */
-            border-radius: 3px; /* Bordes redondeados */
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
             margin-top: 15px;
-            margin-bottom: 0; /* Sin margen inferior */
-            overflow: hidden; /* Esconder la parte que sobresale */
+            margin-bottom: 0;
+            overflow: hidden;
             background-color: var(--progress-bg);
             transition: background-color 0.3s ease;
         }
-
         .todo-item .progress-bar {
             height: 100%;
             background-color: var(--progress-bar-color);
             width: 0%;
             transition: width 0.5s ease-in-out, background-color 0.3s ease;
         }
-
-         /* Ocultar el texto de progreso para mayor minimalismo */
          .todo-item .progress-text { display: none; }
 
-
-         /* Estilo para cuando la lista principal está vacía */
         #todo-list:empty:before {
             content: "No hay tareas. ¡Agrega una!";
             display: block;
@@ -635,79 +510,57 @@
             transition: color 0.3s ease;
         }
 
-        /* --- Clases de Visibilidad (Añadidas/Quitadas por JS para controlar CSS display) --- */
-
-        /* Mostrar el input y botón de sub-tarea si tiene la clase show-subtask-ui */
         .todo-item.show-subtask-ui .subtask-input-container {
-             display: flex; /* Mostrar el input container */
+             display: flex;
         }
-
-        /* Ocultar el botón '+ Agregar Sub-tareas' si se muestra el input */
         .todo-item.show-subtask-ui .add-subtasks-toggle {
-             display: none; /* Ocultar el toggle button */
+             display: none;
         }
 
-         /* Mostrar el input y botón de link si tiene la clase show-link-ui */
-         .todo-item.show-link-ui .link-input-container {
-              display: flex; /* Mostrar el input container */
-         }
-
-         /* Ocultar el botón 'Agregar/Editar Link' si se muestra el input */
-         .todo-item.show-link-ui .add-link-toggle {
-              display: none; /* Ocultar el toggle button */
-         }
-
-         /* Ocultar el icono de link si se muestra el input de link */
-         .todo-item.show-link-ui .link-icon {
-              display: none !important; /* Usar !important para asegurar que se oculte */
-         }
-          /* Mostrar el icono de link SOLO si hay link Y el input de link NO está visible */
-         .todo-item .link-icon {
-             display: none; /* Oculto por defecto */
-         }
-         .todo-item:not(.show-link-ui) .link-icon[title]:not([title='No link']) {
-             display: inline-block; /* Mostrar si NO se muestra el input Y tiene un link válido */
-         }
-
-
-        /* --- Estilo para tarea COMPLETADA --- */
         .todo-item.completed .main-task-header span,
         .todo-item.completed .subtasks-list li span {
-            color: var(--completed-text-color); /* Color gris claro */
-            text-decoration: line-through; /* Texto tachado */
+            color: var(--completed-text-color);
+            text-decoration: line-through;
         }
-         /* Barra de progreso verde oscuro cuando 100% y completada (sin sub-tareas) */
         .todo-item.completed .progress-bar {
-            background-color: var(--progress-bar-completed-color); /* Verde completado */
+            background-color: var(--progress-bar-completed-color);
         }
-         /* Atenuar botones y fecha en tareas completadas */
-        .todo-item.completed .main-task-header button,
-        .todo-item.completed .subtasks-list li .app-button, /* Aplicar a todos los botones de sub-tarea */
+        .todo-item.completed .main-task-header button, /* Esto incluye el link-button */
+        .todo-item.completed .subtasks-list li .app-button,
         .todo-item.completed .main-task-header input[type="date"],
-        .todo-item.completed .priority-color-label,
-        .todo-item.completed .link-icon, /* Atenuar icono de link */
-        .todo-item.completed .add-link-toggle, /* Atenuar toggle de link */
-        .todo-item.completed .add-subtasks-toggle /* Atenuar toggle de sub-tarea */
-         {
+        .todo-item.completed .priority-color-label {
             opacity: 0.7;
-            cursor: default; /* Cambiar cursor */
-         }
-         /* Desactivar hover en elementos atenuados */
+            /* cursor: default;  Quitado para que el link-button siga siendo clickable si tiene URL */
+        }
          .todo-item.completed .main-task-header button:hover,
-         .todo-item.completed .subtasks-list li .app-button:hover, /* Aplicar a todos los botones de sub-tarea */
+         .todo-item.completed .subtasks-list li .app-button:hover,
          .todo-item.completed .main-task-header input[type="date"]:hover,
          .todo-item.completed .main-task-header input[type="date"]:focus,
-         .todo-item.completed .priority-color-label:hover,
-         .todo-item.completed .link-icon:hover, /* Desactivar hover en icono de link */
-         .todo-item.completed .add-link-toggle:hover, /* Desactivar hover en toggle de link */
-         .todo-item.completed .add-subtasks-toggle:hover /* Desactivar hover en toggle de sub-tarea */
-          {
-             opacity: 0.7; /* Mantener opacidad */
-             color: inherit; /* No cambiar color */
-             text-decoration: none; /* No subrayar */
-             transform: none; /* No hacer zoom */
-          }
-         /* Asegurar que el checkbox principal completado se vea bien */
+         .todo-item.completed .priority-color-label:hover {
+             /* opacity: 0.7; */ /* Se maneja por el estado específico del link-button */
+             /* color: inherit; */
+             text-decoration: none;
+             transform: none;
+         }
+         /* Ajuste para que el link-button en estado completado y con link siga siendo usable */
+         .todo-item.completed .main-task-header .link-button.link-on {
+            opacity: 0.7; /* Atenuado pero usable */
+            cursor: pointer;
+         }
+         .todo-item.completed .main-task-header .link-button.link-on:hover {
+            color: var(--button-hover-color); /* Permitir hover si tiene link */
+            opacity: 1; /* Puede resaltar un poco más en hover */
+         }
+         .todo-item.completed .main-task-header .link-button.link-off {
+            opacity: 0.4; /* Más atenuado si no tiene link y está completada */
+            cursor: default;
+         }
+         .todo-item.completed .main-task-header .link-button.link-off:hover {
+            color: var(--button-color);
+            opacity: 0.4;
+         }
+
+
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
              background-color: var(--completed-text-color);
@@ -717,61 +570,40 @@
               background-color: var(--completed-text-color);
           }
          .todo-item.completed .main-task-header input[type="checkbox"]:checked::after {
-              border-color: var(--item-bg) !important; /* Checkmark claro */
+              border-color: var(--item-bg) !important;
          }
           body.dark-mode .todo-item.completed .main-task-header input[type="checkbox"]:checked::after {
-              border-color: var(--item-bg) !important; /* Checkmark claro en dark mode */
+              border-color: var(--item-bg) !important;
           }
 
-
-         /* Estilo para el input de agregar tarea principal y sus botones */
          #todo-input-container {
              display: flex;
              gap: 10px;
-             padding: 0; /* Padding ya en .container */
+             padding: 0;
              align-items: center;
-             margin-bottom: 20px; /* Espacio antes de la leyenda si está abajo */
-             flex-wrap: wrap; /* Permitir que los botones se envuelvan en pantallas pequeñas */
+             margin-bottom: 20px;
+             flex-wrap: wrap;
          }
-          #todo-input-container input[type="text"] {
-              /* Ya usan el estilo unificado base */
-          }
-          /* Ajustar el margen del botón de añadir para que no empuje al de ordenar */
           #todo-input-container #add-todo-button {
-               margin-left: 0; /* Eliminar margin-left: auto */
-               padding: 10px 15px; /* Padding */
+               margin-left: 0;
+               padding: 10px 15px;
                font-size: 1.1rem;
           }
-           /* Estilo para el nuevo botón de ordenar */
           #todo-input-container #reorder-button {
-               margin-left: auto; /* Empujar a la derecha */
-               /* Padding y font-size ya definidos en .sort-button */
+               margin-left: auto;
           }
-
-
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Título principal cambiado -->
         <h1>ToDayList</h1>
-
-        <!-- La lista de tareas va PRIMERO -->
-        <ul id="todo-list">
-            <!-- Las tareas se agregarán aquí dinámicamente -->
-        </ul>
-
-        <!-- El contenedor de input y botones de agregar/ordenar tarea va DESPUÉS de la lista -->
+        <ul id="todo-list"></ul>
         <div id="todo-input-container">
             <input type="text" id="new-todo-input" placeholder="Agregar nueva tarea">
-            <!-- Botón Agregar Tarea (cambiado a '+') - Aplicar clase add-button -->
             <button id="add-todo-button" class="app-button add-button" aria-label="Agregar Tarea"><i class="fas fa-plus"></i></button>
-            <!-- Nuevo Botón para reordenar -->
             <button id="reorder-button" class="app-button sort-button" aria-label="Reordenar Tareas"><i class="fas fa-sort-amount-down-alt"></i></button>
         </div>
-
-        <!-- Leyenda de Prioridad (MOVIMIENTO: Ahora está al final del container) -->
         <div id="priority-legend">
             Prioridad:
             <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span>Urgente</span>
@@ -781,95 +613,62 @@
             <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span>No Olvidar</span>
             >
             <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span>Puede Esperar</span>
-            <!-- Eliminado: > <span class="priority-legend-item"><span class="priority-color-label" data-color="none"></span> Ninguna</span> -->
         </div>
-
-
-    </div> <!-- Fin .container -->
-
-    <!-- Botón para alternar modo oscuro/claro (icono) - Aplicar clase app-button -->
-    <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button> <!-- Icono de luna por defecto -->
-
+    </div>
+    <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
 
     <script type="module">
-        // 1. Importar los módulos necesarios de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
 
-        // 2. Configurar tu conexión a Firebase
-        // !! IMPORTANTE: Asegúrate de que las reglas de seguridad de Firestore
-        //    estén configuradas para permitir lectura y escritura SIN autenticación
-        //    si este es un proyecto público o de prueba.
-        // El projectId "todolist-5cc91" no se puede cambiar desde aquí.
         const firebaseConfig = {
             apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4",
             authDomain: "todolist-5cc91.firebaseapp.com",
-            projectId: "todolist-5cc91", // Este ID no cambia con el nombre de la app en el código
+            projectId: "todolist-5cc91",
             storageBucket: "todolist-5cc91.firebaseapp.com",
             messagingSenderId: "834516228026",
             appId: "1:834516228026:web:772d2e3a6fbe958a212f83"
         };
 
-        // 3. Inicializar Firebase y obtener acceso a Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const tareasRef = collection(db, "tareas"); // Referencia a la colección "tareas"
+        const tareasRef = collection(db, "tareas");
 
-        // Obtener referencias a los elementos del DOM (ahora dentro del módulo)
-        // Declarar estas variables aquí para que estén disponibles en todo el módulo
         let todoInput;
         let addTodoButton;
         let todoListContainer;
-        let reorderButton; // Referencia al nuevo botón de reordenar
+        let reorderButton;
         let darkModeToggle;
         let body;
 
-
-        // Colores de prioridad disponibles y su orden para ciclar
         const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
-
-        // Definir el orden numérico para la clasificación de prioridad
-        const PRIORITY_ORDER = {
-            'red': 1,
-            'orange': 2,
-            'yellow': 3,
-            'green': 4,
-            'none': 5 // Las tareas sin color van al final
-        };
-
-
-        // --- Funciones para Local Storage (Se mantienen para carga rápida y fallback) ---
+        const PRIORITY_ORDER = { 'red': 1, 'orange': 2, 'yellow': 3, 'green': 4, 'none': 5 };
 
         function loadTodos() {
             try {
                 const storedTodos = localStorage.getItem('todos');
                 if (storedTodos) {
                     const todos = JSON.parse(storedTodos);
-                    // Asegurarse de que las tareas antiguas tengan las propiedades necesarias
-                    // y limpiar datos potencialmente corruptos o faltantes
                     return todos.map(todo => ({
-                        // No necesitamos firebaseId para la lógica JS en este modelo, pero lo mantenemos si existe en los datos
                         firebaseId: todo.firebaseId || null,
-                        text: todo.text || 'Tarea sin nombre', // Default text if missing
-                        completed: typeof todo.completed === 'boolean' ? todo.completed : false, // Ensure boolean
+                        text: todo.text || 'Tarea sin nombre',
+                        completed: typeof todo.completed === 'boolean' ? todo.completed : false,
                         subtasks: Array.isArray(todo.subtasks) ? todo.subtasks.map(sub => ({
                             text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
-                        })) : [], // Ensure subtasks is an array and clean its items
-                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false, // Ensure boolean with default false
-                        showLinkUI: typeof todo.showLinkUI === 'boolean' ? todo.showLinkUI : false, // NEW: Ensure boolean for link UI visibility
-                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none', // Ensure valid color with default 'none'
-                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null, // Add date property, validate format
-                        link: typeof todo.link === 'string' ? todo.link : null, // NEW: Add link property, ensure string or null
-                         // Mantener el campo order si existe, aunque no se use activamente en este modelo de guardado
-                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity) // Fallback order if missing
+                        })) : [],
+                        showSubtaskUI: typeof todo.showSubtaskUI === 'boolean' ? todo.showSubtaskUI : false,
+                        priorityColor: PRIORITY_COLORS.includes(todo.priorityColor) ? todo.priorityColor : 'none',
+                        date: typeof todo.date === 'string' && todo.date.match(/^\d{4}-\d{2}-\d{2}$/) ? todo.date : null,
+                        linkUrl: typeof todo.linkUrl === 'string' ? todo.linkUrl : null, // MODIFICADO
+                        order: typeof todo.order === 'number' ? todo.order : (todo.date ? new Date(todo.date).getTime() : Infinity)
                     }));
                 } else {
                     return [];
                 }
             } catch (e) {
                  console.error("Error al cargar de localStorage:", e);
-                 return []; // Si hay error, empezar con lista vacía localmente
+                 return [];
             }
         }
 
@@ -881,44 +680,33 @@
              }
         }
 
-        // --- Funciones para Firebase Firestore (Modelo anterior: Delete All + Add All) ---
-
-        // Función para guardar TODAS las tareas en Firestore (sobrescribe lo anterior)
         async function saveTodosOnline(todosArray) {
             try {
-                // 1. Eliminar documentos existentes
                 const querySnapshot = await getDocs(tareasRef);
                 const deletePromises = querySnapshot.docs.map(docSnap =>
                     deleteDoc(doc(db, "tareas", docSnap.id))
                 );
-                await Promise.all(deletePromises); // Esperar a que se borren todos
-
-                // 2. Añadir los nuevos documentos
-                // Asegurarse de NO guardar el firebaseId en el nuevo documento
+                await Promise.all(deletePromises);
                 const addPromises = todosArray.map(todo => {
-                    const { firebaseId, ...dataToSave } = todo; // Excluir firebaseId
+                    const { firebaseId, ...dataToSave } = todo;
                     return addDoc(tareasRef, dataToSave);
                 });
-                await Promise.all(addPromises); // Esperar a que se añadan todos
-
+                await Promise.all(addPromises);
                 console.log("Datos guardados en Firestore correctamente.");
             } catch (e) {
                 console.error("Error al guardar en Firestore:", e);
-                // alert("Error al guardar la lista de tareas en la nube."); // Ya se muestra en saveTodos
             }
         }
 
-        // Función para cargar las tareas desde Firestore (Modelo anterior)
         async function loadTodosOnline() {
             try {
                 console.log("Cargando de Firestore...");
                 const querySnapshot = await getDocs(tareasRef);
                 const todos = [];
                 querySnapshot.forEach(docSnap => {
-                    // Asegurarse de que los datos cargados tengan la estructura esperada
                     const data = docSnap.data();
                      todos.push({
-                        firebaseId: docSnap.id, // Guardar el ID de Firebase si existe
+                        firebaseId: docSnap.id,
                         text: data.text || 'Tarea sin nombre',
                         completed: typeof data.completed === 'boolean' ? data.completed : false,
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
@@ -926,57 +714,38 @@
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [],
                         showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
-                        showLinkUI: typeof data.showLinkUI === 'boolean' ? data.showLinkUI : false, // NEW: Load showLinkUI
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
-                        link: typeof data.link === 'string' ? data.link : null, // NEW: Load link
-                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity) // Cargar el campo order si existe
+                        linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null, // MODIFICADO
+                        order: typeof data.order === 'number' ? data.order : (data.date ? new Date(data.date).getTime() : Infinity)
                     });
                 });
                 console.log("Datos cargados de Firestore:", todos);
-
-                // Guardar los datos cargados de Firestore en Local Storage para la próxima carga rápida
                 saveTodosToLocalStorage(todos);
-
                 return todos;
-
             } catch (e) {
                  console.error("Error al cargar de Firestore:", e);
-                 // Si falla la carga de Firestore, lanzar el error para que el llamador (DOMContentLoaded) lo capture
-                 throw e; // Lanzar el error para que el fallback a LS funcione
+                 throw e;
             }
         }
 
-        // --- Sobrescribir la función original de guardado para que use Firestore ---
-        // Ahora esta función es la única que se llama para guardar cambios.
         async function saveTodos(todosArray) {
             console.log("Guardando datos (local y online)...");
             try {
-                // Guardar primero en Local Storage (más rápido para el usuario)
                 saveTodosToLocalStorage(todosArray);
-                // Luego, guardar en Firestore (en segundo plano)
                 await saveTodosOnline(todosArray);
                 console.log("Guardado completo (local y online).");
             } catch (e) {
                 console.error("Error general al guardar datos:", e);
-                alert("Error al guardar la lista de tareas."); // Notificar al usuario si falla el guardado general
+                alert("Error al guardar la lista de tareas.");
             }
         }
 
-
-        // --- Funciones de Lógica de la App (Modifican array local y llaman a saveTodos) ---
-
-        // Calcula el progreso de una tarea principal basado en sus sub-tareas
         function calculateProgress(subtasks) {
-            if (!subtasks || subtasks.length === 0) {
-                return 0; // 0% si no hay sub-tareas
-            }
+            if (!subtasks || subtasks.length === 0) return 0;
             const completed = subtasks.filter(sub => sub.completed).length;
             return (completed / subtasks.length) * 100;
         }
-
-        // --- Functions for Creating DOM Elements ---
-        // Centralize the creation of recurring elements for consistency
 
         function createMainTaskHeader(mainTask, mainIndex) {
             const mainTaskHeader = document.createElement('div');
@@ -984,9 +753,8 @@
 
             const mainCheckbox = document.createElement('input');
             mainCheckbox.type = 'checkbox';
-            mainCheckbox.classList.add('custom-checkbox'); // Aplicar clase de estilo custom
+            mainCheckbox.classList.add('custom-checkbox');
             mainCheckbox.checked = mainTask.completed;
-            // El listener ahora solo llama a toggleMainCompletion, que modifica el array local y guarda
             mainCheckbox.addEventListener('change', (event) => {
                 toggleMainCompletion(mainIndex, event.target.checked);
             });
@@ -995,64 +763,80 @@
             priorityLabel.classList.add('priority-color-label');
             priorityLabel.dataset.color = mainTask.priorityColor;
             priorityLabel.title = `Prioridad: ${mainTask.priorityColor.charAt(0).toUpperCase() + mainTask.priorityColor.slice(1)}`;
-            // El listener ahora solo llama a cyclePriorityColor, que modifica el array local y guarda
             priorityLabel.addEventListener('click', () => {
-                 // Solo permitir cambiar prioridad si la tarea no está completada
                  if (!mainTask.completed) {
                     cyclePriorityColor(mainIndex);
                  }
             });
 
-            // --- Icono de Link (visible solo si hay link y el input no está visible) ---
-            const linkIcon = document.createElement('i');
-            linkIcon.classList.add('fas', 'fa-link', 'link-icon');
-            // El título se actualizará en renderTodos para mostrar el link
-            linkIcon.title = mainTask.link || 'No link';
-            // La visibilidad inicial se controla por CSS y la clase show-link-ui en renderTodos
-            // linkIcon.style.display = 'none'; // Esto se maneja mejor con CSS ahora
-
-            if (mainTask.link) {
-                 linkIcon.addEventListener('click', () => {
-                     // Solo abrir link si la tarea no está completada
-                     if (!mainTask.completed && mainTask.link) {
-                         // Asegurarse de que la URL tiene un protocolo para abrir correctamente
-                         const url = mainTask.link.startsWith('http://') || mainTask.link.startsWith('https://')
-                                     ? mainTask.link
-                                     : `http://${mainTask.link}`; // Añadir http:// si falta
-                         window.open(url, '_blank'); // Abrir en nueva pestaña
-                     }
-                 });
-            }
-
-
             const mainTaskSpan = document.createElement('span');
             mainTaskSpan.textContent = mainTask.text;
 
-            // --- Input de Fecha ---
+            // --- BOTÓN DE ENLACE (NUEVO) ---
+            const linkButton = document.createElement('button');
+            linkButton.classList.add('app-button', 'link-button');
+            linkButton.innerHTML = '<i class="fas fa-link"></i>';
+            linkButton.setAttribute('aria-label', 'Gestionar enlace');
+
+            if (mainTask.linkUrl) {
+                linkButton.classList.add('link-on');
+                linkButton.title = `Abrir enlace: ${mainTask.linkUrl}`;
+            } else {
+                linkButton.classList.add('link-off');
+                linkButton.title = 'Añadir enlace';
+            }
+
+            linkButton.addEventListener('click', () => {
+                const todos = loadTodos();
+                const currentTask = todos[mainIndex];
+
+                if (currentTask.completed) {
+                    if (currentTask.linkUrl) {
+                        window.open(currentTask.linkUrl, '_blank');
+                    }
+                    return;
+                }
+
+                if (currentTask.linkUrl) {
+                    window.open(currentTask.linkUrl, '_blank');
+                } else {
+                    const newUrl = prompt("Introduce la URL para esta tarea (ej: https://ejemplo.com):", "");
+                    if (newUrl === null) return;
+
+                    if (newUrl.trim() !== "") {
+                        let finalUrl = newUrl.trim();
+                        if (!finalUrl.toLowerCase().startsWith('http://') && !finalUrl.toLowerCase().startsWith('https://')) {
+                            finalUrl = 'https://' + finalUrl;
+                        }
+                        currentTask.linkUrl = finalUrl;
+                    } else {
+                        currentTask.linkUrl = null;
+                    }
+                    
+                    saveTodos(todos).then(() => {
+                        renderTodos(todos);
+                    }).catch(e => console.error("Error guardando URL de enlace:", e));
+                }
+            });
+            // --- FIN BOTÓN DE ENLACE ---
+
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
             dateInput.classList.add('task-date-input');
-            dateInput.value = mainTask.date || ''; // Usar el valor de la tarea o cadena vacía si es null
-            dateInput.title = 'Establecer fecha'; // Tooltip
-            // Listener para guardar la fecha cuando cambia
+            dateInput.value = mainTask.date || '';
+            dateInput.title = 'Establecer fecha';
             dateInput.addEventListener('change', (event) => {
-                 // Solo permitir cambiar fecha si la tarea no está completada
                  if (!mainTask.completed) {
                     updateTaskDate(mainIndex, event.target.value);
                  } else {
-                     // Si estaba completada, revertir el cambio y notificar
-                     event.target.value = mainTask.date || ''; // Revertir al valor guardado
-                     alert("No puedes cambiar la fecha de una tarea completada.");
+                     event.target.value = mainTask.date || '';
                  }
             });
 
-
             const deleteMainButton = document.createElement('button');
-            deleteMainButton.classList.add('app-button', 'delete-button'); // Aplicar clases de estilo
-            deleteMainButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Icono de papelera
+            deleteMainButton.classList.add('app-button', 'delete-button');
+            deleteMainButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
             deleteMainButton.setAttribute('aria-label', 'Eliminar tarea');
-
-            // El listener ahora solo llama a deleteTodo, que modifica el array local y guarda
             deleteMainButton.addEventListener('click', () => {
                  if ((mainTask.subtasks && mainTask.subtasks.length > 0) || mainTask.completed) {
                      if (!confirm(`¿Estás seguro de eliminar la tarea "${mainTask.text}"?`)) {
@@ -1064,9 +848,9 @@
 
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
-            mainTaskHeader.appendChild(linkIcon); // Añadir el icono de link
             mainTaskHeader.appendChild(mainTaskSpan);
-            mainTaskHeader.appendChild(dateInput); // Añadir el input de fecha
+            mainTaskHeader.appendChild(linkButton); // AÑADIDO EL BOTÓN DE ENLACE
+            mainTaskHeader.appendChild(dateInput);
             mainTaskHeader.appendChild(deleteMainButton);
 
             return mainTaskHeader;
@@ -1075,10 +859,8 @@
         function createProgressBar(mainTask) {
              const progressContainer = document.createElement('div');
              progressContainer.classList.add('progress-container');
-
              const progressBar = document.createElement('div');
              progressBar.classList.add('progress-bar');
-
              let progressPercentage = 0;
              if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                  progressPercentage = calculateProgress(mainTask.subtasks);
@@ -1086,449 +868,228 @@
                  progressPercentage = 100;
              }
              progressBar.style.width = `${progressPercentage}%`;
-
              progressContainer.appendChild(progressBar);
-
              return progressContainer;
         }
 
-        // NEW: Function to create the Add/Edit Link toggle button
-        function createLinkToggle(mainTask, mainIndex) {
-             const linkToggle = document.createElement('button');
-             linkToggle.classList.add('app-button', 'add-link-toggle'); // Usar clase add-link-toggle
-             linkToggle.setAttribute('aria-label', mainTask.link ? 'Editar link' : 'Agregar link');
-
-             if (mainTask.link) {
-                 linkToggle.innerHTML = '<i class="fas fa-edit"></i> Editar Link'; // Icono y texto para editar
-             } else {
-                 linkToggle.innerHTML = '<i class="fas fa-plus"></i> Agregar Link'; // Icono y texto para agregar
-             }
-
-             linkToggle.addEventListener('click', () => {
-                 // Solo permitir editar/agregar link si la tarea no está completada
-                 const todos = loadTodos(); // Cargar estado actual para verificar
-                 if (mainIndex >= 0 && mainIndex < todos.length && !todos[mainIndex].completed) {
-                    toggleLinkInput(mainIndex, true); // Mostrar el input de link
-                 } else if (mainIndex >= 0 && mainIndex < todos.length && todos[mainIndex].completed) {
-                     alert("No puedes editar el link de una tarea completada.");
-                 } else {
-                     console.error("Índice de tarea principal inválido para toggleLinkInput:", mainIndex);
-                 }
-             });
-
-             return linkToggle;
-        }
-
-
-        function createAddSubtasksToggle(mainIndex) { // Recibe el índice
+        function createAddSubtasksToggle(mainIndex) {
              const addSubtasksToggle = document.createElement('button');
-             // Mantener app-button y add-button para estilos base y hover, pero sobreescribir en CSS
              addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle');
-             // Cambiar el contenido a solo el icono
-             addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i>'; // Solo icono
-             addSubtasksToggle.setAttribute('aria-label', 'Agregar sub-tarea'); // Ajustar aria-label
-
-             // Listener para alternar visibilidad del INPUT
+             addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i>';
+             addSubtasksToggle.setAttribute('aria-label', 'Agregar sub-tarea');
              addSubtasksToggle.addEventListener('click', () => {
-                 // Solo permitir agregar sub-tareas si la tarea no está completada
-                 const todos = loadTodos(); // Cargar estado actual para verificar
-                 if (mainIndex >= 0 && mainIndex < todos.length && !todos[mainIndex].completed) {
-                     toggleSubtaskSection(mainIndex, true); // Mostrar el input de sub-tarea
-                 } else if (mainIndex >= 0 && mainIndex < todos.length && todos[mainIndex].completed) {
-                     alert("No puedes agregar sub-tareas a una tarea completada.");
+                 const todos = loadTodos();
+                 if (mainIndex >= 0 && mainIndex < todos.length) {
+                     const mainTask = todos[mainIndex];
+                     const currentState = mainTask.showSubtaskUI;
+                     const newState = !currentState;
+                     mainTask.showSubtaskUI = newState;
+                     if (newState && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
+                         mainTask.subtasks = [];
+                     }
+                     saveTodos(todos).then(() => {
+                         renderTodos(todos);
+                         if (newState) {
+                              const listItemElement = todoListContainer.children[mainIndex];
+                              if (listItemElement) {
+                                  const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                                  if (inputElement) {
+                                      setTimeout(() => { inputElement.focus(); }, 50);
+                                  }
+                              }
+                         }
+                     }).catch(e => console.error("Error guardando toggleSubtaskSection:", e));
                  } else {
-                     console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainIndex);
+                      console.error("Índice de tarea principal inválido para alternar sección de sub-tareas:", mainIndex);
                  }
              });
-
              return addSubtasksToggle;
         }
 
-        function createSubtaskInputContainer(mainIndex) { // Recibe el índice
+        function createSubtasksList(mainTask, mainIndex) {
+            const subtasksList = document.createElement('ul');
+            subtasksList.classList.add('subtasks-list');
+            if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                mainTask.subtasks.forEach((subtask, subIndex) => {
+                    const subtaskItem = document.createElement('li');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.classList.add('custom-checkbox');
+                    checkbox.checked = subtask.completed;
+                    checkbox.addEventListener('change', () => {
+                        toggleSubtaskCompletion(mainIndex, subIndex);
+                    });
+                    const subtaskSpan = document.createElement('span');
+                    subtaskSpan.textContent = subtask.text;
+                    const moveUpButton = document.createElement('button');
+                    moveUpButton.classList.add('app-button', 'subtask-move-button');
+                    moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                    moveUpButton.setAttribute('aria-label', 'Mover sub-tarea arriba');
+                    if (subIndex === 0) moveUpButton.disabled = true;
+                    moveUpButton.addEventListener('click', () => moveSubtaskUp(mainIndex, subIndex));
+                    const moveDownButton = document.createElement('button');
+                    moveDownButton.classList.add('app-button', 'subtask-move-button');
+                    moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
+                    moveDownButton.setAttribute('aria-label', 'Mover sub-tarea abajo');
+                    if (subIndex === mainTask.subtasks.length - 1) moveDownButton.disabled = true;
+                    moveDownButton.addEventListener('click', () => moveSubtaskDown(mainIndex, subIndex));
+                    const deleteSubtaskButton = document.createElement('button');
+                    deleteSubtaskButton.classList.add('app-button', 'delete-button');
+                    deleteSubtaskButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    deleteSubtaskButton.setAttribute('aria-label', 'Eliminar sub-tarea');
+                    deleteSubtaskButton.addEventListener('click', () => deleteSubtask(mainIndex, subIndex));
+                    subtaskItem.appendChild(checkbox);
+                    subtaskItem.appendChild(subtaskSpan);
+                    subtaskItem.appendChild(moveUpButton);
+                    subtaskItem.appendChild(moveDownButton);
+                    subtaskItem.appendChild(deleteSubtaskButton);
+                    subtasksList.appendChild(subtaskItem);
+                });
+            }
+            return subtasksList;
+        }
+
+        function createSubtaskInputContainer(mainIndex) {
              const subtaskInputContainer = document.createElement('div');
              subtaskInputContainer.classList.add('subtask-input-container');
-
              const subtaskInput = document.createElement('input');
              subtaskInput.type = 'text';
              subtaskInput.placeholder = 'Agregar nueva sub-tarea...';
-
              const addSubtaskButton = document.createElement('button');
-             addSubtaskButton.classList.add('app-button', 'add-button'); // Aplicar clases de estilo
-             addSubtaskButton.innerHTML = '<i class="fas fa-plus"></i>'; // Icono de más
+             addSubtaskButton.classList.add('app-button', 'add-button');
+             addSubtaskButton.innerHTML = '<i class="fas fa-plus"></i>';
              addSubtaskButton.setAttribute('aria-label', 'Agregar sub-tarea');
-
-             // El listener ahora solo llama a addSubtask, que modifica el array local y guarda
-             addSubtaskButton.addEventListener('click', () => {
-                 addSubtask(mainIndex, subtaskInput);
-             });
+             addSubtaskButton.addEventListener('click', () => addSubtask(mainIndex, subtaskInput));
               subtaskInput.addEventListener('keypress', (event) => {
                   if (event.key === 'Enter') {
                       event.preventDefault();
                       addSubtaskButton.click();
                   }
               });
-
              subtaskInputContainer.appendChild(subtaskInput);
              subtaskInputContainer.appendChild(addSubtaskButton);
-
              return subtaskInputContainer;
         }
 
-        // NEW: Function to create the Link Input Container
-        function createLinkInputContainer(mainTask, mainIndex) { // Recibe la tarea y el índice
-             const linkInputContainer = document.createElement('div');
-             linkInputContainer.classList.add('link-input-container');
-
-             const linkInput = document.createElement('input');
-             linkInput.type = 'url'; // Usar tipo url para validación básica del navegador
-             linkInput.placeholder = 'Pegar o escribir URL aquí...';
-             linkInput.value = mainTask.link || ''; // Pre-llenar si ya existe un link
-
-             const saveLinkButton = document.createElement('button');
-             saveLinkButton.classList.add('app-button'); // Usar estilo base
-             saveLinkButton.innerHTML = '<i class="fas fa-check"></i> Guardar'; // Icono de check y texto
-             saveLinkButton.setAttribute('aria-label', 'Guardar link');
-
-             saveLinkButton.addEventListener('click', () => {
-                 updateTaskLink(mainIndex, linkInput.value.trim()); // Guardar el valor del input
-             });
-             linkInput.addEventListener('keypress', (event) => {
-                 if (event.key === 'Enter') {
-                     event.preventDefault();
-                     saveLinkButton.click(); // Simular clic en guardar al presionar Enter
-                 }
-             });
-
-
-             linkInputContainer.appendChild(linkInput);
-             linkInputContainer.appendChild(saveLinkButton);
-
-             return linkInputContainer;
-        }
-
-
-        // Función para renderizar (mostrar) la lista completa de tareas en el HTML
-        // Esta función recibe el array que debe renderizar
         function renderTodos(todosArray) {
             if (!todoListContainer) {
                  console.error("Error: todoListContainer no encontrado.");
                  return;
             }
-            todoListContainer.innerHTML = ''; // Limpiar la lista actual
-
+            todoListContainer.innerHTML = '';
             if (todosArray.length === 0) {
                 if (todoInput) todoInput.value = '';
                 return;
             }
-
-            // Usamos el array tal cual está (ya sea el cargado, el modificado, o el ordenado por el botón)
             todosArray.forEach((mainTask, mainIndex) => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('todo-item');
-
-                // Añadir clases CSS según el estado
-                if (mainTask.completed) {
-                    listItem.classList.add('completed');
-                }
-                 // Añadir la clase para controlar la visibilidad del INPUT de sub-tareas
-                 if (mainTask.showSubtaskUI) {
-                    listItem.classList.add('show-subtask-ui');
-                 }
-                 // NEW: Añadir la clase para controlar la visibilidad del INPUT de link
-                 if (mainTask.showLinkUI) {
-                     listItem.classList.add('show-link-ui');
-                 }
-
-
-                // Agregar los elementos a la tarea principal (li) en el orden deseado
-                // Pasamos el índice local a las funciones de creación de elementos interactivos
+                if (mainTask.completed) listItem.classList.add('completed');
+                if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
                 listItem.appendChild(createMainTaskHeader(mainTask, mainIndex));
                 listItem.appendChild(createProgressBar(mainTask));
-
-                // NEW: Añadir el toggle de link y el input container de link
-                listItem.appendChild(createLinkToggle(mainTask, mainIndex)); // Pasar tarea y índice
-                listItem.appendChild(createLinkInputContainer(mainTask, mainIndex)); // Pasar tarea y índice
-
-                listItem.appendChild(createAddSubtasksToggle(mainIndex)); // Pasar índice
-                listItem.appendChild(createSubtasksList(mainTask, mainIndex)); // Pasar tarea y índice
-                listItem.appendChild(createSubtaskInputContainer(mainIndex)); // Pasar índice
-
-
-                // Agregar el elemento de lista principal a la lista principal en el HTML
+                listItem.appendChild(createAddSubtasksToggle(mainIndex));
+                listItem.appendChild(createSubtasksList(mainTask, mainIndex));
+                listItem.appendChild(createSubtaskInputContainer(mainIndex));
                 todoListContainer.appendChild(listItem);
-
-                 // NEW: La visibilidad del icono de link ahora se controla completamente por CSS
-                 // usando la clase .show-link-ui y el selector de atributo [title]
-                 // No necesitamos JS aquí para ocultarlo/mostrarlo inicialmente.
             });
-             // Limpiar el input de agregar tarea principal después de renderizar la lista
              if (todoInput) todoInput.value = '';
         }
 
-
-         // --- Funciones de Manipulación de Datos (Modifican array local y llaman a saveTodos) ---
-
-        // Función para mostrar/ocultar la sección de sub-tareas para una tarea principal
-        // Esta función ahora modifica el array local y llama a saveTodos
-        function toggleSubtaskSection(mainTaskIndex, show) {
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                const mainTask = todos[mainTaskIndex];
-                mainTask.showSubtaskUI = show;
-                // Si se muestra la sección, inicializa el array de sub-tareas si es null/undefined
-                if (show && (!Array.isArray(mainTask.subtasks) || mainTask.subtasks.length === 0)) {
-                     mainTask.subtasks = []; // Asegurarse de que es un array vacío si se muestra y no tiene subs
-                }
-
-                // NEW: Si se muestra la sección de sub-tareas, ocultar la de link
-                if (show) {
-                    mainTask.showLinkUI = false;
-                }
-
-
-                saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
-                     renderTodos(todos); // Renderiza el estado actual
-                     // Si se acaba de mostrar el input, intentar enfocarlo
-                     if (show) {
-                          const listItemElement = todoListContainer.children[mainIndex];
-                          if (listItemElement) {
-                              const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                              if (inputElement) {
-                                  setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
-                                  // Mover el cursor al final del texto si ya había algo
-                                  const len = inputElement.value.length;
-                                  inputElement.setSelectionRange(len, len);
-                              }
-                          }
-                     }
-                 })
-                 .catch(e => console.error("Error guardando toggleSubtaskSection:", e)); // Capturar error de guardado
-            } else {
-                 console.error("Índice de tarea principal inválido para toggleSubtaskSection:", mainTaskIndex);
-            }
-        }
-
-        // NEW: Función para mostrar/ocultar la sección de input de link
-        function toggleLinkInput(mainTaskIndex, show) {
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                 const mainTask = todos[mainTaskIndex];
-                 mainTask.showLinkUI = show;
-
-                 // NEW: Si se muestra la sección de link, ocultar la de sub-tareas
-                 if (show) {
-                     mainTask.showSubtaskUI = false;
-                 }
-
-                 saveTodos(todos).then(() => { // Esperar a que guarde online antes de enfocar
-                     renderTodos(todos); // Renderiza el estado actual
-                     // Si se acaba de mostrar el input, intentar enfocarlo
-                     if (show) {
-                          const listItemElement = todoListContainer.children[mainIndex];
-                          if (listItemElement) {
-                              const inputElement = listItemElement.querySelector('.link-input-container input[type="url"]');
-                              if (inputElement) {
-                                  setTimeout(() => { inputElement.focus(); }, 50); // Pequeño retraso
-                                   // Mover el cursor al final del texto si ya había algo
-                                  const len = inputElement.value.length;
-                                  inputElement.setSelectionRange(len, len);
-                              }
-                          }
-                     }
-                 })
-                 .catch(e => console.error("Error guardando toggleLinkInput:", e)); // Capturar error de guardado
-             } else {
-                  console.error("Índice de tarea principal inválido para toggleLinkInput:", mainTaskIndex);
-             }
-        }
-
-        // NEW: Función para actualizar el link de una tarea principal
-        function updateTaskLink(mainTaskIndex, newLinkValue) {
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-            if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                // Guardar null si el valor está vacío (el usuario borró el link)
-                todos[mainTaskIndex].link = newLinkValue || null;
-                // Ocultar el input después de guardar
-                todos[mainTaskIndex].showLinkUI = false;
-
-                saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
-                 })
-                 .catch(e => console.error("Error guardando updateTaskLink:", e)); // Capturar error de guardado
-            } else {
-                 console.error("Índice de tarea principal inválido para actualizar link:", mainTaskIndex);
-            }
-        }
-
-
-        // Función para ciclar el color de prioridad de una tarea principal
         function cyclePriorityColor(mainTaskIndex) {
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
+             const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const currentColors = PRIORITY_COLORS;
-                 // Asegurar que priorityColor es un string válido antes de buscar el índice
-                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string'
-                                      ? todos[mainTaskIndex].priorityColor
-                                      : 'none'; // Usar 'none' si es null, undefined o no string
+                 const currentColor = typeof todos[mainTaskIndex].priorityColor === 'string' ? todos[mainTaskIndex].priorityColor : 'none';
                  const currentIndex = currentColors.indexOf(currentColor);
-                 const nextIndex = (currentIndex + 1) % currentColors.length; // Ciclar al siguiente
+                 const nextIndex = (currentIndex + 1) % currentColors.length;
                  todos[mainTaskIndex].priorityColor = currentColors[nextIndex];
-
-                 // Ya NO ordenamos la lista después de cambiar la prioridad
-                 // todos.sort(...)
-
-                 saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual (sin reordenar)
-                 })
-                 .catch(e => console.error("Error guardando cyclePriorityColor:", e)); // Capturar error de guardado
+                 saveTodos(todos).then(() => renderTodos(todos))
+                 .catch(e => console.error("Error guardando cyclePriorityColor:", e));
              } else {
                   console.error("Índice de tarea principal inválido para ciclar color:", mainTaskIndex);
              }
         }
 
-        // Función para actualizar la fecha de una tarea principal
         function updateTaskDate(mainTaskIndex, newDateValue) {
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
+            const todos = loadTodos();
             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
-                // Guardar null si el valor está vacío (el usuario borró la fecha)
                 todos[mainTaskIndex].date = newDateValue || null;
-
-                 // Ya NO ordenamos la lista después de cambiar la fecha
-                 // todos.sort(...)
-
-                saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual (sin reordenar)
-                 })
-                 .catch(e => console.error("Error guardando updateTaskDate:", e)); // Capturar error de guardado
+                saveTodos(todos).then(() => renderTodos(todos))
+                 .catch(e => console.error("Error guardando updateTaskDate:", e));
             } else {
                  console.error("Índice de tarea principal inválido para actualizar fecha:", mainTaskIndex);
             }
         }
 
-
-        // Función para agregar una nueva tarea principal
         function addTodo() {
             const newTodoText = todoInput.value.trim();
-
             if (newTodoText === '') {
                 alert('Por favor, ingresa el nombre de la tarea.');
                 return;
             }
-
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+            const todos = loadTodos();
             todos.push({
-                // No necesitamos firebaseId para la lógica JS en este modelo, pero lo añadimos si quieres mantenerlo en los datos
-                // firebaseId: null, // Firebase asignará uno al guardar online
                 text: newTodoText,
                 completed: false,
-                subtasks: [], // Siempre array vacío inicialmente
-                showSubtaskUI: false, // Sección de sub-tareas oculta inicialmente
-                showLinkUI: false, // NEW: Sección de link oculta inicialmente
-                priorityColor: 'none', // Color de prioridad por defecto
-                date: null, // Fecha inicialmente nula
-                link: null, // NEW: Link inicialmente nulo
-                order: Date.now() // Usar timestamp para el orden inicial (desempate)
+                subtasks: [],
+                showSubtaskUI: false,
+                priorityColor: 'none',
+                date: null,
+                linkUrl: null, // MODIFICADO
+                order: Date.now()
             });
-
-            // Ya NO ordenamos la lista inmediatamente después de añadir
-            // todos.sort(...)
-
-            saveTodos(todos).then(() => { // Esperar a que guarde online
-                 renderTodos(todos); // Renderiza el estado actual (la nueva tarea estará al final del array local)
-            })
-            .catch(e => console.error("Error guardando addTodo:", e)); // Capturar error de guardado
-            if (todoInput) todoInput.value = ''; // Limpiar input inmediatamente
+            saveTodos(todos).then(() => renderTodos(todos))
+            .catch(e => console.error("Error guardando addTodo:", e));
+            if (todoInput) todoInput.value = '';
         }
 
-        // Función para agregar una sub-tarea a una tarea principal específica
         function addSubtask(mainTaskIndex, subtaskInput) {
              const newSubtaskText = subtaskInput.value.trim();
-
              if (newSubtaskText === '') {
                  alert('Por favor, ingresa el nombre de la sub-tarea.');
                  return;
              }
-
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+             const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const mainTask = todos[mainTaskIndex];
-
-                 // Asegurarse de que subtasks es un array antes de pushear
-                 if (!Array.isArray(mainTask.subtasks)) {
-                     mainTask.subtasks = [];
-                 }
-
-                 mainTask.subtasks.push({
-                     text: newSubtaskText,
-                     completed: false
-                 });
-
-                 // Al añadir una sub-tarea, la tarea principal ya no puede considerarse "completada"
-                 // si ahora tiene sub-tareas pendientes. Desmarcamos si estaba marcada.
-                 if (mainTask.completed) {
-                     mainTask.completed = false;
-                 }
-
-                 // Ocultar el input de sub-tarea después de añadir
+                 if (!Array.isArray(mainTask.subtasks)) mainTask.subtasks = [];
+                 mainTask.subtasks.push({ text: newSubtaskText, completed: false });
+                 if (mainTask.completed) mainTask.completed = false;
                  mainTask.showSubtaskUI = false;
-
-                 // No reordenar al añadir sub-tarea, solo guardar y renderizar
-                 saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
-                 })
-                 .catch(e => console.error("Error guardando addSubtask:", e)); // Capturar error de guardado
-                 subtaskInput.value = ''; // Limpiar input inmediatamente
-
+                 saveTodos(todos).then(() => renderTodos(todos))
+                 .catch(e => console.error("Error guardando addSubtask:", e));
+                 subtaskInput.value = '';
              } else {
                  console.error("Índice de tarea principal inválido para agregar sub-tarea:", mainTaskIndex);
              }
         }
 
-        // Función para eliminar una tarea principal
         function deleteTodo(indexToDelete) {
-            const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+            const todos = loadTodos();
             if (indexToDelete >= 0 && indexToDelete < todos.length) {
                 todos.splice(indexToDelete, 1);
-
-                // No reordenar al eliminar tarea principal, solo guardar y renderizar
-                saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
-                })
-                .catch(e => console.error("Error guardando deleteTodo:", e)); // Capturar error de guardado
+                saveTodos(todos).then(() => renderTodos(todos))
+                .catch(e => console.error("Error guardando deleteTodo:", e));
             } else {
                 console.error("Índice de tarea principal a eliminar fuera de rango:", indexToDelete);
             }
         }
 
-        // Función para eliminar una sub-tarea
         function deleteSubtask(mainTaskIndex, subtaskIndexToDelete) {
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+             const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const mainTask = todos[mainTaskIndex];
                  if (Array.isArray(mainTask.subtasks) && subtaskIndexToDelete >= 0 && subtaskIndexToDelete < mainTask.subtasks.length) {
                      mainTask.subtasks.splice(subtaskIndexToDelete, 1);
-
-                     // Después de eliminar, recalcular el estado de completado de la tarea principal
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-
                      if (mainTask.subtasks.length === 0) {
-                         // Si no quedan sub-tareas, desmarcar la principal
                          mainTask.completed = false;
-                         // mainTask.showSubtaskUI = false; // Ya no ocultamos el input si se borra la última sub-tarea
                      } else {
-                         // Si aún quedan sub-tareas, actualizar el estado principal si es necesario
                          mainTask.completed = allSubtasksCompleted;
                      }
-
-                     // No reordenar al eliminar sub-tarea, solo guardar y renderizar
-                     saveTodos(todos).then(() => { // Esperar a que guarde online
-                         renderTodos(todos); // Renderiza el estado actual
-                     })
-                     .catch(e => console.error("Error guardando deleteSubtask:", e)); // Capturar error de guardado
+                     saveTodos(todos).then(() => renderTodos(todos))
+                     .catch(e => console.error("Error guardando deleteSubtask:", e));
                  } else {
                      console.error("Índice de sub-tarea a eliminar fuera de rango:", subtaskIndexToDelete);
                  }
@@ -1537,29 +1098,18 @@
              }
         }
 
-        // Función para cambiar el estado de completado de una sub-tarea
         function toggleSubtaskCompletion(mainTaskIndex, subtaskIndexToToggle) {
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+             const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const mainTask = todos[mainTaskIndex];
                   if (Array.isArray(mainTask.subtasks) && subtaskIndexToToggle >= 0 && subtaskIndexToToggle < mainTask.subtasks.length) {
                      mainTask.subtasks[subtaskIndexToToggle].completed = !mainTask.subtasks[subtaskIndexToToggle].completed;
-
-                     // Recalcular si todas las sub-tareas están completadas
                      const allSubtasksCompleted = mainTask.subtasks.length > 0 && mainTask.subtasks.every(sub => sub.completed);
-
-                     // Auto-marca/desmarca la tarea principal si HAY sub-tareas
                      if (mainTask.subtasks.length > 0) {
                           mainTask.completed = allSubtasksCompleted;
                      }
-                     // Si no tiene sub-tareas, el checkbox principal se controla solo manualmente.
-
-                     // No reordenar al cambiar estado sub-tarea, solo guardar y renderizar
-                     saveTodos(todos).then(() => { // Esperar a que guarde online
-                         renderTodos(todos); // Renderiza el estado actual
-                     })
-                     .catch(e => console.error("Error guardando toggleSubtaskCompletion:", e)); // Capturar error de guardado
+                     saveTodos(todos).then(() => renderTodos(todos))
+                     .catch(e => console.error("Error guardando toggleSubtaskCompletion:", e));
                  } else {
                      console.error("Índice de sub-tarea a cambiar estado fuera de rango:", subtaskIndexToToggle);
                  }
@@ -1568,126 +1118,69 @@
              }
         }
 
-         // Función para cambiar el estado de completado de la TAREA PRINCIPAL
         function toggleMainCompletion(mainTaskIndex, isChecked) {
-             const todos = loadTodos(); // Cargar estado actual (desde LS)
-
+             const todos = loadTodos();
              if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                  const mainTask = todos[mainTaskIndex];
-
                  mainTask.completed = isChecked;
-
-                 // Si la tarea principal tiene sub-tareas, sincronizar el estado de sus sub-tareas
                  if (Array.isArray(mainTask.subtasks) && mainTask.subtasks.length > 0) {
                      mainTask.subtasks.forEach(subtask => {
                          subtask.completed = isChecked;
                      });
                  }
-                 // Si no tiene sub-tareas, solo se actualiza el estado principal.
-
-                 // No reordenar al cambiar estado principal, solo guardar y renderizar
-                 saveTodos(todos).then(() => { // Esperar a que guarde online
-                     renderTodos(todos); // Renderiza el estado actual
-                 })
-                 .catch(e => console.error("Error guardando toggleMainCompletion:", e)); // Capturar error de guardado
+                 saveTodos(todos).then(() => renderTodos(todos))
+                 .catch(e => console.error("Error guardando toggleMainCompletion:", e));
              } else {
                   console.error("Índice de tarea principal inválido para cambiar estado:", mainTaskIndex);
              }
         }
 
-        // --- NUEVAS Funciones para Mover Sub-tareas ---
-
         function moveSubtaskUp(mainTaskIndex, subtaskIndex) {
-            const todos = loadTodos(); // Cargar estado actual
+            const todos = loadTodos();
             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                 const mainTask = todos[mainTaskIndex];
                 if (Array.isArray(mainTask.subtasks) && subtaskIndex > 0 && subtaskIndex < mainTask.subtasks.length) {
-                    // Intercambiar la sub-tarea actual con la anterior
                     [mainTask.subtasks[subtaskIndex - 1], mainTask.subtasks[subtaskIndex]] =
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex - 1]];
-
-                    saveTodos(todos).then(() => {
-                        renderTodos(todos); // Renderizar con el nuevo orden
-                    }).catch(e => console.error("Error guardando moveSubtaskUp:", e));
-                } else {
-                    console.warn("No se puede mover la sub-tarea arriba (índice inválido o ya es la primera).");
+                    saveTodos(todos).then(() => renderTodos(todos))
+                    .catch(e => console.error("Error guardando moveSubtaskUp:", e));
                 }
-            } else {
-                console.error("Índice de tarea principal inválido para mover sub-tarea arriba:", mainTaskIndex);
             }
         }
 
         function moveSubtaskDown(mainTaskIndex, subtaskIndex) {
-            const todos = loadTodos(); // Cargar estado actual
+            const todos = loadTodos();
             if (mainTaskIndex >= 0 && mainTaskIndex < todos.length) {
                 const mainTask = todos[mainTaskIndex];
                 if (Array.isArray(mainTask.subtasks) && subtaskIndex >= 0 && subtaskIndex < mainTask.subtasks.length - 1) {
-                    // Intercambiar la sub-tarea actual con la siguiente
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[subtaskIndex + 1]] =
                     [mainTask.subtasks[subtaskIndex + 1], mainTask.subtasks[subtaskIndex]];
-
-                    saveTodos(todos).then(() => {
-                        renderTodos(todos); // Renderizar con el nuevo orden
-                    }).catch(e => console.error("Error guardando moveSubtaskDown:", e));
-                } else {
-                     console.warn("No se puede mover la sub-tarea abajo (índice inválido o ya es la última).");
+                    saveTodos(todos).then(() => renderTodos(todos))
+                    .catch(e => console.error("Error guardando moveSubtaskDown:", e));
                 }
-            } else {
-                console.error("Índice de tarea principal inválido para mover sub-tarea abajo:", mainTaskIndex);
             }
         }
 
-
-        // --- Función de Reordenar MANUALMENTE ---
-        // Esta función ahora es la única forma de reordenar explícitamente
         function performManualSort() {
-             const todos = loadTodos(); // Cargar el estado actual (desde LS)
-
-             // Aplicar la lógica de ordenación localmente
+             const todos = loadTodos();
              todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
-
-                 // 1. Ordenar por Prioridad (rojo, naranja, amarillo, verde, ninguno)
-                 if (rankA !== rankB) {
-                     return rankA - rankB;
-                 }
-
-                 // Si las prioridades son iguales:
-                 // 2. Ordenar por Fecha (tareas con fecha antes, luego cronológicamente)
-                 // Usar Infinity para fechas nulas o inválidas para que vayan al final de las tareas con fecha
+                 if (rankA !== rankB) return rankA - rankB;
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
-                 if (dateA !== dateB) {
-                     return dateA - dateB; // Ordenar por fecha ascendente (más antigua primero)
-                 }
-
-                 // Si prioridad y fecha son iguales:
-                 // 3. Ordenar por el campo 'order' (para mantener el orden manual o de creación)
-                 // Usamos el timestamp de creación/último reordenamiento como desempate final
-                 const orderA = a.order || 0; // Usar 0 si order no existe (para data vieja)
+                 if (dateA !== dateB) return dateA - dateB;
+                 const orderA = a.order || 0;
                  const orderB = b.order || 0;
-                 return orderA - orderB; // Ordenar por 'order' ascendente
+                 return orderA - orderB;
              });
-
-             // Al reordenar manualmente, actualizamos el campo 'order' en el array local
-             // para que el orden se mantenga en futuras cargas desde LS o Firestore
-             // Esto asegura que si dos tareas tienen la misma prioridad y fecha,
-             // mantengan el orden que tenían después de la última ordenación manual.
              todos.forEach((task, index) => {
-                 task.order = Date.now() + index; // Asignar un nuevo timestamp + índice
+                 task.order = Date.now() + index;
              });
-
-
-             saveTodos(todos).then(() => { // Esperar a que guarde online
-                 renderTodos(todos); // Renderiza la lista en el nuevo orden
-                 // Eliminado: alert("Tareas reordenadas.");
-             })
-             .catch(e => console.error("Error guardando performManualSort:", e)); // Capturar error de guardado
+             saveTodos(todos).then(() => renderTodos(todos))
+             .catch(e => console.error("Error guardando performManualSort:", e));
         }
 
-
-        // --- Dark Mode Toggle Functionality ---
         function enableDarkMode() {
             if (body) body.classList.add('dark-mode');
             localStorage.setItem('theme', 'dark');
@@ -1695,7 +1188,7 @@
                 const icon = darkModeToggle.querySelector('i');
                 if (icon) {
                     icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun'); // Icono de sol para modo claro
+                    icon.classList.add('fa-sun');
                 }
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
             }
@@ -1708,7 +1201,7 @@
                  const icon = darkModeToggle.querySelector('i');
                  if (icon) {
                      icon.classList.remove('fa-sun');
-                     icon.classList.add('fa-moon'); // Icono de luna para modo oscuro
+                     icon.classList.add('fa-moon');
                  }
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
             }
@@ -1722,66 +1215,41 @@
             }
         }
 
-
-        // --- Inicialización y Event Listeners Globales ---
-
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("DOM cargado. Inicializando...");
-
-            // Obtener referencias a los elementos del DOM *después* de que el DOM esté cargado
             todoInput = document.getElementById('new-todo-input');
             addTodoButton = document.getElementById('add-todo-button');
             todoListContainer = document.getElementById('todo-list');
-            reorderButton = document.getElementById('reorder-button'); // Obtener referencia al nuevo botón
+            reorderButton = document.getElementById('reorder-button');
             darkModeToggle = document.getElementById('dark-mode-toggle');
             body = document.body;
 
-            // Cargar la preferencia de tema al inicio
             const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                enableDarkMode();
-            } else {
-                disableDarkMode();
-            }
+            if (savedTheme === 'dark') enableDarkMode(); else disableDarkMode();
 
-            // Cargar los datos: intentar desde Firestore, si falla, cargar desde Local Storage
             let initialTodos = [];
             try {
-                 initialTodos = await loadTodosOnline(); // Intentar cargar de Firestore
+                 initialTodos = await loadTodosOnline();
             } catch (e) {
                  console.error("Error al cargar datos iniciales desde Firestore. Cayendo a Local Storage:", e);
-                 initialTodos = loadTodos(); // Fallback a Local Storage
-                 // Solo mostrar alerta si la carga de Firestore falló Y Local Storage estaba vacío o falló también
-                 if (initialTodos.length === 0) {
-                     alert("Error al cargar la lista de tareas. No se encontraron datos guardados.");
-                 } else {
-                     alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
-                 }
+                 initialTodos = loadTodos();
+                 alert("Error al cargar la lista de tareas desde la nube. Se cargaron datos locales.");
             }
 
-            // Ordenar la lista inicial después de cargarla (ya sea de Firestore o LS)
-            // Esto asegura que la lista se muestre ordenada al abrir la app
              initialTodos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
-
                  if (rankA !== rankB) return rankA - rankB;
-
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) return dateA - dateB;
-
-                 const orderA = a.order || 0; // Usar 0 si order no existe (para data vieja)
+                 const orderA = a.order || 0;
                  const orderB = b.order || 0;
                  return orderA - orderB;
              });
+            renderTodos(initialTodos);
 
-
-            renderTodos(initialTodos); // Renderiza la lista inicial
-
-            // --- Attach Event Listeners AFTER DOM is ready and references are obtained ---
             if (addTodoButton) addTodoButton.addEventListener('click', addTodo);
-
             if (todoInput) {
                 todoInput.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') {
@@ -1790,25 +1258,10 @@
                     }
                 });
             }
-
-            // --- Event Listener para el nuevo botón de Reordenar ---
-            if (reorderButton) {
-                reorderButton.addEventListener('click', performManualSort); // Llama a la nueva función
-            } else {
-                 console.error("Reorder button not found.");
-            }
-
-
-            // --- Event Listener para el botón de Dark Mode ---
-            if (darkModeToggle) {
-                 darkModeToggle.addEventListener('click', toggleDarkMode);
-            } else {
-                 console.error("Dark mode toggle button not found.");
-            }
-
-             console.log("Inicialización completa.");
+            if (reorderButton) reorderButton.addEventListener('click', performManualSort);
+            if (darkModeToggle) darkModeToggle.addEventListener('click', toggleDarkMode);
+            console.log("Inicialización completa.");
         });
-
     </script>
 
 </body>
