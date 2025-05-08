@@ -167,7 +167,7 @@
              transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
              flex-shrink: 0;
              padding: 6px 10px; /* Padding para botones */
-             font-size: 1rem;
+             font-size: 1rem; /* Base font size for buttons */
              line-height: 1; /* Asegurar alineación vertical */
              display: inline-flex; /* Para centrar icono/texto */
              align-items: center;
@@ -187,7 +187,7 @@
          /* Specific styles for '+' buttons */
          .add-button {
              color: var(--button-color); /* Color base para añadir */
-             font-weight: bold;
+             font-weight: bold; /* Default bold for add buttons */
          }
          .add-button:hover {
              color: var(--button-hover-color);
@@ -407,8 +407,18 @@
              width: fit-content;
              margin: 10px 0 0 auto; /* Alineado a la derecha dentro del padding del item */
              padding: 4px 8px; /* Padding más pequeño */
-             font-size: 1.1rem; /* Tamaño del icono */
+             /* font-size: 1.1rem; /* Tamaño del icono - Mantener este tamaño para el icono */
+             /* font-weight: bold; /* Eliminar negrita */
+             /* color: var(--button-color); /* Cambiar color */
+             font-size: 1.1rem; /* Keep icon size */
+             font-weight: normal; /* Make it not bold */
+             color: var(--legend-text-color); /* Use legend text color */
         }
+         /* Hover state for the discreet button */
+         .todo-item .add-subtasks-toggle:hover {
+             color: var(--button-hover-color); /* Still use the hover color */
+         }
+
 
         /* Contenedor para input y botón de sub-tarea - Oculto por defecto */
         .todo-item .subtask-input-container {
@@ -920,9 +930,11 @@
 
         function createAddSubtasksToggle(mainIndex) { // Recibe el índice
              const addSubtasksToggle = document.createElement('button');
-             addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle'); // Aplicar clases de estilo
-             addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i> Agregar Sub-tareas'; // Texto e icono
-             addSubtasksToggle.setAttribute('aria-label', 'Mostrar/Ocultar sección de sub-tareas');
+             // Mantener app-button y add-button para estilos base y hover, pero sobreescribir en CSS
+             addSubtasksToggle.classList.add('app-button', 'add-button', 'add-subtasks-toggle');
+             // *** MODIFICACIÓN AQUÍ: Cambiar el contenido a solo el icono ***
+             addSubtasksToggle.innerHTML = '<i class="fas fa-plus"></i>'; // Solo icono
+             addSubtasksToggle.setAttribute('aria-label', 'Agregar sub-tarea'); // Ajustar aria-label
 
              // Listener para alternar visibilidad del INPUT
              addSubtasksToggle.addEventListener('click', () => {
