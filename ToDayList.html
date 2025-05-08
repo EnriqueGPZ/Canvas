@@ -44,10 +44,13 @@
             --medal-color: #ffd700; /* Color para el icono de medalla */
             --medal-text-color: var(--text-color);
 
-            /* Nuevas variables para el control de fecha */
-            --date-control-color: var(--button-color); /* Color base para icono y texto de fecha */
-            --date-control-hover-color: var(--button-hover-color);
-            /* --date-control-empty-color: var(--placeholder-color); */ /* Ya no necesitamos una variable específica para el color vacío, usaremos opacidad */
+            /* --- Variables para colores de prioridad --- */
+            --priority-red-color: #e74c3c;
+            --priority-orange-color: #f39c12;
+            --priority-yellow-color: #f1c40f;
+            --priority-green-color: #2ecc71;
+            --priority-none-color: var(--border-color); /* O el color que quieras para 'none' */
+            /* --- Fin Variables para colores de prioridad --- */
         }
 
         /* --- Variables CSS para Colores (Modo Oscuro) --- */
@@ -81,10 +84,13 @@
             --footer-text-color: #666; /* Color para el texto del footer en dark mode */
             --medal-text-color: var(--text-color);
 
-            /* Nuevas variables para el control de fecha en dark mode */
-            --date-control-color: var(--button-color);
-            --date-control-hover-color: var(--button-hover-color);
-            /* --date-control-empty-color: var(--placeholder-color); */
+            /* --- Variables para colores de prioridad (Modo Oscuro) --- */
+            --priority-red-color: #e74c3c; /* Mantener rojo */
+            --priority-orange-color: #f39c12; /* Mantener naranja */
+            --priority-yellow-color: #f1c40f; /* Mantener amarillo */
+            --priority-green-color: #2ecc71; /* Mantener verde */
+            --priority-none-color: var(--border-color);
+            /* --- Fin Variables para colores de prioridad --- */
         }
 
         /* --- Estilos Generales --- */
@@ -185,12 +191,12 @@
              margin-bottom: 0;
          }
 
-        .todo-item[data-priority-color="red"] { border-left-color: #e74c3c; }
-        .todo-item[data-priority-color="orange"] { border-left-color: #f39c12; }
-        .todo-item[data-priority-color="yellow"] { border-left-color: #f1c40f; }
-        .todo-item[data-priority-color="green"] { border-left-color: #2ecc71; }
+        .todo-item[data-priority-color="red"] { border-left-color: var(--priority-red-color); }
+        .todo-item[data-priority-color="orange"] { border-left-color: var(--priority-orange-color); }
+        .todo-item[data-priority-color="yellow"] { border-left-color: var(--priority-yellow-color); }
+        .todo-item[data-priority-color="green"] { border-left-color: var(--priority-green-color); }
         /* Estilo para cuando no hay color */
-        .todo-item[data-priority-color="none"] { border-left-color: var(--border-color); }
+        .todo-item[data-priority-color="none"] { border-left-color: var(--priority-none-color); }
 
 
          .app-button {
@@ -352,10 +358,10 @@
          .todo-item .priority-color-label:hover {
              transform: scale(1.1);
          }
-        .priority-color-label[data-color="red"] { background-color: #e74c3c; border-color: #e74c3c; }
-        .priority-color-label[data-color="orange"] { background-color: #f39c12; border-color: #f39c12; }
-        .priority-color-label[data-color="yellow"] { background-color: #f1c40f; border-color: #f1c40f; }
-        .priority-color-label[data-color="green"] { background-color: #2ecc71; border-color: #2ecc71; }
+        .priority-color-label[data-color="red"] { background-color: var(--priority-red-color); border-color: var(--priority-red-color); }
+        .priority-color-label[data-color="orange"] { background-color: var(--priority-orange-color); border-color: var(--priority-orange-color); }
+        .priority-color-label[data-color="yellow"] { background-color: var(--priority-yellow-color); border-color: var(--priority-yellow-color); }
+        .priority-color-label[data-color="green"] { background-color: var(--priority-green-color); border-color: var(--priority-green-color); }
         .priority-color-label[data-color="none"] { background-color: transparent; border-color: var(--border-color); }
 
 
@@ -397,59 +403,37 @@
             opacity: 1;
         }
 
-        /* --- Estilos para el nuevo control de fecha (icono + texto) --- */
-        .todo-item .task-date-control {
-            display: inline-flex; /* Usar flex para alinear icono y texto */
-            align-items: center;
-            gap: 5px; /* Espacio entre icono y texto */
-            font-size: 0.85rem; /* Fuente pequeña */
-            color: var(--date-control-color); /* Color base apagado */
+        .todo-item .main-task-header .task-body input[type="date"] {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.85rem;
+            color: var(--placeholder-color); /* Color por defecto cuando está vacío */
             cursor: pointer;
-            position: relative; /* Necesario para posicionar el input invisible */
-            padding: 4px 0; /* Pequeño padding para el área clicable */
-            transition: color 0.2s ease;
             flex-shrink: 0;
+            outline: none;
+            /* Quitar transiciones de background, border, box-shadow */
+            transition: color 0.2s ease;
         }
-         .todo-item .task-date-control:hover {
-             color: var(--date-control-hover-color);
+        /* Estilo para fecha válida (no vacía) */
+         .todo-item .main-task-header .task-body input[type="date"]:valid {
+             color: var(--text-color); /* Color por defecto cuando tiene fecha */
          }
-         .todo-item .task-date-control .date-text {
-             /* Estilos para el texto de la fecha */
-             white-space: nowrap; /* Evita que la fecha se rompa en varias líneas */
-             /* Color ya heredado de .task-date-control */
+        /* Estilo para hover/focus */
+        .todo-item .main-task-header .task-body input[type="date"]:hover,
+        .todo-item .main-task-header .task-body input[type="date"]:focus {
+             color: var(--button-hover-color); /* Color de hover general */
+             text-decoration: underline;
          }
-         .todo-item .task-date-control .date-text.empty {
-             /* Estilos cuando no hay fecha seleccionada */
-             opacity: 0.5; /* Opacidad para que se vea apagado */
-             font-style: italic;
+         /* Estilo para hover/focus en tareas completadas */
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
+         .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
+              color: var(--button-hover-color); /* Mantener color de hover general */
          }
 
-        .todo-item .task-date-control input[type="date"] {
-            /* Hacer el input invisible pero clicable */
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0; /* Completamente transparente */
-            cursor: pointer;
-            z-index: 1; /* Asegura que esté por encima del icono y texto */
-            padding: 0; /* Eliminar padding nativo */
-            margin: 0; /* Eliminar margen nativo */
-            border: none; /* Eliminar borde nativo */
-            background: transparent; /* Fondo transparente */
-        }
-
-        /* Asegurar que el input date nativo no muestre nada visualmente */
-        .todo-item .task-date-control input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 0;
-        }
-        .todo-item .task-date-control input[type="date"]::-webkit-inner-spin-button {
-            display: none;
-        }
-        .todo-item .task-date-control input[type="date"]::-webkit-clear-button {
-            display: none;
-        }
+        /* --- ELIMINADO: Estilos específicos para .date-today --- */
+        /* Estos estilos ahora se aplicarán directamente en JS */
 
 
         .todo-item .main-task-header .task-body .task-actions-group .delete-button {
@@ -519,7 +503,9 @@
         .todo-item .subtasks-list li span {
              flex-grow: 1;
              margin-right: 5px;
-             color: var(--button-color);
+             /* --- CAMBIO SOLICITADO: Color de texto de subtareas --- */
+             color: var(--button-color); /* Ahora usa el color de los botones/iconos apagados */
+             /* --- FIN CAMBIO SOLICITADO --- */
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
@@ -590,22 +576,11 @@
         }
 
         .todo-item.completed .priority-color-label,
-        .todo-item.completed .subtasks-list li .app-button {
+        .todo-item.completed .subtasks-list li .app-button,
+        .todo-item.completed .main-task-header .task-body input[type="date"] {
             opacity: 0.7;
             cursor: default;
         }
-         /* Deshabilitar el control de fecha en tareas completadas */
-        .todo-item.completed .task-date-control {
-             opacity: 0.7;
-             cursor: default;
-        }
-         .todo-item.completed .task-date-control:hover {
-             color: var(--date-control-color); /* No cambiar color al hacer hover si está completada */
-         }
-         .todo-item.completed .task-date-control input[type="date"] {
-             pointer-events: none; /* Evita clics en el input invisible */
-         }
-
 
         .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button {
             opacity: 0.7;
@@ -633,11 +608,14 @@
         }
 
         .todo-item.completed .priority-color-label:hover,
-        .todo-item.completed .subtasks-list li .app-button:hover {
-            color: inherit;
+        .todo-item.completed .subtasks-list li .app-button:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:valid:hover,
+        .todo-item.completed .main-task-header .task-body input[type="date"]:valid:focus {
+            color: inherit; /* Revertir al color de completado */
             text-decoration: none;
             transform: none;
         }
+
 
          .todo-item.completed .main-task-header input[type="checkbox"] {
              border-color: var(--completed-text-color);
@@ -696,11 +674,10 @@
                 margin-left: auto;
                 justify-content: flex-end;
             }
-             /* Ajustar el orden del control de fecha en móvil si es necesario */
-            .todo-item .task-date-control {
-                order: 1; /* Ponerlo antes de los botones de enlace y eliminar */
-                flex-grow: 0; /* No permitir que crezca */
-                min-width: 110px; /* Darle un ancho mínimo */
+            .todo-item .main-task-header .task-body input[type="date"] {
+                min-width: 110px;
+                flex-grow: 0;
+                order: 1;
             }
             .todo-item .main-task-header .task-body .link-button {
                 order: 2;
@@ -936,6 +913,34 @@
         }
 
         // --- UI RENDERING & EVENT HANDLERS ---
+
+        // --- FUNCIÓN PARA RESALTAR FECHA DE HOY (MODIFICADA) ---
+        function updateDateHighlight(listItemElement, task) {
+            const dateInput = listItemElement.querySelector('.task-date-input');
+            if (dateInput) {
+                const todayString = getTodayDateString();
+                const isToday = task.date === todayString;
+
+                if (isToday && !task.completed) {
+                    // Obtener el color del borde izquierdo (color de prioridad)
+                    const computedStyle = getComputedStyle(listItemElement);
+                    const priorityColor = computedStyle.borderLeftColor;
+
+                    dateInput.style.color = priorityColor;
+                    dateInput.style.fontWeight = 'bold';
+                    // Asegurarse de que no tenga estilos de .date-today si existieran por error
+                    dateInput.classList.remove('date-today');
+                } else {
+                    // Si no es hoy o está completada, resetear estilos
+                    dateInput.style.color = ''; // Esto hará que use el color por defecto (:valid o .completed)
+                    dateInput.style.fontWeight = '';
+                    dateInput.classList.remove('date-today'); // Limpiar clase por si acaso
+                }
+            }
+        }
+        // --- FIN FUNCIÓN MODIFICADA ---
+
+
         function calculateSubtaskProgress(subtasks) {
             if (!subtasks || subtasks.length === 0) return 0;
             const completed = subtasks.filter(sub => sub.completed).length;
@@ -1013,66 +1018,26 @@
                 }
             });
 
-            // --- INICIO CAMBIO UX FECHA ---
-            const dateControl = document.createElement('div');
-            dateControl.classList.add('task-date-control');
-            dateControl.title = 'Establecer fecha';
-
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
+            dateInput.classList.add('task-date-input');
             dateInput.value = mainTask.date || '';
-
-            const calendarIcon = document.createElement('i');
-            calendarIcon.classList.add('fas', 'fa-calendar-alt');
-
-            const dateTextSpan = document.createElement('span');
-            dateTextSpan.classList.add('date-text');
-
-            // Función para actualizar el texto visible de la fecha
-            const updateDateText = (dateValue) => {
-                if (dateValue) {
-                    try {
-                        // Formatear la fecha como DD/MM/AAAA
-                        const dateObj = new Date(dateValue + 'T00:00:00'); // Añadir T00:00:00 para evitar problemas de zona horaria
-                        const day = String(dateObj.getDate()).padStart(2, '0');
-                        const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // getMonth() es 0-indexed
-                        const year = dateObj.getFullYear();
-                        dateTextSpan.textContent = `${day}/${month}/${year}`;
-                        dateTextSpan.classList.remove('empty');
-                    } catch (e) {
-                        console.error("Error formateando fecha:", dateValue, e);
-                        dateTextSpan.textContent = 'Fecha inválida';
-                        dateTextSpan.classList.add('empty');
-                    }
-                } else {
-                    dateTextSpan.textContent = 'Establecer fecha'; // Texto indicativo cuando no hay fecha
-                    dateTextSpan.classList.add('empty');
-                }
-            };
-
-            // Inicializar el texto visible
-            updateDateText(mainTask.date);
-
-            // Event listener para el input date (se dispara cuando el usuario selecciona una fecha)
+            dateInput.title = 'Establecer fecha';
             dateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
                  if (!task.completed) {
-                     const newDateValue = event.target.value;
-                     updateTaskDate(task.id, newDateValue); // Actualiza el objeto y guarda en Firestore
-                     updateDateText(newDateValue); // Actualiza el texto visible inmediatamente
+                     updateTaskDate(task.id, event.target.value);
+                     // --- LLAMAR A LA FUNCIÓN DE RESALTADO DESPUÉS DE ACTUALIZAR ---
+                     const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
+                     if (listItemElement) {
+                         updateDateHighlight(listItemElement, task);
+                     }
+                     // --- FIN LLAMADA ---
                  } else {
-                     // Si la tarea está completada, revertir el valor del input date si cambia
-                     event.target.value = task.date || '';
+                     event.target.value = task.date || ''; // Revertir si está completada
                  }
             });
-
-            // Añadir elementos al contenedor de fecha
-            dateControl.appendChild(dateInput); // El input invisible primero para que cubra
-            dateControl.appendChild(calendarIcon);
-            dateControl.appendChild(dateTextSpan);
-            // --- FIN CAMBIO UX FECHA ---
-
 
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button');
@@ -1090,7 +1055,7 @@
             });
 
             taskActionsGroup.appendChild(linkButton);
-            taskActionsGroup.appendChild(dateControl); // Usar el nuevo control de fecha
+            taskActionsGroup.appendChild(dateInput);
             taskActionsGroup.appendChild(deleteMainButton);
 
             taskBody.appendChild(mainTaskSpan);
@@ -1098,12 +1063,12 @@
 
             mainTaskHeader.appendChild(mainCheckbox);
             mainTaskHeader.appendChild(priorityLabel);
-            mainTaskHeader.appendChild(taskBody);
+            taskBody.appendChild(taskActionsGroup); // Asegurarse de que taskActionsGroup esté dentro de taskBody
+            mainTaskHeader.appendChild(taskBody); // Asegurarse de que taskBody esté dentro de mainTaskHeader
+
 
             return mainTaskHeader;
         }
-
-        // ... (el resto de las funciones como createProgressBar, createAddSubtasksToggle, etc. no necesitan cambios mayores) ...
 
         function createProgressBar(mainTask) {
              const progressContainer = document.createElement('div');
@@ -1263,7 +1228,8 @@
                 if (mainTask.completed) listItem.classList.add('completed');
                 if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
 
-                listItem.appendChild(createMainTaskHeader(mainTask));
+                const mainTaskHeader = createMainTaskHeader(mainTask);
+                listItem.appendChild(mainTaskHeader);
                 listItem.appendChild(createProgressBar(mainTask));
 
                 if (!mainTask.completed) {
@@ -1280,6 +1246,10 @@
                 }
 
                 todoListContainer.appendChild(listItem);
+
+                // --- LLAMAR A LA FUNCIÓN DE RESALTADO AL RENDERIZAR ---
+                updateDateHighlight(listItem, mainTask);
+                // --- FIN LLAMADA ---
             });
             if (todoInput) todoInput.value = '';
         }
@@ -1294,7 +1264,12 @@
                  const currentIndex = currentColors.indexOf(currentColor);
                  task.priorityColor = currentColors[(currentIndex + 1) % currentColors.length];
                  saveTaskToFirestore(task);
-                 syncAndRender();
+                 // No llamamos a syncAndRender aquí, solo actualizamos el color del borde y el highlight de fecha si aplica
+                 const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
+                 if (listItemElement) {
+                     listItemElement.dataset.priorityColor = task.priorityColor; // Actualizar el data attribute
+                     updateDateHighlight(listItemElement, task); // Re-evaluar el highlight de fecha
+                 }
              } else {
                   console.error("Tarea no encontrada para ciclar color:", taskId);
              }
@@ -1306,11 +1281,7 @@
                  if (task.completed) return;
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task);
-                // No llamamos a syncAndRender() aquí, ya que el event listener del input date
-                // ya actualiza el texto visible y saveTaskToFirestore guarda los datos.
-                // Si necesitas re-renderizar toda la lista por alguna otra razón (ej: orden),
-                // podrías llamarlo, pero para solo actualizar la fecha en la UI, no es necesario.
-                // syncAndRender();
+                // La llamada a updateDateHighlight ya está en el listener del input
             } else {
                  console.error("Tarea no encontrada para actualizar fecha:", taskId);
              }
@@ -1340,7 +1311,7 @@
             todos.push(newTodo);
 
             await saveTaskToFirestore(newTodo);
-            syncAndRender();
+            syncAndRender(); // syncAndRender redibujará la lista, incluyendo el highlight si la fecha es hoy
 
             if (todoInput) todoInput.value = '';
         }
@@ -1365,7 +1336,7 @@
                  mainTask.completedDate = null;
 
                  saveTaskToFirestore(mainTask);
-                 syncAndRender();
+                 syncAndRender(); // syncAndRender redibujará la tarea principal con la nueva sub-tarea
                  subtaskInput.value = '';
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
                  if (listItemElement) {
@@ -1389,7 +1360,7 @@
                 }
 
                 todos.splice(taskIndex, 1);
-                syncAndRender();
+                syncAndRender(); // syncAndRender redibujará la lista sin la tarea eliminada
 
                 if (taskToDelete.firebaseId) {
                     deleteTaskFromFirestore(taskToDelete.firebaseId);
@@ -1412,7 +1383,7 @@
                          mainTask.showSubtaskUI = false;
                      }
                      saveTaskToFirestore(mainTask);
-                     syncAndRender();
+                     syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas actualizadas
                  } else {
                      console.error("Sub-tarea a eliminar no encontrada:", subtaskId);
                  }
@@ -1429,7 +1400,7 @@
                 if (subtask) {
                      subtask.completed = !subtask.completed;
                      saveTaskToFirestore(mainTask);
-                     syncAndRender();
+                     syncAndRender(); // syncAndRender redibujará la tarea principal con el estado de sub-tarea actualizado
                  } else {
                      console.error("Sub-tarea a cambiar estado no encontrada:", subtaskId);
                  }
@@ -1475,7 +1446,7 @@
                 }
 
                 saveTaskToFirestore(task);
-                syncAndRender();
+                syncAndRender(); // syncAndRender redibujará la tarea principal con el estado actualizado (incluyendo highlight de fecha si aplica)
             } else {
                 console.error("Tarea principal inválida para cambiar estado:", taskId);
             }
@@ -1492,7 +1463,7 @@
                     [mainTask.subtasks[subtaskIndex], mainTask.subtasks[newIndex]] =
                     [mainTask.subtasks[newIndex], mainTask.subtasks[subtaskIndex]];
                     saveTaskToFirestore(mainTask);
-                    syncAndRender();
+                    syncAndRender(); // syncAndRender redibujará la tarea principal con las sub-tareas reordenadas
                 }
             }
         }
@@ -1531,7 +1502,7 @@
              } catch (e) {
                  console.error("Error general al actualizar órdenes en Firestore:", e);
              }
-             syncAndRender();
+             syncAndRender(); // syncAndRender redibujará la lista con el nuevo orden
         }
 
         // --- THEME ---
@@ -1547,6 +1518,8 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
+             // Re-renderizar para aplicar colores de prioridad correctos en modo oscuro
+             syncAndRender();
         }
 
         function disableDarkMode() {
@@ -1561,6 +1534,8 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
+            // Re-renderizar para aplicar colores de prioridad correctos en modo claro
+            syncAndRender();
         }
 
         function toggleDarkMode() {
@@ -1594,7 +1569,7 @@
             const initialMedalData = loadAndRefreshMedalData();
             displayMedalCount(initialMedalData.count);
 
-            renderTodosUI();
+            renderTodosUI(); // Esto ahora llamará a updateDateHighlight para cada tarea
 
             console.log(`Renderizado inicial completo.`);
 
