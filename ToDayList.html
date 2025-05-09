@@ -40,7 +40,6 @@
             --footer-text-color: #aaa;
             --medal-color: #ffd700;
             --medal-text-color: var(--text-color);
-            --user-info-color: var(--text-color);
 
             --priority-red-color: #e74c3c;
             --priority-orange-color: #f39c12;
@@ -80,7 +79,6 @@
             --checkbox-checkmark-color: var(--bg-color);
             --footer-text-color: #666;
             --medal-text-color: var(--text-color);
-            --user-info-color: var(--text-color);
 
             --priority-red-color: #e74c3c;
             --priority-orange-color: #f39c12;
@@ -115,35 +113,6 @@
             box-sizing: border-box;
             flex-grow: 1;
         }
-
-        /* Contenedor para ocultar/mostrar la app principal */
-        #app-content {
-            width: 100%;
-        }
-        .app-hidden {
-            display: none !important;
-        }
-
-        #auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #user-info {
-            font-size: 0.9rem;
-            color: var(--user-info-color);
-            max-width: 200px; /* Para evitar que nombres largos rompan el layout */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        #login-btn, #logout-btn {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-        }
-
 
         h1 {
             font-family: 'Quicksand', sans-serif;
@@ -347,16 +316,16 @@
          .custom-checkbox:checked::after {
              content: '';
              position: absolute;
-             box-sizing: content-box;
-             width: 5px;
-             height: 9px;
+             box-sizing: content-box; /* Importante para que el borde no aumente el tamaño efectivo */
+             width: 5px;  /* Ancho de la base del tick */
+             height: 9px; /* Altura del lado más largo del tick */
              border: solid var(--item-bg);
-             border-width: 0 2px 2px 0;
-             top: 3px;
-             left: 6px;
+             border-width: 0 2px 2px 0; /* Grosor del tick */
+             top: 3px;  /* Ajuste vertical */
+             left: 6px; /* Ajuste horizontal */
              transform: rotate(45deg);
          }
-         body.dark-mode .custom-checkbox:checked::after {
+         body.dark-mode .custom-checkbox:checked::after { /* Mantenemos el mismo color de tick */
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
@@ -539,12 +508,12 @@
             content: '';
             position: absolute;
             box-sizing: content-box;
-            width: 4px;
-            height: 8px;
-            border: solid var(--item-bg);
-            border-width: 0 1.8px 1.8px 0;
-            top: 2.5px;
-            left: 5px;
+            width: 4px;  /* Un poco más pequeño para el checkbox de 18px */
+            height: 8px; /* Un poco más pequeño */
+            border: solid var(--item-bg); /* Color del tick en modo claro */
+            border-width: 0 1.8px 1.8px 0; /* Ligeramente más fino si se desea, o mantener 2px */
+            top: 2.5px; /* Ajuste vertical para 18px */
+            left: 5px;  /* Ajuste horizontal para 18px */
             transform: rotate(45deg);
         }
          body.dark-mode .todo-item .subtasks-list li input[type="checkbox"]:checked::after {
@@ -604,7 +573,7 @@
          .todo-item .progress-text { display: none; }
 
         #todo-list:empty:before {
-            content: "Inicia sesión para ver tus tareas o agrega una si no tienes.";
+            content: "No hay tareas. ¡Agrega una!";
             display: block;
             text-align: center;
             color: var(--empty-list-color);
@@ -612,10 +581,6 @@
             font-style: italic;
             transition: color 0.3s ease;
         }
-        #todo-list.user-logged-in:empty:before {
-            content: "No hay tareas. ¡Agrega una!";
-        }
-
 
         .todo-item.show-subtask-ui .subtask-input-container {
              display: flex;
@@ -753,36 +718,27 @@
 <body>
 
     <div class="container">
-        <div id="auth-container">
-            <button id="login-btn" class="app-button" hidden>Entrar con Google</button>
-            <span id="user-info" hidden></span>
-            <button id="logout-btn" class="app-button" hidden>Cerrar sesión</button>
+        <h1>ToDayList</h1>
+        <div id="medal-counter-container">
+            <i class="fas fa-medal"></i> <span id="medal-count">0</span>
         </div>
 
-        <!-- Contenedor para el contenido principal de la app, inicialmente oculto -->
-        <div id="app-content" class="app-hidden">
-            <h1>ToDayList</h1>
-            <div id="medal-counter-container">
-                <i class="fas fa-medal"></i> <span id="medal-count">0</span>
-            </div>
-
-            <ul id="todo-list"></ul>
-            <div id="todo-input-container">
-                <input type="text" id="new-todo-input" placeholder="Agregar nueva tarea">
-                <button id="add-todo-button" class="app-button add-button" aria-label="Agregar Tarea"><i class="fas fa-plus"></i></button>
-                <button id="reorder-button" class="app-button sort-button" aria-label="Reordenar Tareas"><i class="fas fa-sort-amount-down-alt"></i></button>
-            </div>
-            <div id="priority-legend">
-                Prioridad:
-                <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span>Urgente</span>
-                >
-                <span class="priority-legend-item"><span class="priority-color-label" data-color="orange"></span>Alta</span>
-                >
-                <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span>No Olvidar</span>
-                >
-                <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span>Puede Esperar</span>
-            </div>
-        </div> <!-- Fin de #app-content -->
+        <ul id="todo-list"></ul>
+        <div id="todo-input-container">
+            <input type="text" id="new-todo-input" placeholder="Agregar nueva tarea">
+            <button id="add-todo-button" class="app-button add-button" aria-label="Agregar Tarea"><i class="fas fa-plus"></i></button>
+            <button id="reorder-button" class="app-button sort-button" aria-label="Reordenar Tareas"><i class="fas fa-sort-amount-down-alt"></i></button>
+        </div>
+        <div id="priority-legend">
+            Prioridad:
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="red"></span>Urgente</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="orange"></span>Alta</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="yellow"></span>No Olvidar</span>
+            >
+            <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span>Puede Esperar</span>
+        </div>
     </div>
 
     <p class="footer-text">WebApp creada por Enrique Gil para Arteextremeño</p>
@@ -805,31 +761,19 @@
             orderBy,
             enableIndexedDbPersistence
         } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
-        import {
-            getAuth,
-            GoogleAuthProvider,
-            signInWithPopup,
-            signOut,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-auth.js";
 
-
-        // Your web app's Firebase configuration - ¡¡¡ACTUALIZADO CON TU CONFIG!!!
         const firebaseConfig = {
-            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4",
+            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", // Reemplaza con tu API Key real
             authDomain: "todolist-5cc91.firebaseapp.com",
             projectId: "todolist-5cc91",
-            storageBucket: "todolist-5cc91.firebasestorage.app", // Usando el que proporcionaste
+            storageBucket: "todolist-5cc91.firebaseapp.com",
             messagingSenderId: "834516228026",
             appId: "1:834516228026:web:772d2e3a6fbe958a212f83"
         };
 
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        let tareasCollectionRef = null;
+        const tareasCollectionRef = collection(db, "tareas");
 
         enableIndexedDbPersistence(db)
             .then(() => console.log("Persistencia offline de Firestore habilitada."))
@@ -850,18 +794,12 @@
         let darkModeToggle;
         let body;
         let medalCountDisplay;
-        let loginBtn;
-        let logoutBtn;
-        let userInfoDisplay;
-        let appContentContainer;
 
         let todos = [];
-        let currentUser = null;
 
         const PRIORITY_COLORS = ['none', 'red', 'orange', 'yellow', 'green'];
         const PRIORITY_ORDER = { 'red': 1, 'orange': 2, 'yellow': 3, 'green': 4, 'none': 5 };
-        const MEDALS_STORAGE_KEY_PREFIX = 'dailyMedalData_';
-
+        const MEDALS_STORAGE_KEY = 'dailyMedalData';
 
         function generateLocalId() {
             return '_' + Math.random().toString(36).substring(2, 15);
@@ -879,13 +817,6 @@
             return new Date().toISOString().split('T')[0];
         }
 
-        function getMedalsStorageKey() {
-            if (currentUser) {
-                return MEDALS_STORAGE_KEY_PREFIX + currentUser.uid;
-            }
-            return null;
-        }
-
         function displayMedalCount(count) {
             if (medalCountDisplay) {
                 medalCountDisplay.textContent = count;
@@ -893,47 +824,28 @@
         }
 
         function loadAndRefreshMedalData() {
-            const storageKey = getMedalsStorageKey();
-            if (!storageKey) {
-                displayMedalCount(0);
-                return { date: getTodayDateString(), count: 0 };
-            }
-
-            let medalData = JSON.parse(localStorage.getItem(storageKey));
+            let medalData = JSON.parse(localStorage.getItem(MEDALS_STORAGE_KEY));
             const today = getTodayDateString();
-
             if (!medalData || medalData.date !== today) {
                 let countForToday = 0;
-                if (todos && todos.length > 0) {
-                    todos.forEach(task => {
-                        if (task.completed && task.completedDate === today) countForToday++;
-                    });
-                }
+                todos.forEach(task => {
+                    if (task.completed && task.completedDate === today) countForToday++;
+                });
                 medalData = { date: today, count: countForToday };
-                localStorage.setItem(storageKey, JSON.stringify(medalData));
+                localStorage.setItem(MEDALS_STORAGE_KEY, JSON.stringify(medalData));
             }
             return medalData;
         }
 
-
         function updateMedalCount(change) {
-            const storageKey = getMedalsStorageKey();
-            if (!storageKey) return;
-
             let medalData = loadAndRefreshMedalData();
             medalData.count += change;
             if (medalData.count < 0) medalData.count = 0;
-            localStorage.setItem(storageKey, JSON.stringify(medalData));
+            localStorage.setItem(MEDALS_STORAGE_KEY, JSON.stringify(medalData));
             displayMedalCount(medalData.count);
         }
 
-
         async function loadTodosFromFirestore() {
-            if (!tareasCollectionRef) {
-                console.log("No hay colección de tareas definida. Usuario no autenticado.");
-                todos = [];
-                return;
-            }
             try {
                 const q = query(tareasCollectionRef, orderBy("order", "asc"));
                 const querySnapshot = await getDocs(q);
@@ -959,19 +871,15 @@
                 todos = firestoreTodos;
             } catch (e) {
                  console.error("Error al cargar tareas desde Firestore:", e);
-                 alert("Error al cargar tareas. Verifica tu conexión y las reglas de Firestore.");
-                 todos = [];
+                 alert("Error al cargar tareas. Verifica tu conexión.");
             }
         }
 
         async function saveTaskToFirestore(taskData) {
-            if (!tareasCollectionRef) return;
-
             const { firebaseId, ...dataToSave } = { ...taskData };
-
             if (firebaseId) {
                 try {
-                    await updateDoc(doc(db, tareasCollectionRef.path, firebaseId), dataToSave);
+                    await updateDoc(doc(db, "tareas", firebaseId), dataToSave);
                 } catch (e) { console.error(`Error al actualizar tarea ${firebaseId}:`, e); }
             } else {
                 try {
@@ -984,8 +892,8 @@
         }
 
         async function deleteTaskFromFirestore(firebaseId) {
-            if (!tareasCollectionRef || !firebaseId) return;
-            try { await deleteDoc(doc(db, tareasCollectionRef.path, firebaseId)); }
+            if (!firebaseId) return;
+            try { await deleteDoc(doc(db, "tareas", firebaseId)); }
             catch (e) { console.error(`Error al eliminar tarea ${firebaseId}:`, e); }
         }
 
@@ -994,7 +902,7 @@
         }
 
         function updateDateHighlight(listItemElement, task) {
-            const calendarLabel = listItemElement.querySelector('.calendar-button');
+            const calendarLabel = listItemElement.querySelector('.calendar-button'); // Ahora es una label
             const calendarIcon = calendarLabel ? calendarLabel.querySelector('i') : null;
 
             if (!calendarLabel || !calendarIcon) return;
@@ -1006,9 +914,10 @@
             calendarLabel.classList.remove('date-set', 'date-today');
             calendarIcon.style.color = '';
             calendarIcon.style.fontWeight = 'normal';
-            calendarLabel.title = 'Establecer fecha';
+            calendarLabel.title = 'Establecer fecha'; // Título por defecto
 
             if (task.completed) {
+                // La clase .completed + pointer-events: none en CSS se encarga de la apariencia/interacción
                 if (hasDate) {
                     calendarLabel.title = `Fecha: ${task.date} (Completada)`;
                 } else {
@@ -1106,7 +1015,7 @@
             const actualDateInput = document.createElement('input');
             actualDateInput.type = 'date';
             actualDateInput.classList.add('task-date-input-real');
-            const dateInputId = `date-input-${mainTask.id || generateLocalId()}`;
+            const dateInputId = `date-input-${mainTask.id || generateLocalId()}`; // Asegurar ID incluso si mainTask.id es temporal
             actualDateInput.id = dateInputId;
             calendarLabel.htmlFor = dateInputId;
             actualDateInput.value = mainTask.date || '';
@@ -1114,6 +1023,7 @@
             actualDateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
+                // No es necesario comprobar task.completed aquí si CSS lo maneja con pointer-events: none
                 updateTaskDate(task.id, event.target.value);
             });
 
@@ -1199,7 +1109,7 @@
                     subtaskItem.dataset.subtaskId = subtask.id;
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.classList.add('custom-checkbox');
+                    checkbox.classList.add('custom-checkbox'); // Aplicará estilos redondos
                     checkbox.checked = subtask.completed;
                     if (mainTask.completed) checkbox.disabled = true;
                     checkbox.addEventListener('change', () => {
@@ -1258,34 +1168,28 @@
         function renderTodosUI() {
             if (!todoListContainer) return;
             todoListContainer.innerHTML = '';
-            if (currentUser) {
-                todoListContainer.classList.add('user-logged-in');
-                todos.forEach((mainTask) => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('todo-item');
-                    listItem.dataset.taskId = mainTask.id;
-                    listItem.dataset.priorityColor = mainTask.priorityColor || 'none';
-                    if (mainTask.completed) listItem.classList.add('completed');
-                    if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
+            todos.forEach((mainTask) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('todo-item');
+                listItem.dataset.taskId = mainTask.id;
+                listItem.dataset.priorityColor = mainTask.priorityColor || 'none';
+                if (mainTask.completed) listItem.classList.add('completed');
+                if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
 
-                    listItem.appendChild(createMainTaskHeader(mainTask));
-                    listItem.appendChild(createProgressBar(mainTask));
-                    if (!mainTask.completed) {
-                        listItem.appendChild(createAddSubtasksToggle(mainTask.id));
-                    } else { mainTask.showSubtaskUI = false; }
-                    if (mainTask.subtasks && mainTask.subtasks.length > 0) {
-                        listItem.appendChild(createSubtasksList(mainTask));
-                    }
-                    if (mainTask.showSubtaskUI && !mainTask.completed) {
-                         listItem.appendChild(createSubtaskInputContainer(mainTask.id));
-                    }
-                    todoListContainer.appendChild(listItem);
-                    updateDateHighlight(listItem, mainTask);
-                });
-            } else {
-                todoListContainer.classList.remove('user-logged-in');
-            }
-
+                listItem.appendChild(createMainTaskHeader(mainTask));
+                listItem.appendChild(createProgressBar(mainTask));
+                if (!mainTask.completed) {
+                    listItem.appendChild(createAddSubtasksToggle(mainTask.id));
+                } else { mainTask.showSubtaskUI = false; }
+                if (mainTask.subtasks && mainTask.subtasks.length > 0) {
+                    listItem.appendChild(createSubtasksList(mainTask));
+                }
+                if (mainTask.showSubtaskUI && !mainTask.completed) {
+                     listItem.appendChild(createSubtaskInputContainer(mainTask.id));
+                }
+                todoListContainer.appendChild(listItem);
+                updateDateHighlight(listItem, mainTask);
+            });
             if (todoInput) todoInput.value = '';
         }
 
@@ -1310,19 +1214,17 @@
 
         function updateTaskDate(taskId, newDateValue) {
             const task = findTaskById(taskId);
-            if (task && !task.completed) {
+            if (task && !task.completed) { // Doble seguridad, aunque CSS debería prevenirlo
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task).then(syncAndRender);
             } else if (task && task.completed) {
+                // Si por alguna razón el evento 'change' del input se dispara en una tarea completada,
+                // forzar la UI a re-renderizar con el valor original para evitar inconsistencias.
                 syncAndRender();
             }
         }
 
         async function addTodo() {
-            if (!currentUser) {
-                alert("Debes iniciar sesión para agregar tareas.");
-                return;
-            }
             const newTodoText = todoInput.value.trim();
             if (newTodoText === '') return alert('Ingresa el nombre de la tarea.');
             const maxOrder = todos.length > 0 ? Math.max(...todos.map(t => t.order || 0)) : -1;
@@ -1338,7 +1240,6 @@
         }
 
         function addSubtask(mainTaskId, subtaskInput) {
-            if (!currentUser) return;
              const newSubtaskText = subtaskInput.value.trim();
              if (newSubtaskText === '') return alert('Ingresa el nombre de la sub-tarea.');
              const mainTask = findTaskById(mainTaskId);
@@ -1360,7 +1261,6 @@
         }
 
         function deleteTodo(taskId) {
-            if (!currentUser) return;
             const taskIndex = findTaskIndexById(taskId);
             if (taskIndex > -1) {
                 const taskToDelete = todos[taskIndex];
@@ -1374,7 +1274,6 @@
         }
 
         function deleteSubtask(mainTaskId, subtaskId) {
-            if (!currentUser) return;
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && mainTask.subtasks && !mainTask.completed) {
                  const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
@@ -1389,7 +1288,6 @@
         }
 
         function toggleSubtaskCompletion(mainTaskId, subtaskId) {
-            if (!currentUser) return;
              const mainTask = findTaskById(mainTaskId);
              if (mainTask && mainTask.subtasks && !mainTask.completed) {
                 const subtask = mainTask.subtasks.find(sub => sub.id === subtaskId);
@@ -1401,7 +1299,6 @@
         }
 
         function toggleMainCompletion(taskId, isChecked) {
-            if (!currentUser) return;
             const task = findTaskById(taskId);
             if (task) {
                 const wasCompletedTodayBefore = task.completed && task.completedDate === getTodayDateString();
@@ -1423,7 +1320,6 @@
         }
 
         function moveSubtask(mainTaskId, subtaskId, direction) {
-            if (!currentUser) return;
             const mainTask = findTaskById(mainTaskId);
             if (mainTask && mainTask.subtasks && !mainTask.completed) {
                 const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
@@ -1440,7 +1336,6 @@
         function moveSubtaskDown(mainTaskId, subtaskId) { moveSubtask(mainTaskId, subtaskId, 1); }
 
         async function performManualSort() {
-            if (!currentUser || !tareasCollectionRef) return;
              todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
@@ -1453,7 +1348,7 @@
              const updatePromises = todos.map((task, index) => {
                  task.order = index;
                  if (task.firebaseId) {
-                    return updateDoc(doc(db, tareasCollectionRef.path, task.firebaseId), { order: task.order });
+                    return updateDoc(doc(db, "tareas", task.firebaseId), { order: task.order });
                  }
                  return Promise.resolve();
              });
@@ -1487,71 +1382,6 @@
             body.classList.contains('dark-mode') ? disableDarkMode() : enableDarkMode();
         }
 
-
-        function setupAuthButtons() {
-            if (loginBtn) {
-                loginBtn.onclick  = () => {
-                    signInWithPopup(auth, provider)
-                        .catch(error => {
-                            console.error("Error durante el inicio de sesión con Google:", error);
-                            if (error.code === 'auth/popup-closed-by-user') {
-                                console.log("El usuario cerró la ventana emergente de inicio de sesión.");
-                            } else if (error.code === 'auth/cancelled-popup-request') {
-                                console.log("Múltiples solicitudes de ventana emergente. Cancelando una.");
-                            } else if (error.code === 'auth/popup-blocked') {
-                                alert("La ventana emergente de inicio de sesión fue bloqueada por el navegador. Por favor, permite las ventanas emergentes para este sitio e inténtalo de nuevo.");
-                            }
-                        });
-                };
-            }
-            if (logoutBtn) {
-                logoutBtn.onclick = () => {
-                    signOut(auth).then(() => {
-                        console.log("Sesión cerrada exitosamente.");
-                        // Opcional: location.reload(); // Para limpiar caché si es necesario
-                    }).catch(error => {
-                        console.error("Error al cerrar sesión:", error);
-                    });
-                };
-            }
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            if (user) {
-                console.log("Usuario autenticado:", user.displayName || user.email);
-                tareasCollectionRef = collection(db, "users", user.uid, "tareas");
-
-                loginBtn.hidden  = true;
-                logoutBtn.hidden = false;
-                if (userInfoDisplay) {
-                    userInfoDisplay.textContent = `Hola, ${user.displayName || user.email.split('@')[0]}`;
-                    userInfoDisplay.hidden = false;
-                }
-                appContentContainer.classList.remove('app-hidden');
-
-                await loadTodosFromFirestore();
-                const initialMedalData = loadAndRefreshMedalData();
-                displayMedalCount(initialMedalData.count);
-                renderTodosUI();
-
-            } else {
-                console.log("Usuario no autenticado o sesión cerrada.");
-                tareasCollectionRef = null;
-                currentUser = null; // Asegurarse de que currentUser es null
-
-                loginBtn.hidden  = false;
-                logoutBtn.hidden = true;
-                if (userInfoDisplay) userInfoDisplay.hidden = true;
-                appContentContainer.classList.add('app-hidden');
-
-                todos = [];
-                displayMedalCount(0);
-                renderTodosUI();
-            }
-        });
-
-
         document.addEventListener('DOMContentLoaded', async () => {
             todoInput = document.getElementById('new-todo-input');
             addTodoButton = document.getElementById('add-todo-button');
@@ -1560,19 +1390,16 @@
             darkModeToggle = document.getElementById('dark-mode-toggle');
             body = document.body;
             medalCountDisplay = document.getElementById('medal-count');
-            loginBtn = document.getElementById('login-btn');
-            logoutBtn = document.getElementById('logout-btn');
-            userInfoDisplay = document.getElementById('user-info');
-            appContentContainer = document.getElementById('app-content');
 
             if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode();
-            
-            setupAuthButtons();
+
+            await loadTodosFromFirestore();
+            const initialMedalData = loadAndRefreshMedalData();
+            displayMedalCount(initialMedalData.count);
+            renderTodosUI();
 
             addTodoButton.addEventListener('click', addTodo);
-            if (todoInput) {
-                todoInput.addEventListener('keypress', (e) => { if (e.key==='Enter'){ e.preventDefault(); addTodo();}});
-            }
+            todoInput.addEventListener('keypress', (e) => { if (e.key==='Enter'){ e.preventDefault(); addTodo();}});
             reorderButton.addEventListener('click', performManualSort);
             darkModeToggle.addEventListener('click', toggleDarkMode);
         });
