@@ -582,7 +582,7 @@
             transition: color 0.3s ease;
         }
         /* Si el usuario no está logueado, también podría mostrar un mensaje */
-        #app-content[style*="display: none"] ~ #todo-list:empty:before {
+        #app-content[style*="display: none"] ~ #todo-list:empty:before { /* Este selector es un poco frágil, mejor manejarlo en JS */
             content: "Inicia sesión para ver tus tareas.";
         }
 
@@ -728,9 +728,11 @@
         </button>
     </div>
 
-    <div id="user-info-section" style="display:none; text-align: center; margin-bottom: 20px; background-color: var(--item-bg); padding: 10px; border-radius: 8px; max-width: 400px; margin-left: auto; margin-right: auto; box-shadow: var(--fixed-button-shadow);">
-        <img id="user-photo" src="" alt="Foto de perfil" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; vertical-align: middle; border: 2px solid var(--border-color);">
-        <span id="user-display-name" style="vertical-align: middle; font-weight: bold; color: var(--text-color);"></span>
+    <div id="user-info-section" style="display:none; text-align: center; margin-bottom: 20px; background-color: var(--item-bg); padding: 10px; border-radius: 8px; max-width: 400px; margin-left: auto; margin-right: auto; box-shadow: var(--fixed-button-shadow); align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center;">
+            <img id="user-photo" src="" alt="Foto de perfil" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; vertical-align: middle; border: 2px solid var(--border-color);">
+            <span id="user-display-name" style="vertical-align: middle; font-weight: bold; color: var(--text-color);"></span>
+        </div>
         <button id="logout-button" class="app-button" style="margin-left: 15px; font-size: 0.9rem; color: var(--button-color); border: 1px solid var(--border-color); padding: 5px 10px;">Cerrar Sesión</button>
     </div>
 
@@ -788,10 +790,10 @@
         } from "https://www.gstatic.com/firebasejs/11.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", // ¡¡¡ REEMPLAZA CON TU API KEY REAL !!!
+            apiKey: "AIzaSyBUZK_BB9XrII8WXabhF2kiyphS1VVMVH4", // Esta es la API Key que me proporcionaste
             authDomain: "todolist-5cc91.firebaseapp.com",
             projectId: "todolist-5cc91",
-            storageBucket: "todolist-5cc91.firebaseapp.com",
+            storageBucket: "todolist-5cc91.firebasestorage.app", // Corregido
             messagingSenderId: "834516228026",
             appId: "1:834516228026:web:772d2e3a6fbe958a212f83"
         };
@@ -832,7 +834,7 @@
 
         // --- FUNCIONES DE MEDALLAS (POR USUARIO) ---
         function getMedalsStorageKey() {
-            if (!currentUser) return null; // No hay usuario, no hay clave de medallas
+            if (!currentUser) return null;
             return `${MEDALS_STORAGE_KEY_PREFIX}${currentUser.uid}`;
         }
 
@@ -844,13 +846,13 @@
 
         function loadAndRefreshMedalData() {
             const userMedalKey = getMedalsStorageKey();
-            if (!userMedalKey) return { date: getTodayDateString(), count: 0 }; // Si no hay usuario, devuelve datos por defecto
+            if (!userMedalKey) return { date: getTodayDateString(), count: 0 };
 
             let medalData = JSON.parse(localStorage.getItem(userMedalKey));
             const today = getTodayDateString();
             if (!medalData || medalData.date !== today) {
                 let countForToday = 0;
-                todos.forEach(task => { // Asegúrate que 'todos' son solo del usuario actual
+                todos.forEach(task => {
                     if (task.completed && task.completedDate === today) countForToday++;
                 });
                 medalData = { date: today, count: countForToday };
@@ -861,9 +863,9 @@
 
         function updateMedalCount(change) {
             const userMedalKey = getMedalsStorageKey();
-            if (!userMedalKey) return; // No operar si no hay usuario
+            if (!userMedalKey) return;
 
-            let medalData = loadAndRefreshMedalData(); // Esto ya es específico del usuario
+            let medalData = loadAndRefreshMedalData();
             medalData.count += change;
             if (medalData.count < 0) medalData.count = 0;
             localStorage.setItem(userMedalKey, JSON.stringify(medalData));
@@ -890,13 +892,12 @@
                 querySnapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     firestoreTodos.push({
-                        // id: data.id || docSnap.id, // 'id' local no es tan crucial si firebaseId es el principal
-                        firebaseId: docSnap.id, // ID del documento en Firestore
+                        firebaseId: docSnap.id,
                         text: data.text || 'Tarea sin nombre',
                         completed: typeof data.completed === 'boolean' ? data.completed : false,
                         completedDate: data.completedDate || null,
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
-                            id: sub.id || generateLocalId(), // IDs locales para sub-tareas están bien
+                            id: sub.id || generateLocalId(),
                             text: sub.text || 'Sub-tarea sin nombre',
                             completed: typeof sub.completed === 'boolean' ? sub.completed : false
                         })) : [],
@@ -910,13 +911,12 @@
                 todos = firestoreTodos;
                 const initialMedalData = loadAndRefreshMedalData();
                 displayMedalCount(initialMedalData.count);
-                syncAndRender();
             } catch (e) {
                  console.error("Error al cargar tareas desde Firestore:", e);
                  todos = [];
-                 syncAndRender();
                  displayMedalCount(0);
             }
+            syncAndRender(); // Siempre renderizar, incluso si hay error (lista vacía)
         }
 
         async function saveTaskToFirestore(taskData, isNew = false) {
@@ -925,10 +925,9 @@
                 throw new Error("Usuario no autenticado.");
             }
 
-            const dataToSave = { ...taskData }; // Clonar para no modificar el original directamente
-            let taskFirebaseId = dataToSave.firebaseId; // Si existe, es una actualización
+            const dataToSave = { ...taskData };
+            let taskFirebaseId = dataToSave.firebaseId;
 
-            // Asegurar que el userId está presente y es correcto
             if (!dataToSave.userId) {
                 dataToSave.userId = currentUser.uid;
             } else if (dataToSave.userId !== currentUser.uid) {
@@ -936,31 +935,28 @@
                 throw new Error("Violación de seguridad.");
             }
             
-            // Quitar firebaseId del objeto a guardar si es un campo que no va en el doc
             if ('firebaseId' in dataToSave) delete dataToSave.firebaseId;
 
-
-            if (taskFirebaseId && !isNew) { // Actualizar tarea existente
+            if (taskFirebaseId && !isNew) {
                 try {
                     await updateDoc(doc(db, "tareas", taskFirebaseId), dataToSave);
-                    // Actualizar localmente para UI optimista
                     const taskIndex = findTaskIndexById(taskFirebaseId);
                     if (taskIndex > -1) {
-                        todos[taskIndex] = { ...todos[taskIndex], ...taskData, firebaseId: taskFirebaseId }; // Asegurar firebaseId en el objeto local
+                        // Conservar el firebaseId original del objeto en 'todos'
+                        todos[taskIndex] = { ...taskData, firebaseId: taskFirebaseId };
                     }
                 } catch (e) {
                     console.error(`Error al actualizar tarea ${taskFirebaseId}:`, e); throw e;
                 }
-            } else { // Agregar nueva tarea
+            } else {
                 try {
                     const docRef = await addDoc(tareasCollectionRef, dataToSave);
-                    // Añadir la nueva tarea al array 'todos' local con su nuevo firebaseId
-                    todos.push({ ...taskData, firebaseId: docRef.id }); // taskData ya tiene userId
+                    todos.push({ ...taskData, firebaseId: docRef.id, userId: currentUser.uid }); // Asegurar userId aquí también
                 } catch (e) {
                     console.error("Error al agregar nueva tarea a Firestore:", e); throw e;
                 }
             }
-            syncAndRender(); // Re-renderizar después de cualquier operación de guardado
+            syncAndRender();
         }
 
 
@@ -968,7 +964,6 @@
             if (!currentUser || !firebaseId) return;
             try {
                 await deleteDoc(doc(db, "tareas", firebaseId));
-                // Eliminar de la lista local
                 const taskIndex = findTaskIndexById(firebaseId);
                 if (taskIndex > -1) {
                     const taskToDelete = todos[taskIndex];
@@ -977,10 +972,10 @@
                     }
                     todos.splice(taskIndex, 1);
                 }
-                syncAndRender();
             } catch (e) {
                 console.error(`Error al eliminar tarea ${firebaseId}:`, e);
             }
+            syncAndRender();
         }
 
         // --- RENDERIZADO Y UI ---
@@ -1028,8 +1023,8 @@
             return (completed / subtasks.length) * 100;
         }
 
-        // --- CREACIÓN DE ELEMENTOS DEL DOM (sin cambios significativos, pero ahora operan sobre firebaseId) ---
-        function createMainTaskHeader(mainTask) { // mainTask es un objeto de 'todos'
+        // --- CREACIÓN DE ELEMENTOS DEL DOM ---
+        function createMainTaskHeader(mainTask) {
             const mainTaskHeader = document.createElement('div');
             mainTaskHeader.classList.add('main-task-header');
 
@@ -1164,19 +1159,18 @@
                          task.subtasks = [];
                      }
                      saveTaskToFirestore(task).catch(err => console.error("Error guardando estado subtask UI:", err));
-                     // El foco se maneja en renderTodosUI si es necesario o después del renderizado
                  }
              });
              return addSubtasksToggle;
         }
 
-        function createSubtasksList(mainTask) { // mainTask tiene firebaseId
+        function createSubtasksList(mainTask) {
             const subtasksList = document.createElement('ul');
             subtasksList.classList.add('subtasks-list');
             if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                 mainTask.subtasks.forEach((subtask, subIndex) => {
                     const subtaskItem = document.createElement('li');
-                    subtaskItem.dataset.subtaskId = subtask.id; // ID local de la sub-tarea
+                    subtaskItem.dataset.subtaskId = subtask.id;
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.classList.add('custom-checkbox');
@@ -1238,10 +1232,10 @@
         function renderTodosUI() {
             if (!todoListContainer) return;
             todoListContainer.innerHTML = '';
-            todos.forEach((mainTask) => { // mainTask ya tiene firebaseId
+            todos.forEach((mainTask) => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('todo-item');
-                listItem.dataset.taskId = mainTask.firebaseId; // Usar firebaseId como data-task-id
+                listItem.dataset.taskId = mainTask.firebaseId;
                 listItem.dataset.priorityColor = mainTask.priorityColor || 'none';
                 if (mainTask.completed) listItem.classList.add('completed');
                 if (mainTask.showSubtaskUI) listItem.classList.add('show-subtask-ui');
@@ -1250,13 +1244,12 @@
                 listItem.appendChild(createProgressBar(mainTask));
                 if (!mainTask.completed) {
                     listItem.appendChild(createAddSubtasksToggle(mainTask.firebaseId));
-                } else { mainTask.showSubtaskUI = false; }
+                } else { mainTask.showSubtaskUI = false; } // Asegurar que no se muestre si está completada
                 if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                     listItem.appendChild(createSubtasksList(mainTask));
                 }
                 if (mainTask.showSubtaskUI && !mainTask.completed) {
                      listItem.appendChild(createSubtaskInputContainer(mainTask.firebaseId));
-                     // Foco al input de sub-tarea si se acaba de mostrar
                      setTimeout(() => {
                         const subtaskInputElement = listItem.querySelector('.subtask-input-container input[type="text"]');
                         if (subtaskInputElement) subtaskInputElement.focus();
@@ -1265,9 +1258,19 @@
                 todoListContainer.appendChild(listItem);
                 updateDateHighlight(listItem, mainTask);
             });
-            if (todoInput && currentUser) todoInput.value = ''; // Limpiar input solo si hay usuario
-            // Habilitar/deshabilitar "reorder" según si hay tareas y usuario
+
+            if (todoInput && currentUser) todoInput.value = '';
             if (reorderButton) reorderButton.disabled = !(todos.length > 0 && currentUser);
+
+            // Actualizar mensaje de lista vacía
+            const emptyMessage = todoListContainer.querySelector(':scope > :empty:before'); // Intenta ser más específico
+            if (emptyMessage) emptyMessage.remove(); // Limpiar mensaje anterior si existe
+            if (currentUser && todos.length === 0) {
+                // Ya se maneja por CSS :empty:before, pero podrías añadir un mensaje más específico si quieres
+            } else if (!currentUser) {
+                // Si se quiere un mensaje específico cuando no está logueado y la lista está vacía
+                // todoListContainer.innerHTML = '<p class="empty-list-message" style="text-align:center; color: var(--empty-list-color); margin-top:20px; font-style:italic;">Inicia sesión para ver tus tareas.</p>';
+            }
         }
 
         // --- LÓGICA DE LA APP (MANEJO DE TAREAS) ---
@@ -1277,7 +1280,6 @@
                  const currentIndex = PRIORITY_COLORS.indexOf(task.priorityColor || 'none');
                  task.priorityColor = PRIORITY_COLORS[(currentIndex + 1) % PRIORITY_COLORS.length];
                  saveTaskToFirestore(task).catch(err => console.error("Error guardando prioridad:", err));
-                 // La UI se actualiza con syncAndRender() llamado desde saveTaskToFirestore
              }
         }
 
@@ -1287,7 +1289,7 @@
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task).catch(err => console.error("Error guardando fecha:", err));
             } else if (task && task.completed) {
-                syncAndRender(); // Forzar re-render si se intenta cambiar fecha de tarea completada
+                syncAndRender();
             }
         }
 
@@ -1310,12 +1312,11 @@
                 date: null,
                 linkUrl: null,
                 order: maxOrder + 1,
-                userId: currentUser.uid // Asociar con el usuario actual
-                // firebaseId se asignará después de guardar en Firestore
+                userId: currentUser.uid
             };
 
             try {
-                await saveTaskToFirestore(newTodoData, true); // true indica que es una nueva tarea
+                await saveTaskToFirestore(newTodoData, true);
             } catch (error) {
                 console.error("Error al intentar agregar tarea:", error);
                 alert("No se pudo agregar la tarea.");
@@ -1330,18 +1331,16 @@
              if (mainTask && !mainTask.completed) {
                  if (!mainTask.subtasks) mainTask.subtasks = [];
                  mainTask.subtasks.push({ id: generateLocalId(), text: newSubtaskText, completed: false });
-                 mainTask.completed = false; // Si se añade sub-tarea, la principal no puede estar completa
+                 mainTask.completed = false;
                  mainTask.completedDate = null;
                  saveTaskToFirestore(mainTask).catch(err => console.error("Error guardando sub-tarea:", err));
                  subtaskInput.value = '';
-                 // El foco se maneja en renderTodosUI si es necesario
              }
         }
 
-        function deleteTodo(taskFirebaseId) { // Renombrado, ya que se basa en firebaseId
-            const task = findTaskById(taskFirebaseId);
+        function deleteTodo(taskFirebaseId) {
+            const task = findTaskById(taskFirebaseId); // Verificación ya en createMainTaskHeader
             if (!task) return;
-            // Confirmación ya está en createMainTaskHeader
             deleteTaskFromFirestore(taskFirebaseId).catch(err => console.error("Error eliminando tarea principal:", err));
         }
 
@@ -1378,15 +1377,15 @@
                 const today = getTodayDateString();
                 if (isChecked) {
                     task.completedDate = today;
-                    task.priorityColor = 'none'; // Opcional: resetear prioridad al completar
+                    task.priorityColor = 'none';
                     if (!wasCompletedTodayBefore) updateMedalCount(1);
                     if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 }});
                 } else {
                     if (wasCompletedTodayBefore) updateMedalCount(-1);
                     task.completedDate = null;
-                    task.showSubtaskUI = false; // Opcional: ocultar UI de sub-tareas al desmarcar
+                    task.showSubtaskUI = false;
                 }
-                if (task.subtasks) task.subtasks.forEach(sub => sub.completed = isChecked); // Marcar/desmarcar todas las sub-tareas
+                if (task.subtasks) task.subtasks.forEach(sub => sub.completed = isChecked);
                 saveTaskToFirestore(task).catch(err => console.error("Error guardando estado de completado:", err));
             }
         }
@@ -1416,22 +1415,21 @@
                  const dateA = a.date ? new Date(a.date).getTime() : Infinity;
                  const dateB = b.date ? new Date(b.date).getTime() : Infinity;
                  if (dateA !== dateB) return dateA - dateB;
-                 return (a.order || 0) - (b.order || 0); // Como fallback, usa el orden original
+                 return (a.order || 0) - (b.order || 0);
              });
-             // Actualizar 'order' en Firestore para todas las tareas del usuario
              const updatePromises = todos.map((task, index) => {
-                 task.order = index; // Asignar nuevo índice de orden
-                 if (task.firebaseId) { // Solo actualizar si tiene firebaseId
+                 task.order = index;
+                 if (task.firebaseId) {
                     return updateDoc(doc(db, "tareas", task.firebaseId), { order: task.order });
                  }
-                 return Promise.resolve(); // Si no tiene firebaseId, no hacer nada (no debería pasar)
+                 return Promise.resolve();
              });
              try {
                 await Promise.all(updatePromises);
              } catch(e) {
                 console.error("Error actualizando órdenes en Firestore:", e);
              }
-             syncAndRender(); // Re-renderizar con el nuevo orden
+             syncAndRender();
         }
 
         // --- MODO OSCURO ---
@@ -1455,7 +1453,7 @@
 
         function toggleDarkMode() {
             body.classList.contains('dark-mode') ? disableDarkMode() : enableDarkMode();
-            syncAndRender(); // Re-renderizar para aplicar colores de modo oscuro/claro a elementos dinámicos si es necesario
+            syncAndRender();
         }
 
         // --- AUTENTICACIÓN Y ESTADO DE UI ---
@@ -1464,14 +1462,14 @@
                 currentUser = user;
                 console.log("Usuario conectado:", currentUser.uid, currentUser.displayName);
                 updateUIAfterLogin();
-                loadTodosForCurrentUser();
+                loadTodosForCurrentUser(); // Carga las tareas después de actualizar la UI de login
             } else {
                 currentUser = null;
                 console.log("Usuario desconectado");
-                todos = [];
+                todos = []; // Limpiar tareas
                 updateUIAfterLogout();
-                syncAndRender();
-                displayMedalCount(0);
+                syncAndRender(); // Renderizar lista vacía
+                displayMedalCount(0); // Resetear contador de medallas en UI
             }
         });
 
@@ -1479,7 +1477,6 @@
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                // onAuthStateChanged se encargará del resto
             } catch (error) {
                 console.error("Error durante el inicio de sesión con Google:", error);
                 if (error.code === 'auth/popup-closed-by-user') {
@@ -1495,7 +1492,6 @@
         async function performSignOut() {
             try {
                 await signOut(auth);
-                // onAuthStateChanged se encargará del resto
             } catch (error) {
                 console.error("Error durante el cierre de sesión:", error);
             }
@@ -1504,15 +1500,15 @@
         function updateUIAfterLogin() {
             if (!currentUser) return;
             authSection.style.display = 'none';
-            userInfoSection.style.display = 'flex'; // 'flex' para alinear bien
-            appContentContainer.style.display = 'block'; // o 'flex' si .container es flex
+            userInfoSection.style.display = 'flex';
+            appContentContainer.style.display = 'block';
 
-            userPhoto.src = currentUser.photoURL || 'https://via.placeholder.com/40?text=User'; // Imagen por defecto
+            userPhoto.src = currentUser.photoURL || 'https://via.placeholder.com/40?text=U';
             userDisplayName.textContent = currentUser.displayName || currentUser.email || 'Usuario';
 
             todoInput.disabled = false;
             addTodoButton.disabled = false;
-            reorderButton.disabled = !(todos.length === 0); // Habilitar si hay tareas
+            reorderButton.disabled = !(todos.length > 0);
         }
 
         function updateUIAfterLogout() {
@@ -1565,7 +1561,7 @@
             reorderButton.addEventListener('click', performManualSort);
             darkModeToggle.addEventListener('click', toggleDarkMode);
 
-            // onAuthStateChanged se encarga de la carga inicial de datos si el usuario ya está logueado.
+            // onAuthStateChanged ya se encarga de la carga inicial de datos
         });
     </script>
 
