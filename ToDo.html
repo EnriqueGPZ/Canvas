@@ -483,7 +483,7 @@
         .todo-item .subtasks-list li {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* MODIFICADO: Reducido para menor interlineado */
             gap: 5px;
         }
          .todo-item .subtasks-list li:last-child {
@@ -1085,16 +1085,18 @@
                      if (task.showSubtaskUI && (!task.subtasks || task.subtasks.length === 0)) {
                          task.subtasks = [];
                      }
-                     saveTaskToFirestore(task).then(syncAndRender);
-                     if (task.showSubtaskUI) {
-                          const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
-                          if (listItemElement) {
-                            setTimeout(() => {
-                                const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                                if (inputElement) inputElement.focus();
-                            }, 0);
-                          }
-                     }
+                     saveTaskToFirestore(task).then(() => {
+                        syncAndRender(); // Re-render primero
+                        if (task.showSubtaskUI) { // Luego, si se debe mostrar, enfocar
+                             const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
+                             if (listItemElement) {
+                               setTimeout(() => {
+                                   const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
+                                   if (inputElement) inputElement.focus();
+                               }, 0);
+                             }
+                        }
+                     });
                  }
              });
              return addSubtasksToggle;
@@ -1180,11 +1182,13 @@
                 listItem.appendChild(createProgressBar(mainTask));
                 if (!mainTask.completed) {
                     listItem.appendChild(createAddSubtasksToggle(mainTask.id));
-                } else { mainTask.showSubtaskUI = false; }
+                } else { mainTask.showSubtaskUI = false; } // Asegurarse de que no se muestre si está completada
+                
                 if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                     listItem.appendChild(createSubtasksList(mainTask));
                 }
-                if (mainTask.showSubtaskUI && !mainTask.completed) {
+                // Importante: showSubtaskUI ya fue actualizado si se agregó una sub-tarea
+                if (mainTask.showSubtaskUI && !mainTask.completed) { 
                      listItem.appendChild(createSubtaskInputContainer(mainTask.id));
                 }
                 todoListContainer.appendChild(listItem);
@@ -1246,17 +1250,11 @@
              if (mainTask && !mainTask.completed) {
                  if (!mainTask.subtasks) mainTask.subtasks = [];
                  mainTask.subtasks.push({ id: generateLocalId(), text: newSubtaskText, completed: false });
-                 mainTask.completed = false;
+                 mainTask.completed = false; // Asegura que la tarea principal no se marque como completada
                  mainTask.completedDate = null;
+                 mainTask.showSubtaskUI = false; // <-- MODIFICADO: Oculta el input después de agregar
                  saveTaskToFirestore(mainTask).then(syncAndRender);
-                 subtaskInput.value = '';
-                 const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
-                 if (listItemElement) {
-                      setTimeout(() => {
-                        const currentSubtaskInput = listItemElement.querySelector('.subtask-input-container input[type="text"]');
-                        if (currentSubtaskInput) currentSubtaskInput.focus();
-                      }, 0);
-                 }
+                 if (subtaskInput) subtaskInput.value = ''; // Limpia el campo de texto si existe
              }
         }
 
@@ -1281,7 +1279,13 @@
                      mainTask.subtasks.splice(subtaskIndex, 1);
                      mainTask.completed = false;
                      mainTask.completedDate = null;
-                     if (mainTask.subtasks.length === 0) mainTask.showSubtaskUI = false;
+                     // No cambiamos showSubtaskUI aquí, el usuario puede querer añadir otra.
+                     // Si la lista de sub-tareas está vacía Y el usuario NO quiere añadir otra,
+                     // el botón "+" aparecerá de nuevo.
+                     // Si se eliminan todas las sub-tareas y showSubtaskUI era true,
+                     // se mantendrá así hasta que el usuario cierre el input o añada otra.
+                     // Para ocultar si no quedan sub-tareas:
+                     // if (mainTask.subtasks.length === 0) mainTask.showSubtaskUI = false;
                      saveTaskToFirestore(mainTask).then(syncAndRender);
                  }
              }
@@ -1307,12 +1311,13 @@
                 if (isChecked) {
                     task.completedDate = today;
                     task.priorityColor = 'none';
+                    task.showSubtaskUI = false; // Ocultar input de subtareas al completar
                     if (!wasCompletedTodayBefore) updateMedalCount(1);
                     if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 }});
                 } else {
                     if (wasCompletedTodayBefore) updateMedalCount(-1);
                     task.completedDate = null;
-                    task.showSubtaskUI = false;
+                    // showSubtaskUI se mantiene como estaba antes, o el usuario lo puede activar.
                 }
                 if (task.subtasks) task.subtasks.forEach(sub => sub.completed = isChecked);
                 saveTaskToFirestore(task).then(syncAndRender);
@@ -1364,7 +1369,7 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
-            syncAndRender();
+            syncAndRender(); // Volver a renderizar por si los colores de los iconos de calendario dependen del modo
         }
 
         function disableDarkMode() {
@@ -1375,7 +1380,7 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
-            syncAndRender();
+            syncAndRender(); // Volver a renderizar
         }
 
         function toggleDarkMode() {
@@ -1391,7 +1396,7 @@
             body = document.body;
             medalCountDisplay = document.getElementById('medal-count');
 
-            if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode();
+            if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode(); // Llama a disableDarkMode para setear icono inicial si es light
 
             await loadTodosFromFirestore();
             const initialMedalData = loadAndRefreshMedalData();
