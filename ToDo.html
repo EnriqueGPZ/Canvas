@@ -532,7 +532,7 @@
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
-             font-size: 0.85em;
+             font-size: 0.85em; /* Relativo al li padre (que hereda del body) */
              font-weight: 300;
         }
          .todo-item .subtasks-list li .subtask-move-button {
@@ -681,6 +681,65 @@
           #todo-input-container #reorder-button {
                margin-left: auto;
           }
+
+        /* --- ESTILOS PARA ZONA DE ANOTACIONES RÁPIDAS --- */
+        #quick-notes-container {
+            margin-top: 25px; /* Espacio después de la leyenda */
+            margin-bottom: 20px; /* Espacio antes del footer o final del container */
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Espacio entre textarea y botón */
+        }
+
+        #quick-notes-area {
+            width: 100%;
+            min-height: 70px; /* Altura mínima discreta */
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px; /* Consistente con otros elementos */
+            font-family: 'Lexend', sans-serif; /* Consistente con el resto de la app */
+            font-weight: 300; /* Igual que las subtareas */
+            font-size: 0.85rem; /* Ajustado para parecerse a las subtareas */
+            line-height: 1.4; /* Interlineado ajustado para legibilidad y espacio */
+            background-color: var(--input-bg);
+            color: var(--input-text-color);
+            box-sizing: border-box;
+            resize: vertical; /* Permitir redimensionar verticalmente */
+            outline: none;
+            transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #quick-notes-area::placeholder {
+            color: var(--placeholder-color);
+            opacity: 1;
+        }
+        #quick-notes-area:focus {
+            border-color: var(--button-hover-color);
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15); /* Sombra de foco sutil, usando el color rojo de hover */
+        }
+        body.dark-mode #quick-notes-area:focus {
+            box-shadow: 0 0 0 2px rgba(243, 156, 18, 0.2); /* Sombra de foco sutil para modo oscuro, usando el naranja de hover */
+        }
+
+
+        #clear-notes-button {
+            align-self: flex-end; /* Botón a la derecha, debajo del textarea */
+            padding: 5px 10px; /* Más pequeño */
+            font-size: 0.8rem; /* Texto más pequeño */
+            color: var(--button-color);
+            background-color: var(--item-bg); /* Fondo sutil para integrarse */
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        #clear-notes-button:hover {
+            color: var(--button-hover-color);
+            border-color: var(--button-hover-color);
+            background-color: var(--fixed-button-bg); /* Ligero cambio de fondo al pasar el ratón */
+        }
+        #clear-notes-button i {
+            margin-right: 4px;
+        }
+        /* --- FIN ESTILOS PARA ZONA DE ANOTACIONES RÁPIDAS --- */
+
 
         .footer-text {
             text-align: center;
@@ -869,9 +928,19 @@
             >
             <span class="priority-legend-item"><span class="priority-color-label" data-color="green"></span>Puede Esperar</span>
         </div>
-    </div>
 
-    <p class="footer-text">WebApp creada por Enrique Gil para Arteextremeño</p>
+        <!-- ZONA DE ANOTACIONES RÁPIDAS -->
+        <div id="quick-notes-container">
+            <textarea id="quick-notes-area" placeholder="Anotaciones rápidas..."></textarea>
+            <button id="clear-notes-button" class="app-button" aria-label="Borrar anotaciones">
+                <i class="fas fa-eraser"></i> Borrar
+            </button>
+        </div>
+        <!-- FIN ZONA DE ANOTACIONES RÁPIDAS -->
+
+    </div> <!-- CIERRE DEL .container -->
+
+    <p class="footer-text">WebApp creada por Enrique Gil</p>
 
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
 
@@ -951,6 +1020,12 @@
         let body;
         let medalCountDisplay;
         let infoButton, infoModal, closeModalButton; // Variables para el modal de info
+        
+        // Variables para la zona de anotaciones rápidas
+        let quickNotesArea;
+        let clearNotesButton;
+        const QUICK_NOTES_STORAGE_KEY = 'quickNotesContent';
+
 
         let todos = [];
 
@@ -1016,7 +1091,7 @@
                         completedDate: data.completedDate || null,
                         subtasks: Array.isArray(data.subtasks) ? data.subtasks.map(sub => ({
                             id: sub.id || generateLocalId(), text: sub.text || 'Sub-tarea sin nombre',
-                            completed: typeof sub.completed === 'boolean' ? sub.completed : false
+                            completed: typeof sub.completed === 'boolean' ? data.completed : false
                         })) : [],
                         showSubtaskUI: typeof data.showSubtaskUI === 'boolean' ? data.showSubtaskUI : false,
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
@@ -1546,6 +1621,11 @@
             infoModal = document.getElementById('info-modal');
             closeModalButton = document.getElementById('close-modal-button');
 
+            // Obtener elementos de la zona de anotaciones rápidas
+            quickNotesArea = document.getElementById('quick-notes-area');
+            clearNotesButton = document.getElementById('clear-notes-button');
+
+
             if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode();
 
             await loadTodosFromFirestore();
@@ -1568,18 +1648,37 @@
                     infoModal.classList.remove('visible');
                 });
 
-                // Cerrar modal al hacer clic en el overlay (fuera del contenido)
                 infoModal.addEventListener('click', (event) => {
-                    if (event.target === infoModal) { // Solo si se hace clic directamente en el overlay
+                    if (event.target === infoModal) {
                         infoModal.classList.remove('visible');
                     }
                 });
 
-                // Cerrar modal al presionar la tecla Escape
                 document.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape' && infoModal.classList.contains('visible')) {
                         infoModal.classList.remove('visible');
                     }
+                });
+            }
+
+            // Funcionalidad para la zona de anotaciones rápidas
+            if (quickNotesArea && clearNotesButton) {
+                // Cargar notas guardadas
+                const savedNotes = localStorage.getItem(QUICK_NOTES_STORAGE_KEY);
+                if (savedNotes) {
+                    quickNotesArea.value = savedNotes;
+                }
+
+                // Guardar notas al escribir
+                quickNotesArea.addEventListener('input', () => {
+                    localStorage.setItem(QUICK_NOTES_STORAGE_KEY, quickNotesArea.value);
+                });
+
+                // Funcionalidad del botón borrar
+                clearNotesButton.addEventListener('click', () => {
+                    quickNotesArea.value = '';
+                    localStorage.removeItem(QUICK_NOTES_STORAGE_KEY); 
+                    quickNotesArea.focus(); // Para conveniencia del usuario
                 });
             }
         });
