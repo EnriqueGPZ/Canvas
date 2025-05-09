@@ -112,6 +112,7 @@
             padding: 0 10px;
             box-sizing: border-box;
             flex-grow: 1;
+            position: relative; /* Para el botón de información */
         }
 
         h1 {
@@ -123,6 +124,7 @@
             font-weight: 700;
             font-size: 2.5rem;
             letter-spacing: -0.5px;
+            padding-top: 45px; /* Ajuste para no solaparse con el botón de info */
         }
 
         #medal-counter-container {
@@ -693,6 +695,16 @@
 
 
         @media (max-width: 500px) {
+            h1 {
+                padding-top: 50px; /* Un poco más de espacio para el botón info en móviles */
+            }
+            #info-button {
+                top: 10px;
+                left: 10px;
+                font-size: 1.5rem;
+                width: 38px;
+                height: 38px;
+            }
             .todo-item .main-task-header {
                 row-gap: 8px;
             }
@@ -713,11 +725,129 @@
                   margin-left: 0;
              }
         }
+
+        /* --- Estilos para el Icono de Información y Modal --- */
+        #info-button {
+            position: absolute;
+            top: 15px; /* Ajusta según necesites */
+            left: 15px; /* Ajusta según necesites */
+            font-size: 1.6rem;
+            color: var(--button-color);
+            z-index: 900; /* Debajo del modal pero encima de otro contenido si lo hubiera */
+            padding: 8px; /* Para hacerlo un poco más grande al tacto */
+            background-color: var(--item-bg); /* Para que se vea bien sobre el fondo */
+            border-radius: 50%;
+            box-shadow: var(--fixed-button-shadow);
+            width: 40px; /* Tamaño fijo */
+            height: 40px; /* Tamaño fijo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #info-button:hover {
+            color: var(--button-hover-color);
+            background-color: var(--fixed-button-bg); /* Usar variable para consistencia */
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.65); /* Overlay más oscuro */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050; /* Más alto que el dark mode toggle */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s linear 0s;
+        }
+
+        .modal-content {
+            background-color: var(--item-bg);
+            color: var(--text-color);
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 580px; /* Un poco menos que el container principal */
+            max-height: 85vh; /* Para evitar que sea demasiado alto en pantallas pequeñas */
+            overflow-y: auto; /* Scroll si el contenido es muy largo */
+            position: relative; /* Para posicionar el botón de cierre absoluto */
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--heading-color);
+            text-align: center;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.8rem;
+        }
+
+        .modal-content ol {
+            padding-left: 20px;
+            margin-bottom: 0; /* Quitar margen inferior por si acaso */
+        }
+        .modal-content ol li {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .modal-content ol li ul { /* Estilo para la lista anidada de sub-tareas */
+            padding-left: 20px;
+            margin-top: 8px;
+            list-style-type: disc; /* O el que prefieras */
+        }
+        .modal-content ol li ul li {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .modal-content strong {
+            color: var(--heading-color); /* O un color de acento si prefieres */
+        }
+        /* Para que los iconos dentro de las instrucciones resalten un poco */
+        .modal-content i.fas, .modal-content i.far {
+            color: var(--button-hover-color); /* Usar un color llamativo */
+            margin: 0 2px;
+            font-size: 0.9em; /* Ligeramente más pequeños para no dominar el texto */
+        }
+
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 1.9rem; /* Más grande para que sea fácil de pulsar */
+            color: var(--button-color);
+            padding: 5px 10px; /* Padding para área de toque */
+            line-height: 1; /* Evitar altura extra */
+            background: none; /* Sin fondo */
+            border: none; /* Sin borde */
+        }
+        .close-modal:hover {
+            color: var(--button-hover-color);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <button id="info-button" class="app-button" aria-label="Información de la aplicación" title="Cómo usar la aplicación">
+            <i class="fas fa-info-circle"></i>
+        </button>
         <h1>ToDayList</h1>
         <div id="medal-counter-container">
             <i class="fas fa-medal"></i> <span id="medal-count">0</span>
@@ -744,6 +874,32 @@
     <p class="footer-text">WebApp creada por Enrique Gil para Arteextremeño</p>
 
     <button id="dark-mode-toggle" class="app-button" aria-label="Alternar modo oscuro/claro"><i class="fas fa-moon"></i></button>
+
+    <!-- Modal de Información -->
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-modal-button" class="app-button close-modal" aria-label="Cerrar ventana de información">×</button>
+            <h2>Cómo usar ToDayList</h2>
+            <ol>
+                <li><strong>Añadir Tareas:</strong> Escribe tu tarea en el campo inferior y pulsa el botón <i class="fas fa-plus"></i> o la tecla "Enter".</li>
+                <li><strong>Marcar como Completada:</strong> Haz clic en el círculo a la izquierda de la tarea. ¡Ganas una medalla <i class="fas fa-medal"></i> por cada tarea completada en el día!</li>
+                <li><strong>Prioridad:</strong> Haz clic en el cuadrado de color junto al círculo para cambiar la prioridad de la tarea (Rojo: Urgente > Naranja: Alta > Amarillo: No Olvidar > Verde: Puede Esperar > Gris: Sin prioridad).</li>
+                <li><strong>Fecha Límite:</strong> Haz clic en el icono de calendario <i class="fas fa-calendar-alt"></i> para asignar una fecha a la tarea. Las tareas para "hoy" resaltarán su icono de calendario con el color de su prioridad.</li>
+                <li><strong>Enlaces:</strong> Haz clic en el icono de enlace <i class="fas fa-link"></i> para añadir o abrir un enlace web asociado a la tarea.</li>
+                <li><strong>Sub-Tareas:</strong>
+                    <ul>
+                        <li>Pulsa el botón <i class="fas fa-plus"></i> (pequeño, a la derecha de la tarea principal, debajo de la barra de progreso) para mostrar el campo y añadir sub-tareas.</li>
+                        <li>Una vez añadida una sub-tarea, el campo de texto se ocultará. Pulsa el botón <i class="fas fa-plus"></i> de nuevo si deseas añadir más.</li>
+                        <li>Las sub-tareas tienen su propio círculo para marcarlas como completadas, botones para moverlas <i class="fas fa-arrow-up"></i><i class="fas fa-arrow-down"></i>, o eliminarlas <i class="fas fa-trash-alt"></i>.</li>
+                    </ul>
+                </li>
+                <li><strong>Barra de Progreso:</strong> Indica el porcentaje de sub-tareas completadas. Se llena al 100% cuando la tarea principal se marca como completada.</li>
+                <li><strong>Reordenar Tareas:</strong> Pulsa el botón de reordenar <i class="fas fa-sort-amount-down-alt"></i> para organizar automáticamente todas las tareas por prioridad (de más a menos urgente) y luego por fecha (las más antiguas primero).</li>
+                <li><strong>Modo Oscuro/Claro:</strong> Utiliza el botón <i class="fas fa-moon"></i> / <i class="fas fa-sun"></i> situado abajo a la derecha para cambiar el tema visual de la aplicación.</li>
+                <li><strong>Eliminar Tareas:</strong> Haz clic en el icono de papelera <i class="fas fa-trash-alt"></i> para eliminar tareas principales o sub-tareas.</li>
+            </ol>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -794,6 +950,7 @@
         let darkModeToggle;
         let body;
         let medalCountDisplay;
+        let infoButton, infoModal, closeModalButton; // Variables para el modal de info
 
         let todos = [];
 
@@ -1023,7 +1180,6 @@
             actualDateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
-                // No es necesario comprobar task.completed aquí si CSS lo maneja con pointer-events: none
                 updateTaskDate(task.id, event.target.value);
             });
 
@@ -1111,7 +1267,7 @@
                     subtaskItem.dataset.subtaskId = subtask.id;
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.classList.add('custom-checkbox'); // Aplicará estilos redondos
+                    checkbox.classList.add('custom-checkbox');
                     checkbox.checked = subtask.completed;
                     if (mainTask.completed) checkbox.disabled = true;
                     checkbox.addEventListener('change', () => {
@@ -1182,12 +1338,11 @@
                 listItem.appendChild(createProgressBar(mainTask));
                 if (!mainTask.completed) {
                     listItem.appendChild(createAddSubtasksToggle(mainTask.id));
-                } else { mainTask.showSubtaskUI = false; } // Asegurarse de que no se muestre si está completada
+                } else { mainTask.showSubtaskUI = false; }
                 
                 if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                     listItem.appendChild(createSubtasksList(mainTask));
                 }
-                // Importante: showSubtaskUI ya fue actualizado si se agregó una sub-tarea
                 if (mainTask.showSubtaskUI && !mainTask.completed) { 
                      listItem.appendChild(createSubtaskInputContainer(mainTask.id));
                 }
@@ -1218,12 +1373,10 @@
 
         function updateTaskDate(taskId, newDateValue) {
             const task = findTaskById(taskId);
-            if (task && !task.completed) { // Doble seguridad, aunque CSS debería prevenirlo
+            if (task && !task.completed) {
                 task.date = newDateValue || null;
                 saveTaskToFirestore(task).then(syncAndRender);
             } else if (task && task.completed) {
-                // Si por alguna razón el evento 'change' del input se dispara en una tarea completada,
-                // forzar la UI a re-renderizar con el valor original para evitar inconsistencias.
                 syncAndRender();
             }
         }
@@ -1250,11 +1403,11 @@
              if (mainTask && !mainTask.completed) {
                  if (!mainTask.subtasks) mainTask.subtasks = [];
                  mainTask.subtasks.push({ id: generateLocalId(), text: newSubtaskText, completed: false });
-                 mainTask.completed = false; // Asegura que la tarea principal no se marque como completada
+                 mainTask.completed = false;
                  mainTask.completedDate = null;
-                 mainTask.showSubtaskUI = false; // <-- MODIFICADO: Oculta el input después de agregar
+                 mainTask.showSubtaskUI = false; // Oculta el input después de agregar
                  saveTaskToFirestore(mainTask).then(syncAndRender);
-                 if (subtaskInput) subtaskInput.value = ''; // Limpia el campo de texto si existe
+                 if (subtaskInput) subtaskInput.value = '';
              }
         }
 
@@ -1279,13 +1432,6 @@
                      mainTask.subtasks.splice(subtaskIndex, 1);
                      mainTask.completed = false;
                      mainTask.completedDate = null;
-                     // No cambiamos showSubtaskUI aquí, el usuario puede querer añadir otra.
-                     // Si la lista de sub-tareas está vacía Y el usuario NO quiere añadir otra,
-                     // el botón "+" aparecerá de nuevo.
-                     // Si se eliminan todas las sub-tareas y showSubtaskUI era true,
-                     // se mantendrá así hasta que el usuario cierre el input o añada otra.
-                     // Para ocultar si no quedan sub-tareas:
-                     // if (mainTask.subtasks.length === 0) mainTask.showSubtaskUI = false;
                      saveTaskToFirestore(mainTask).then(syncAndRender);
                  }
              }
@@ -1311,13 +1457,12 @@
                 if (isChecked) {
                     task.completedDate = today;
                     task.priorityColor = 'none';
-                    task.showSubtaskUI = false; // Ocultar input de subtareas al completar
+                    task.showSubtaskUI = false;
                     if (!wasCompletedTodayBefore) updateMedalCount(1);
                     if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 }});
                 } else {
                     if (wasCompletedTodayBefore) updateMedalCount(-1);
                     task.completedDate = null;
-                    // showSubtaskUI se mantiene como estaba antes, o el usuario lo puede activar.
                 }
                 if (task.subtasks) task.subtasks.forEach(sub => sub.completed = isChecked);
                 saveTaskToFirestore(task).then(syncAndRender);
@@ -1369,7 +1514,7 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
-            syncAndRender(); // Volver a renderizar por si los colores de los iconos de calendario dependen del modo
+            syncAndRender();
         }
 
         function disableDarkMode() {
@@ -1380,7 +1525,7 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
-            syncAndRender(); // Volver a renderizar
+            syncAndRender();
         }
 
         function toggleDarkMode() {
@@ -1396,7 +1541,12 @@
             body = document.body;
             medalCountDisplay = document.getElementById('medal-count');
 
-            if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode(); // Llama a disableDarkMode para setear icono inicial si es light
+            // Obtener elementos del modal de información
+            infoButton = document.getElementById('info-button');
+            infoModal = document.getElementById('info-modal');
+            closeModalButton = document.getElementById('close-modal-button');
+
+            if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode();
 
             await loadTodosFromFirestore();
             const initialMedalData = loadAndRefreshMedalData();
@@ -1407,6 +1557,31 @@
             todoInput.addEventListener('keypress', (e) => { if (e.key==='Enter'){ e.preventDefault(); addTodo();}});
             reorderButton.addEventListener('click', performManualSort);
             darkModeToggle.addEventListener('click', toggleDarkMode);
+
+            // Event Listeners para el Modal de Información
+            if (infoButton && infoModal && closeModalButton) {
+                infoButton.addEventListener('click', () => {
+                    infoModal.classList.add('visible');
+                });
+
+                closeModalButton.addEventListener('click', () => {
+                    infoModal.classList.remove('visible');
+                });
+
+                // Cerrar modal al hacer clic en el overlay (fuera del contenido)
+                infoModal.addEventListener('click', (event) => {
+                    if (event.target === infoModal) { // Solo si se hace clic directamente en el overlay
+                        infoModal.classList.remove('visible');
+                    }
+                });
+
+                // Cerrar modal al presionar la tecla Escape
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && infoModal.classList.contains('visible')) {
+                        infoModal.classList.remove('visible');
+                    }
+                });
+            }
         });
     </script>
 
