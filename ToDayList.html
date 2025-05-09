@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MODIFICADO: Añadido el peso 300 para Lexend -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
@@ -327,7 +328,7 @@
 
         .todo-item .main-task-header {
             display: flex;
-            align-items: baseline; 
+            align-items: baseline;
             margin-bottom: 15px;
             padding: 0;
             gap: 10px;
@@ -385,7 +386,7 @@
         .todo-item .main-task-header .task-body .task-actions-group {
             display: flex;
             align-items: center;
-            gap: 5px; 
+            gap: 5px;
             margin-left: auto;
             flex-shrink: 0;
         }
@@ -400,7 +401,7 @@
         .todo-item .main-task-header .task-body .link-button.link-on {
             opacity: 1;
         }
-        
+
         /* Estilos para la label del calendario */
         .todo-item .main-task-header .task-body .calendar-button { /* Clase se mantiene para la label */
             padding: 4px 8px;
@@ -408,14 +409,14 @@
             /* app-button ya define cursor: pointer */
         }
         .todo-item .main-task-header .task-body .calendar-button i {
-            color: var(--calendar-icon-default-color); 
+            color: var(--calendar-icon-default-color);
             transition: color 0.2s ease, font-weight 0.2s ease;
         }
         .todo-item .main-task-header .task-body .calendar-button.date-set i {
-            color: var(--calendar-icon-set-color); 
+            color: var(--calendar-icon-set-color);
         }
         .todo-item .main-task-header .task-body .calendar-button.date-today i {
-            font-weight: bold; 
+            font-weight: bold;
         }
 
         /* Input de fecha real oculto de forma accesible */
@@ -478,7 +479,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
-            font-size: 0.95rem;
+            /* font-size: 0.95rem; ¡Este era el tamaño original del li! */
             gap: 5px;
         }
          .todo-item .subtasks-list li:last-child {
@@ -498,13 +499,18 @@
              border-color: var(--checkbox-checkmark-color) !important;
          }
 
+        /* --- MODIFICADO: Estilos para el texto de la subtarea --- */
         .todo-item .subtasks-list li span {
              flex-grow: 1;
              margin-right: 5px;
-             color: var(--button-color); 
+             color: var(--button-color);
              text-decoration: none;
              transition: color 0.3s ease, text-decoration 0.3s ease;
              word-break: break-word;
+             font-size: 0.85em; /* Más pequeño (relativo al font-size del li padre si tuviera, o al por defecto) */
+                                /* El li padre tiene font-size: 0.95rem; por lo que esto será 0.85 * 0.95rem */
+                                /* O podrías usar un valor fijo como 13px o 0.8rem */
+             font-weight: 300;  /* Más fino. Asegúrate de importar el peso 300 de Lexend */
         }
          .todo-item .subtasks-list li .subtask-move-button {
              color: var(--button-color);
@@ -563,9 +569,10 @@
         }
 
         .todo-item.completed .main-task-header .task-body span,
-        .todo-item.completed .subtasks-list li span {
+        .todo-item.completed .subtasks-list li span { /* Esta regla también afecta a las subtareas completadas */
             color: var(--completed-text-color);
             text-decoration: line-through;
+            /* font-size y font-weight de la subtarea NO se sobreescriben aquí, así que se mantienen los nuevos */
         }
         .todo-item.completed .progress-bar {
             background-color: var(--progress-bar-completed-color);
@@ -576,7 +583,7 @@
             opacity: 0.7;
             cursor: default;
         }
-        
+
         .todo-item.completed .main-task-header .task-body .calendar-button {
             opacity: 0.7;
             cursor: default;
@@ -593,7 +600,7 @@
         }
         .todo-item.completed .main-task-header .task-body .task-actions-group .delete-button:hover {
             opacity: 0.7;
-            color: var(--delete-button-color); 
+            color: var(--delete-button-color);
         }
 
         .todo-item.completed .main-task-header .task-body .link-button.link-on {
@@ -615,7 +622,7 @@
 
         .todo-item.completed .priority-color-label:hover,
         .todo-item.completed .subtasks-list li .app-button:hover {
-            color: inherit; 
+            color: inherit;
             text-decoration: none;
             transform: none;
         }
@@ -885,7 +892,7 @@
             const hasDate = !!task.date;
 
             calendarLabel.classList.remove('date-set', 'date-today');
-            calendarIcon.style.color = ''; 
+            calendarIcon.style.color = '';
             calendarIcon.style.fontWeight = 'normal';
             calendarLabel.title = 'Establecer fecha'; // Título por defecto
 
@@ -896,7 +903,7 @@
                 } else {
                     calendarLabel.title = 'Fecha no establecida (Completada)';
                 }
-                return; 
+                return;
             }
 
             if (hasDate) {
@@ -906,11 +913,11 @@
                 calendarLabel.title = 'Añadir fecha';
             }
 
-            if (isToday) { 
+            if (isToday) {
                 calendarLabel.classList.add('date-today');
                 const computedStyle = getComputedStyle(listItemElement);
-                const priorityColorForToday = computedStyle.borderLeftColor; 
-                calendarIcon.style.color = priorityColorForToday; 
+                const priorityColorForToday = computedStyle.borderLeftColor;
+                calendarIcon.style.color = priorityColorForToday;
                 calendarLabel.title = `Fecha: ${task.date} (Hoy)`;
             }
         }
@@ -965,10 +972,10 @@
             linkButton.addEventListener('click', () => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
-                if (task.completed && !task.linkUrl) return; 
+                if (task.completed && !task.linkUrl) return;
                 if (task.linkUrl) {
                     window.open(task.linkUrl, '_blank');
-                } else if (!task.completed) { 
+                } else if (!task.completed) {
                     const newUrl = prompt("Introduce la URL (ej: https://ejemplo.com):", task.linkUrl || "");
                     if (newUrl === null) return;
                     let finalUrl = newUrl.trim();
@@ -980,26 +987,26 @@
                 }
             });
 
-            const calendarLabel = document.createElement('label'); 
-            calendarLabel.classList.add('app-button', 'calendar-button'); 
+            const calendarLabel = document.createElement('label');
+            calendarLabel.classList.add('app-button', 'calendar-button');
             calendarLabel.innerHTML = '<i class="fas fa-calendar-alt"></i>';
             calendarLabel.setAttribute('aria-label', 'Establecer fecha');
-            
+
             const actualDateInput = document.createElement('input');
             actualDateInput.type = 'date';
-            actualDateInput.classList.add('task-date-input-real'); 
+            actualDateInput.classList.add('task-date-input-real');
             const dateInputId = `date-input-${mainTask.id || generateLocalId()}`; // Asegurar ID incluso si mainTask.id es temporal
             actualDateInput.id = dateInputId;
-            calendarLabel.htmlFor = dateInputId; 
+            calendarLabel.htmlFor = dateInputId;
             actualDateInput.value = mainTask.date || '';
 
             actualDateInput.addEventListener('change', (event) => {
                 const task = findTaskById(mainTask.id);
                 if (!task) return;
                 // No es necesario comprobar task.completed aquí si CSS lo maneja con pointer-events: none
-                updateTaskDate(task.id, event.target.value); 
+                updateTaskDate(task.id, event.target.value);
             });
-            
+
             const deleteMainButton = document.createElement('button');
             deleteMainButton.classList.add('app-button', 'delete-button');
             deleteMainButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -1014,8 +1021,8 @@
             });
 
             taskActionsGroup.appendChild(linkButton);
-            taskActionsGroup.appendChild(calendarLabel); 
-            taskActionsGroup.appendChild(actualDateInput); 
+            taskActionsGroup.appendChild(calendarLabel);
+            taskActionsGroup.appendChild(actualDateInput);
             taskActionsGroup.appendChild(deleteMainButton);
 
             taskBody.appendChild(mainTaskSpan);
@@ -1062,7 +1069,7 @@
                      if (task.showSubtaskUI) {
                           const listItemElement = todoListContainer.querySelector(`li[data-task-id="${mainTaskId}"]`);
                           if (listItemElement) {
-                            setTimeout(() => { 
+                            setTimeout(() => {
                                 const inputElement = listItemElement.querySelector('.subtask-input-container input[type="text"]');
                                 if (inputElement) inputElement.focus();
                             }, 0);
@@ -1171,7 +1178,7 @@
              if (task && !task.completed) {
                  const currentIndex = PRIORITY_COLORS.indexOf(task.priorityColor || 'none');
                  task.priorityColor = PRIORITY_COLORS[(currentIndex + 1) % PRIORITY_COLORS.length];
-                 saveTaskToFirestore(task); 
+                 saveTaskToFirestore(task);
                  const listItemElement = todoListContainer.querySelector(`li[data-task-id="${task.id}"]`);
                  if (listItemElement) {
                      listItemElement.dataset.priorityColor = task.priorityColor;
@@ -1180,7 +1187,7 @@
                          priorityLabelElement.dataset.color = task.priorityColor;
                          priorityLabelElement.title = `Prioridad: ${task.priorityColor.charAt(0).toUpperCase() + task.priorityColor.slice(1)}`;
                      }
-                     updateDateHighlight(listItemElement, task); 
+                     updateDateHighlight(listItemElement, task);
                  }
              }
         }
@@ -1189,7 +1196,7 @@
             const task = findTaskById(taskId);
             if (task && !task.completed) { // Doble seguridad, aunque CSS debería prevenirlo
                 task.date = newDateValue || null;
-                saveTaskToFirestore(task).then(syncAndRender); 
+                saveTaskToFirestore(task).then(syncAndRender);
             } else if (task && task.completed) {
                 // Si por alguna razón el evento 'change' del input se dispara en una tarea completada,
                 // forzar la UI a re-renderizar con el valor original para evitar inconsistencias.
@@ -1207,7 +1214,7 @@
                 date: null, linkUrl: null, order: maxOrder + 1
             };
             todos.push(newTodo);
-            await saveTaskToFirestore(newTodo); 
+            await saveTaskToFirestore(newTodo);
             syncAndRender();
             if (todoInput) todoInput.value = '';
         }
@@ -1219,7 +1226,7 @@
              if (mainTask && !mainTask.completed) {
                  if (!mainTask.subtasks) mainTask.subtasks = [];
                  mainTask.subtasks.push({ id: generateLocalId(), text: newSubtaskText, completed: false });
-                 mainTask.completed = false; 
+                 mainTask.completed = false;
                  mainTask.completedDate = null;
                  saveTaskToFirestore(mainTask).then(syncAndRender);
                  subtaskInput.value = '';
@@ -1252,7 +1259,7 @@
                  const subtaskIndex = mainTask.subtasks.findIndex(sub => sub.id === subtaskId);
                  if (subtaskIndex > -1) {
                      mainTask.subtasks.splice(subtaskIndex, 1);
-                     mainTask.completed = false; 
+                     mainTask.completed = false;
                      mainTask.completedDate = null;
                      if (mainTask.subtasks.length === 0) mainTask.showSubtaskUI = false;
                      saveTaskToFirestore(mainTask).then(syncAndRender);
@@ -1279,13 +1286,13 @@
                 const today = getTodayDateString();
                 if (isChecked) {
                     task.completedDate = today;
-                    task.priorityColor = 'none'; 
+                    task.priorityColor = 'none';
                     if (!wasCompletedTodayBefore) updateMedalCount(1);
                     if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 90, origin: { y: 0.55 }});
                 } else {
                     if (wasCompletedTodayBefore) updateMedalCount(-1);
                     task.completedDate = null;
-                    task.showSubtaskUI = false; 
+                    task.showSubtaskUI = false;
                 }
                 if (task.subtasks) task.subtasks.forEach(sub => sub.completed = isChecked);
                 saveTaskToFirestore(task).then(syncAndRender);
@@ -1319,11 +1326,11 @@
                  return (a.order || 0) - (b.order || 0);
              });
              const updatePromises = todos.map((task, index) => {
-                 task.order = index; 
+                 task.order = index;
                  if (task.firebaseId) {
                     return updateDoc(doc(db, "tareas", task.firebaseId), { order: task.order });
                  }
-                 return Promise.resolve(); 
+                 return Promise.resolve();
              });
              await Promise.all(updatePromises).catch(e => console.error("Error actualizando órdenes en Firestore:", e));
              syncAndRender();
@@ -1337,7 +1344,7 @@
                 darkModeToggle.setAttribute('aria-label', 'Alternar a modo claro');
                 darkModeToggle.title = 'Alternar a modo claro';
             }
-            syncAndRender(); 
+            syncAndRender();
         }
 
         function disableDarkMode() {
@@ -1348,7 +1355,7 @@
                  darkModeToggle.setAttribute('aria-label', 'Alternar a modo oscuro');
                  darkModeToggle.title = 'Alternar a modo oscuro';
             }
-            syncAndRender(); 
+            syncAndRender();
         }
 
         function toggleDarkMode() {
@@ -1365,9 +1372,9 @@
             medalCountDisplay = document.getElementById('medal-count');
 
             if (localStorage.getItem('theme') === 'dark') enableDarkMode(); else disableDarkMode();
-            
+
             await loadTodosFromFirestore();
-            const initialMedalData = loadAndRefreshMedalData(); 
+            const initialMedalData = loadAndRefreshMedalData();
             displayMedalCount(initialMedalData.count);
             renderTodosUI();
 
