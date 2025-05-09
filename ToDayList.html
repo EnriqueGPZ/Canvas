@@ -820,11 +820,11 @@
             return '_' + Math.random().toString(36).substring(2, 15);
         }
 
-        function findTaskById(taskId) { // Busca por firebaseId
+        function findTaskById(taskId) {
             return todos.find(todo => todo.firebaseId === taskId);
         }
 
-        function findTaskIndexById(taskId) { // Busca por firebaseId
+        function findTaskIndexById(taskId) {
             return todos.findIndex(todo => todo.firebaseId === taskId);
         }
 
@@ -876,11 +876,13 @@
         // --- FUNCIONES DE FIRESTORE Y DATOS ---
         async function loadTodosForCurrentUser() {
             if (!currentUser) {
+                console.log("loadTodosForCurrentUser: No hay usuario, limpiando tareas.");
                 todos = [];
                 syncAndRender();
                 displayMedalCount(0);
                 return;
             }
+            console.log(`loadTodosForCurrentUser: Cargando tareas para usuario ${currentUser.uid}`);
             try {
                 const q = query(
                     tareasCollectionRef,
@@ -888,6 +890,8 @@
                     orderBy("order", "asc")
                 );
                 const querySnapshot = await getDocs(q);
+                console.log(`loadTodosForCurrentUser: Tareas crudas de Firestore para ${currentUser.uid}:`, querySnapshot.docs.map(d => ({id: d.id, ...d.data()})));
+
                 const firestoreTodos = [];
                 querySnapshot.forEach(docSnap => {
                     const data = docSnap.data();
@@ -906,62 +910,75 @@
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
                         linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
                         order: typeof data.order === 'number' ? data.order : Date.now()
+                        // userId: data.userId // No es estrictamente necesario en el objeto 'todo' local si todas las ops usan currentUser.uid
                     });
                 });
+                console.log("loadTodosForCurrentUser: Tareas procesadas para la UI:", firestoreTodos);
                 todos = firestoreTodos;
                 const initialMedalData = loadAndRefreshMedalData();
                 displayMedalCount(initialMedalData.count);
             } catch (e) {
-                 console.error("Error al cargar tareas desde Firestore:", e);
+                 console.error("loadTodosForCurrentUser: Error al cargar tareas desde Firestore:", e);
                  todos = [];
                  displayMedalCount(0);
             }
-            syncAndRender(); // Siempre renderizar, incluso si hay error (lista vacía)
+            syncAndRender();
         }
 
-        async function saveTaskToFirestore(taskData, isNew = false) {
+        async function saveTaskToFirestore(taskDataFromApp, isNew = false) {
             if (!currentUser) {
-                console.error("No hay usuario logueado para guardar la tarea.");
+                console.error("saveTaskToFirestore: No hay usuario logueado para guardar la tarea.");
                 throw new Error("Usuario no autenticado.");
             }
 
-            const dataToSave = { ...taskData };
-            let taskFirebaseId = dataToSave.firebaseId;
+            // Clonar taskDataFromApp para no mutar el objeto original que podría estar en el array 'todos'
+            const dataToSave = { ...taskDataFromApp };
 
-            if (!dataToSave.userId) {
-                dataToSave.userId = currentUser.uid;
-            } else if (dataToSave.userId !== currentUser.uid) {
-                console.error("Error de seguridad: Intento de modificar tarea de otro usuario.");
-                throw new Error("Violación de seguridad.");
+            // Asegurar que el userId está presente para la BBDD
+            dataToSave.userId = currentUser.uid;
+
+            // El firebaseId no se guarda como un campo en el documento de Firestore,
+            // es el ID del documento mismo. Lo quitamos si está en dataToSave.
+            const taskFirebaseId = dataToSave.firebaseId; // Guardamos el ID si es una actualización
+            if ('firebaseId' in dataToSave) {
+                delete dataToSave.firebaseId;
             }
-            
-            if ('firebaseId' in dataToSave) delete dataToSave.firebaseId;
 
-            if (taskFirebaseId && !isNew) {
+
+            if (taskFirebaseId && !isNew) { // Actualizar tarea existente
+                console.log("saveTaskToFirestore: Actualizando tarea en Firestore:", taskFirebaseId, "Datos:", dataToSave);
                 try {
                     await updateDoc(doc(db, "tareas", taskFirebaseId), dataToSave);
+                    // Actualizar el objeto en el array 'todos' local
                     const taskIndex = findTaskIndexById(taskFirebaseId);
                     if (taskIndex > -1) {
-                        // Conservar el firebaseId original del objeto en 'todos'
-                        todos[taskIndex] = { ...taskData, firebaseId: taskFirebaseId };
+                        // taskDataFromApp es el objeto más completo que teníamos, solo le actualizamos los campos
+                        // y mantenemos su firebaseId.
+                        todos[taskIndex] = { ...taskDataFromApp }; // taskDataFromApp ya debería tener el firebaseId
                     }
                 } catch (e) {
-                    console.error(`Error al actualizar tarea ${taskFirebaseId}:`, e); throw e;
+                    console.error(`saveTaskToFirestore: Error al actualizar tarea ${taskFirebaseId}:`, e); throw e;
                 }
-            } else {
+            } else { // Agregar nueva tarea
+                console.log("saveTaskToFirestore: Creando nueva tarea en Firestore. Datos:", dataToSave);
                 try {
                     const docRef = await addDoc(tareasCollectionRef, dataToSave);
-                    todos.push({ ...taskData, firebaseId: docRef.id, userId: currentUser.uid }); // Asegurar userId aquí también
+                    console.log("saveTaskToFirestore: Nueva tarea creada con Firestore ID:", docRef.id);
+                    // Añadir la nueva tarea al array 'todos' local, incluyendo el firebaseId y el userId
+                    // taskDataFromApp es el objeto original de addTodo, que ya tiene userId.
+                    todos.push({ ...taskDataFromApp, firebaseId: docRef.id });
                 } catch (e) {
-                    console.error("Error al agregar nueva tarea a Firestore:", e); throw e;
+                    console.error("saveTaskToFirestore: Error al agregar nueva tarea a Firestore:", e); throw e;
                 }
             }
+            console.log("saveTaskToFirestore: Estado de 'todos' después de guardar:", JSON.parse(JSON.stringify(todos)));
             syncAndRender();
         }
 
 
         async function deleteTaskFromFirestore(firebaseId) {
             if (!currentUser || !firebaseId) return;
+            console.log(`deleteTaskFromFirestore: Eliminando tarea ${firebaseId} para usuario ${currentUser.uid}`);
             try {
                 await deleteDoc(doc(db, "tareas", firebaseId));
                 const taskIndex = findTaskIndexById(firebaseId);
@@ -973,13 +990,14 @@
                     todos.splice(taskIndex, 1);
                 }
             } catch (e) {
-                console.error(`Error al eliminar tarea ${firebaseId}:`, e);
+                console.error(`deleteTaskFromFirestore: Error al eliminar tarea ${firebaseId}:`, e);
             }
             syncAndRender();
         }
 
         // --- RENDERIZADO Y UI ---
         function syncAndRender() {
+            console.log("syncAndRender: Renderizando UI con 'todos':", JSON.parse(JSON.stringify(todos)));
             renderTodosUI();
         }
 
@@ -1244,7 +1262,7 @@
                 listItem.appendChild(createProgressBar(mainTask));
                 if (!mainTask.completed) {
                     listItem.appendChild(createAddSubtasksToggle(mainTask.firebaseId));
-                } else { mainTask.showSubtaskUI = false; } // Asegurar que no se muestre si está completada
+                } else { mainTask.showSubtaskUI = false; }
                 if (mainTask.subtasks && mainTask.subtasks.length > 0) {
                     listItem.appendChild(createSubtasksList(mainTask));
                 }
@@ -1261,16 +1279,6 @@
 
             if (todoInput && currentUser) todoInput.value = '';
             if (reorderButton) reorderButton.disabled = !(todos.length > 0 && currentUser);
-
-            // Actualizar mensaje de lista vacía
-            const emptyMessage = todoListContainer.querySelector(':scope > :empty:before'); // Intenta ser más específico
-            if (emptyMessage) emptyMessage.remove(); // Limpiar mensaje anterior si existe
-            if (currentUser && todos.length === 0) {
-                // Ya se maneja por CSS :empty:before, pero podrías añadir un mensaje más específico si quieres
-            } else if (!currentUser) {
-                // Si se quiere un mensaje específico cuando no está logueado y la lista está vacía
-                // todoListContainer.innerHTML = '<p class="empty-list-message" style="text-align:center; color: var(--empty-list-color); margin-top:20px; font-style:italic;">Inicia sesión para ver tus tareas.</p>';
-            }
         }
 
         // --- LÓGICA DE LA APP (MANEJO DE TAREAS) ---
@@ -1302,7 +1310,8 @@
             if (newTodoText === '') return alert('Ingresa el nombre de la tarea.');
 
             const maxOrder = todos.length > 0 ? Math.max(...todos.map(t => t.order || 0)) : -1;
-            const newTodoData = {
+            // Este es el objeto que se pasará a saveTaskToFirestore y se usará como base para 'todos.push'
+            const newTodoDataForApp = {
                 text: newTodoText,
                 completed: false,
                 completedDate: null,
@@ -1312,13 +1321,15 @@
                 date: null,
                 linkUrl: null,
                 order: maxOrder + 1,
-                userId: currentUser.uid
+                userId: currentUser.uid // userId para el objeto local y para Firestore
+                // firebaseId se añadirá después de guardar en Firestore
             };
+            console.log("addTodo: Preparando para guardar nueva tarea:", newTodoDataForApp);
 
             try {
-                await saveTaskToFirestore(newTodoData, true);
+                await saveTaskToFirestore(newTodoDataForApp, true); // true indica que es una nueva tarea
             } catch (error) {
-                console.error("Error al intentar agregar tarea:", error);
+                console.error("addTodo: Error al intentar agregar tarea:", error);
                 alert("No se pudo agregar la tarea.");
             }
             if (todoInput) todoInput.value = '';
@@ -1339,7 +1350,7 @@
         }
 
         function deleteTodo(taskFirebaseId) {
-            const task = findTaskById(taskFirebaseId); // Verificación ya en createMainTaskHeader
+            const task = findTaskById(taskFirebaseId);
             if (!task) return;
             deleteTaskFromFirestore(taskFirebaseId).catch(err => console.error("Error eliminando tarea principal:", err));
         }
@@ -1458,27 +1469,30 @@
 
         // --- AUTENTICACIÓN Y ESTADO DE UI ---
         onAuthStateChanged(auth, (user) => {
+            console.log("onAuthStateChanged: Se detectó cambio de estado.");
             if (user) {
                 currentUser = user;
-                console.log("Usuario conectado:", currentUser.uid, currentUser.displayName);
+                console.log("onAuthStateChanged: Usuario conectado:", currentUser.uid, currentUser.displayName);
                 updateUIAfterLogin();
-                loadTodosForCurrentUser(); // Carga las tareas después de actualizar la UI de login
+                loadTodosForCurrentUser();
             } else {
                 currentUser = null;
-                console.log("Usuario desconectado");
-                todos = []; // Limpiar tareas
+                console.log("onAuthStateChanged: Usuario desconectado.");
+                todos = [];
                 updateUIAfterLogout();
-                syncAndRender(); // Renderizar lista vacía
-                displayMedalCount(0); // Resetear contador de medallas en UI
+                syncAndRender();
+                displayMedalCount(0);
             }
         });
 
         async function signInWithGoogle() {
             const provider = new GoogleAuthProvider();
             try {
+                console.log("signInWithGoogle: Intentando iniciar sesión...");
                 await signInWithPopup(auth, provider);
+                console.log("signInWithGoogle: signInWithPopup completado (onAuthStateChanged se encargará).");
             } catch (error) {
-                console.error("Error durante el inicio de sesión con Google:", error);
+                console.error("signInWithGoogle: Error durante el inicio de sesión con Google:", error);
                 if (error.code === 'auth/popup-closed-by-user') {
                     alert("Cancelaste el inicio de sesión con Google.");
                 } else if (error.code === 'auth/popup-blocked') {
@@ -1491,14 +1505,17 @@
 
         async function performSignOut() {
             try {
+                console.log("performSignOut: Intentando cerrar sesión...");
                 await signOut(auth);
+                console.log("performSignOut: signOut completado (onAuthStateChanged se encargará).");
             } catch (error) {
-                console.error("Error durante el cierre de sesión:", error);
+                console.error("performSignOut: Error durante el cierre de sesión:", error);
             }
         }
 
         function updateUIAfterLogin() {
             if (!currentUser) return;
+            console.log("updateUIAfterLogin: Actualizando UI para estado logueado.");
             authSection.style.display = 'none';
             userInfoSection.style.display = 'flex';
             appContentContainer.style.display = 'block';
@@ -1508,10 +1525,11 @@
 
             todoInput.disabled = false;
             addTodoButton.disabled = false;
-            reorderButton.disabled = !(todos.length > 0);
+            reorderButton.disabled = !(todos.length > 0); // Solo habilitar si hay tareas
         }
 
         function updateUIAfterLogout() {
+            console.log("updateUIAfterLogout: Actualizando UI para estado deslogueado.");
             authSection.style.display = 'block';
             userInfoSection.style.display = 'none';
             appContentContainer.style.display = 'none';
@@ -1523,6 +1541,7 @@
 
         // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log("DOMContentLoaded: Página cargada y lista.");
             // Referencias DOM
             todoInput = document.getElementById('new-todo-input');
             addTodoButton = document.getElementById('add-todo-button');
@@ -1546,11 +1565,11 @@
             // Persistencia Offline
             try {
                 await enableIndexedDbPersistence(db);
-                console.log("Persistencia offline de Firestore habilitada.");
+                console.log("DOMContentLoaded: Persistencia offline de Firestore habilitada.");
             } catch (err) {
-                if (err.code === 'failed-precondition') console.warn("Persistencia Firestore: Múltiples pestañas.");
-                else if (err.code === 'unimplemented') console.warn("Persistencia Firestore: Navegador no soporta IndexedDB.");
-                else console.error("Error persistencia Firestore:", err);
+                if (err.code === 'failed-precondition') console.warn("DOMContentLoaded: Persistencia Firestore: Múltiples pestañas.");
+                else if (err.code === 'unimplemented') console.warn("DOMContentLoaded: Persistencia Firestore: Navegador no soporta IndexedDB.");
+                else console.error("DOMContentLoaded: Error persistencia Firestore:", err);
             }
 
             // Event Listeners
@@ -1561,7 +1580,8 @@
             reorderButton.addEventListener('click', performManualSort);
             darkModeToggle.addEventListener('click', toggleDarkMode);
 
-            // onAuthStateChanged ya se encarga de la carga inicial de datos
+            console.log("DOMContentLoaded: Inicialización completa. Esperando onAuthStateChanged...");
+            // onAuthStateChanged se ejecutará automáticamente y manejará la carga inicial si el usuario ya está logueado.
         });
     </script>
 
