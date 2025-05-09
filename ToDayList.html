@@ -834,7 +834,7 @@
 
         // --- FUNCIONES DE MEDALLAS (POR USUARIO) ---
         function getMedalsStorageKey() {
-            if (!currentUser) return null;
+            if (!currentUser || !currentUser.uid) return null; // Asegurar que currentUser.uid existe
             return `${MEDALS_STORAGE_KEY_PREFIX}${currentUser.uid}`;
         }
 
@@ -875,8 +875,8 @@
 
         // --- FUNCIONES DE FIRESTORE Y DATOS ---
         async function loadTodosForCurrentUser() {
-            if (!currentUser) {
-                console.log("loadTodosForCurrentUser: No hay usuario, limpiando tareas.");
+            if (!currentUser || !currentUser.uid) { // Verificación robusta
+                console.log("loadTodosForCurrentUser: No hay usuario o UID, limpiando tareas.");
                 todos = [];
                 syncAndRender();
                 displayMedalCount(0);
@@ -909,8 +909,8 @@
                         priorityColor: PRIORITY_COLORS.includes(data.priorityColor) ? data.priorityColor : 'none',
                         date: typeof data.date === 'string' && data.date.match(/^\d{4}-\d{2}-\d{2}$/) ? data.date : null,
                         linkUrl: typeof data.linkUrl === 'string' ? data.linkUrl : null,
-                        order: typeof data.order === 'number' ? data.order : Date.now()
-                        // userId: data.userId // No es estrictamente necesario en el objeto 'todo' local si todas las ops usan currentUser.uid
+                        order: typeof data.order === 'number' ? data.order : Date.now(),
+                        userId: data.userId // Incluir para verificar si es necesario
                     });
                 });
                 console.log("loadTodosForCurrentUser: Tareas procesadas para la UI:", firestoreTodos);
@@ -925,48 +925,48 @@
             syncAndRender();
         }
 
-        async function saveTaskToFirestore(taskDataFromApp, isNew = false) {
-            if (!currentUser) {
-                console.error("saveTaskToFirestore: No hay usuario logueado para guardar la tarea.");
-                throw new Error("Usuario no autenticado.");
+        async function saveTaskToFirestore(taskObjectFromApp, isNew = false) {
+            if (!currentUser || !currentUser.uid) {
+                console.error("¡ERROR CRÍTICO en saveTaskToFirestore: currentUser o currentUser.uid no está definido!");
+                alert("Error: No se pudo identificar al usuario. Por favor, intenta iniciar sesión de nuevo.");
+                throw new Error("Usuario no autenticado o UID no disponible.");
             }
 
-            // Clonar taskDataFromApp para no mutar el objeto original que podría estar en el array 'todos'
-            const dataToSave = { ...taskDataFromApp };
+            // Clonar el objeto de la tarea de la app para evitar mutaciones no deseadas.
+            const dataToSave = { ...taskObjectFromApp };
 
-            // Asegurar que el userId está presente para la BBDD
+            // Asegurar que el userId es el del usuario actual.
             dataToSave.userId = currentUser.uid;
 
-            // El firebaseId no se guarda como un campo en el documento de Firestore,
-            // es el ID del documento mismo. Lo quitamos si está en dataToSave.
-            const taskFirebaseId = dataToSave.firebaseId; // Guardamos el ID si es una actualización
+            // firebaseId no es un campo del documento, es el ID del documento.
+            // Lo guardamos si existe (para actualizaciones) y lo eliminamos del objeto a guardar.
+            const existingFirebaseId = dataToSave.firebaseId;
             if ('firebaseId' in dataToSave) {
                 delete dataToSave.firebaseId;
             }
 
-
-            if (taskFirebaseId && !isNew) { // Actualizar tarea existente
-                console.log("saveTaskToFirestore: Actualizando tarea en Firestore:", taskFirebaseId, "Datos:", dataToSave);
+            if (existingFirebaseId && !isNew) { // Actualizar tarea existente
+                console.log("saveTaskToFirestore: Actualizando tarea en Firestore:", existingFirebaseId, "Datos:", JSON.parse(JSON.stringify(dataToSave)));
                 try {
-                    await updateDoc(doc(db, "tareas", taskFirebaseId), dataToSave);
-                    // Actualizar el objeto en el array 'todos' local
-                    const taskIndex = findTaskIndexById(taskFirebaseId);
+                    await updateDoc(doc(db, "tareas", existingFirebaseId), dataToSave);
+                    // Actualizar el objeto en el array 'todos' local.
+                    // taskObjectFromApp es el objeto original del array 'todos' (o una copia si es nuevo)
+                    const taskIndex = findTaskIndexById(existingFirebaseId);
                     if (taskIndex > -1) {
-                        // taskDataFromApp es el objeto más completo que teníamos, solo le actualizamos los campos
-                        // y mantenemos su firebaseId.
-                        todos[taskIndex] = { ...taskDataFromApp }; // taskDataFromApp ya debería tener el firebaseId
+                        // Reemplazar el objeto antiguo con el actualizado (que ya tiene firebaseId).
+                        todos[taskIndex] = { ...taskObjectFromApp, ...dataToSave, firebaseId: existingFirebaseId };
                     }
                 } catch (e) {
-                    console.error(`saveTaskToFirestore: Error al actualizar tarea ${taskFirebaseId}:`, e); throw e;
+                    console.error(`saveTaskToFirestore: Error al actualizar tarea ${existingFirebaseId}:`, e); throw e;
                 }
             } else { // Agregar nueva tarea
-                console.log("saveTaskToFirestore: Creando nueva tarea en Firestore. Datos:", dataToSave);
+                console.log("saveTaskToFirestore: Creando nueva tarea en Firestore. Datos:", JSON.parse(JSON.stringify(dataToSave)));
                 try {
                     const docRef = await addDoc(tareasCollectionRef, dataToSave);
                     console.log("saveTaskToFirestore: Nueva tarea creada con Firestore ID:", docRef.id);
-                    // Añadir la nueva tarea al array 'todos' local, incluyendo el firebaseId y el userId
-                    // taskDataFromApp es el objeto original de addTodo, que ya tiene userId.
-                    todos.push({ ...taskDataFromApp, firebaseId: docRef.id });
+                    // Añadir la nueva tarea al array 'todos' local.
+                    // taskObjectFromApp es el objeto original de addTodo (newTodoDataForApp).
+                    todos.push({ ...taskObjectFromApp, firebaseId: docRef.id }); // userId ya está en taskObjectFromApp
                 } catch (e) {
                     console.error("saveTaskToFirestore: Error al agregar nueva tarea a Firestore:", e); throw e;
                 }
@@ -977,7 +977,7 @@
 
 
         async function deleteTaskFromFirestore(firebaseId) {
-            if (!currentUser || !firebaseId) return;
+            if (!currentUser || !currentUser.uid || !firebaseId) return; // Verificación robusta
             console.log(`deleteTaskFromFirestore: Eliminando tarea ${firebaseId} para usuario ${currentUser.uid}`);
             try {
                 await deleteDoc(doc(db, "tareas", firebaseId));
@@ -1302,16 +1302,16 @@
         }
 
         async function addTodo() {
-            if (!currentUser) {
-                alert("Debes iniciar sesión para agregar tareas.");
+            if (!currentUser || !currentUser.uid) { // Verificación robusta
+                console.error("¡ERROR CRÍTICO en addTodo: currentUser o currentUser.uid no está definido!");
+                alert("Error: No se pudo identificar al usuario. Por favor, intenta iniciar sesión de nuevo.");
                 return;
             }
             const newTodoText = todoInput.value.trim();
             if (newTodoText === '') return alert('Ingresa el nombre de la tarea.');
 
             const maxOrder = todos.length > 0 ? Math.max(...todos.map(t => t.order || 0)) : -1;
-            // Este es el objeto que se pasará a saveTaskToFirestore y se usará como base para 'todos.push'
-            const newTodoDataForApp = {
+            const newTodoDataForApp = { // Objeto que se manejará en la app y se pasará a Firestore
                 text: newTodoText,
                 completed: false,
                 completedDate: null,
@@ -1321,10 +1321,10 @@
                 date: null,
                 linkUrl: null,
                 order: maxOrder + 1,
-                userId: currentUser.uid // userId para el objeto local y para Firestore
+                userId: currentUser.uid // Asegurar que el userId se asigna aquí
                 // firebaseId se añadirá después de guardar en Firestore
             };
-            console.log("addTodo: Preparando para guardar nueva tarea:", newTodoDataForApp);
+            console.log("addTodo: Preparando para guardar nueva tarea:", JSON.parse(JSON.stringify(newTodoDataForApp)));
 
             try {
                 await saveTaskToFirestore(newTodoDataForApp, true); // true indica que es una nueva tarea
@@ -1418,7 +1418,7 @@
         function moveSubtaskDown(mainTaskFirebaseId, subtaskId) { moveSubtask(mainTaskFirebaseId, subtaskId, 1); }
 
         async function performManualSort() {
-            if (!currentUser || todos.length === 0) return;
+            if (!currentUser || !currentUser.uid || todos.length === 0) return; // Verificación robusta
              todos.sort((a, b) => {
                  const rankA = PRIORITY_ORDER[a.priorityColor] || PRIORITY_ORDER['none'];
                  const rankB = PRIORITY_ORDER[b.priorityColor] || PRIORITY_ORDER['none'];
@@ -1471,10 +1471,10 @@
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged: Se detectó cambio de estado.");
             if (user) {
-                currentUser = user;
+                currentUser = user; // Asignar el objeto de usuario globalmente
                 console.log("onAuthStateChanged: Usuario conectado:", currentUser.uid, currentUser.displayName);
                 updateUIAfterLogin();
-                loadTodosForCurrentUser();
+                loadTodosForCurrentUser(); // Cargar tareas después de que currentUser esté definido
             } else {
                 currentUser = null;
                 console.log("onAuthStateChanged: Usuario desconectado.");
@@ -1525,7 +1525,7 @@
 
             todoInput.disabled = false;
             addTodoButton.disabled = false;
-            reorderButton.disabled = !(todos.length > 0); // Solo habilitar si hay tareas
+            reorderButton.disabled = !(todos.length > 0);
         }
 
         function updateUIAfterLogout() {
